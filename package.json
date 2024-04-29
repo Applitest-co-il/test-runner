@@ -1,0 +1,39 @@
+{
+    "name": "test-runner",
+    "version": "0.9.0",
+    "description": "applitest manager test runner",
+    "scripts": {
+        "test": "node --inspect ./src/index.js --conf ./samples/json/test.json",
+        "start": "node ./src/index.js --conf ./samples/json/run.json",
+        "start:debug": "node --inspect  ./src/index.js --conf ./samples/json/run.json"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Applitest-co-il/test-runner.git"
+    },
+    "keywords": [
+        "appium",
+        "selenium",
+        "webdriverio"
+    ],
+    "author": "Daniel Yaghil",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Applitest-co-il/test-runner/issues"
+    },
+    "homepage": "https://github.com/Applitest-co-il/test-runner#readme",
+    "dependencies": {
+        "commander": "^11.1.0",
+        "dotenv": "^16.4.5",
+        "webdriverio": "^8.36.1"
+    },
+    "devDependencies": {
+        "eslint": "^8.57.0",
+        "eslint-config-prettier": "^9.1.0",
+        "prettier": "^3.2.5"
+    },
+    "bundledDependencies": [
+        "commander",
+        "webdriverio"
+    ]
+}
