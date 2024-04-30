@@ -13,24 +13,23 @@ commander
     .parse(process.argv);
 
 async function init() {
-    try {
-        console.log('Starting test runner CLI...');
+    console.log('Starting test runner CLI...');
 
-        const options = commander.opts();
-        let jsonData = {};
+    const options = commander.opts();
+    let jsonData = {};
 
-        if (options.conf) {
-            const file = options.conf;
-            const data = fs.readFileSync(file, 'utf-8');
-            jsonData = JSON.parse(data);
-        } else {
-            //check queue
-        }
+    if (options.conf) {
+        const file = options.conf;
+        const data = fs.readFileSync(file, 'utf-8');
+        jsonData = JSON.parse(data);
+    } else {
+        //check queue
+    }
 
-        const testRunner = new TestRunner(jsonData);
-        await testRunner.run();
-    } catch (error) {
-        console.error('Unknown error - all test failed', error);
+    const testRunner = new TestRunner(jsonData);
+    const result = await testRunner.run();
+    if (!result) {
+        throw new Error('Test run failed');
     }
 }
 

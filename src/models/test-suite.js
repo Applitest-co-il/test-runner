@@ -38,6 +38,10 @@ class TestSuite {
         const tests = this.#tests;
         for (let i = 0; i < tests.length; i++) {
             const test = tests[i];
+            if (test.skip) {
+                continue;
+            }
+
             await test.run(driver);
             if (this.#stopOnFailure && test.status === 'failed') {
                 break;
@@ -74,6 +78,12 @@ class TestSuite {
         console.log('===============\n\n');
         console.log(`Passed: ${passed}\nFailed: ${failed}\nSkipped: ${skipped}`);
         console.log('===============\n');
+
+        if (failed > 0 || skipped > 0) {
+            return false;
+        }
+
+        return true;
     }
 }
 

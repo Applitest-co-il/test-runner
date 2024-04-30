@@ -35,11 +35,13 @@ class TestRunner {
             await this.startSession();
 
             await this.#suite.run(this.#driver);
-            await this.#suite.report();
+            let suiteResult = await this.#suite.report();
 
             await this.closeSession();
 
             console.log('Test run complete');
+
+            return suiteResult;
         } catch (error) {
             console.error('Error running test:', error);
         }

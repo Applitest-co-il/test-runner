@@ -1,14 +1,17 @@
 const TestStep = require('./test-step');
 
 class TestDefinition {
-    name = '';
+    #name = '';
+    #skip = false;
+
     #steps = [];
 
     #status = 'pending';
     #lastStep = 0;
 
     constructor(options) {
-        this.name = options.name;
+        this.#name = options.name;
+        this.#skip = options.skip ?? false;
         this.#buildSteps(options.steps);
     }
 
@@ -23,6 +26,14 @@ class TestDefinition {
             let testStep = new TestStep(i + 1, step);
             this.#steps.push(testStep);
         }
+    }
+
+    get name() {
+        return this.#name;
+    }
+
+    get skip() {
+        return this.#skip;
     }
 
     get steps() {

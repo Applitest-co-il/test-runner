@@ -28,7 +28,7 @@ class RunConfiguration {
 
     constructor(options) {
         this.#runType = options.runType ?? 'mobile';
-        this.#farm = options.farm ?? process.env.FARM ?? 'local';
+        this.#farm = options.farm ?? process.env.AM_FARM ?? 'local';
         this.#logLevel = options.logLevel ?? 'info';
         this.#reset = options.reset ?? true;
         this.#hostname = options.appium.host ?? 'localhost';
@@ -87,6 +87,7 @@ class RunConfigurationMobile extends RunConfiguration {
     #app = '';
     #appPackage = '';
     #appActivity = '';
+    #autoGrantPermissions = true;
 
     constructor(options) {
         super(options);
@@ -96,6 +97,7 @@ class RunConfigurationMobile extends RunConfiguration {
         this.#app = options.appium.app ?? '';
         this.#appPackage = options.appium.appPackage ?? '';
         this.#appActivity = options.appium.appActivity ?? '';
+        this.#autoGrantPermissions = options.appium.autoGrantPermissions ?? true;
     }
 
     get conf() {
@@ -114,16 +116,18 @@ class RunConfigurationMobile extends RunConfiguration {
             wdio.capabilities[this.capabilityPropertyName('appPackage')] = this.#appPackage;
             wdio.capabilities[this.capabilityPropertyName('appActivity')] = this.#appActivity;
             wdio.capabilities[this.capabilityPropertyName('noReset')] = !this.reset;
+            wdio.capabilities[this.capabilityPropertyName('autoGrantPermissions')] = this.#autoGrantPermissions;
         } else if (this.farm === 'aws') {
             // Implement AWS capabilities
-            wdio['path'] = '/wd/hub';
+            wdio['path'] = process.env.APPIUM_BASE_PATH;
             wdio.capabilities['platformName'] = process.env.DEVICEFARM_DEVICE_PLATFORM_NAME;
             wdio.capabilities[this.capabilityPropertyName('automationName')] = this.#automationName;
             wdio.capabilities[this.capabilityPropertyName('deviceName')] = process.env.DEVICEFARM_DEVICE_NAME;
             wdio.capabilities[this.capabilityPropertyName('app')] = process.env.DEVICEFARM_APP_PATH;
             wdio.capabilities[this.capabilityPropertyName('appPackage')] = this.#appPackage;
             wdio.capabilities[this.capabilityPropertyName('appActivity')] = this.#appActivity;
-            wdio.capabilities[this.capabilityPropertyName('noReset')] = !this.reset;
+            wdio.capabilities[this.capabilityPropertyName('noReset')] = false;
+            wdio.capabilities[this.capabilityPropertyName('autoGrantPermissions')] = this.#autoGrantPermissions;
         }
         return wdio;
     }
