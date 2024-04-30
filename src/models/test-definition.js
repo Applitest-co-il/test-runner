@@ -1,7 +1,9 @@
+const { mergeVariables } = require('../helpers/utils');
 const TestStep = require('./test-step');
 
 class TestDefinition {
     #name = '';
+    #variables = {};
     #skip = false;
 
     #steps = [];
@@ -12,6 +14,7 @@ class TestDefinition {
     constructor(options) {
         this.#name = options.name;
         this.#skip = options.skip ?? false;
+        this.#variables = options.variables ?? {};
         this.#buildSteps(options.steps);
     }
 
@@ -56,11 +59,14 @@ class TestDefinition {
         return '';
     }
 
-    async run(driver) {
+    async run(driver, variables) {
         const steps = this.#steps;
+
+        mergeVariables(this.#variables, variables);
+
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
-            const success = await step.run(driver);
+            const success = await step.run(driver, this.#variables);
             if (!success) {
                 this.#status = 'failed';
                 this.#lastStep = i;

@@ -1,15 +1,18 @@
+const { mergeVariables } = require('../helpers/utils');
 const TestDefinition = require('./test-definition');
 
 class TestSuite {
     #name = '';
     #waitBetweenTests = 0;
     #stopOnFailure = false;
+    #variables = {};
     #tests = [];
 
     constructor(options) {
         this.#name = options.name;
         this.#waitBetweenTests = options.waitBetweenTests ?? 0;
         this.#stopOnFailure = options.stopOnFailure ?? false;
+        this.#variables = options.variables ?? {};
         this.#buildTests(options.tests);
     }
 
@@ -34,15 +37,18 @@ class TestSuite {
         return this.#tests;
     }
 
-    async run(driver) {
+    async run(driver, variables) {
         const tests = this.#tests;
+
+        mergeVariables(this.#variables, variables);
+
         for (let i = 0; i < tests.length; i++) {
             const test = tests[i];
             if (test.skip) {
                 continue;
             }
 
-            await test.run(driver);
+            await test.run(driver, this.#variables);
             if (this.#stopOnFailure && test.status === 'failed') {
                 break;
             }

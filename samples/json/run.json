@@ -267,12 +267,15 @@
                         "value": 300
                     },
                     {
-                        "command": "scroll-down",
-                        "value": 1
+                        "command": "scroll-down-to-element",
+                        "selectors": [
+                            "android|||//android.widget.TextView[@text=\" Warehouse test grower - Warehouse \"]"
+                        ],
+                        "value": 3000
                     },
                     {
                         "command": "pause",
-                        "value": 300
+                        "value": 100
                     },
                     {
                         "command": "click",
@@ -377,6 +380,11 @@
                         "selectors": ["android|||//android.widget.TextView[@text=\"MALATHION 1000EC\"]"]
                     },
                     {
+                        "command": "scroll-down-to-element",
+                        "selectors": ["android|||//android.widget.EditText"],
+                        "value": 3000
+                    },
+                    {
                         "command": "set-value",
                         "selectors": ["android|||//android.widget.EditText"],
                         "value": "1"
@@ -390,18 +398,23 @@
                         "value": 1000
                     },
                     {
-                        "command": "scroll-down",
-                        "value": 1
+                        "command": "scroll-down-to-element",
+                        "selectors": ["android|||//android.widget.TextView[@text=\"    Barcode #1\"]"],
+                        "value": 3000
                     },
                     {
                         "command": "assert-is-displayed",
                         "selectors": ["android|||//android.widget.TextView[@text=\"    Barcode #1\"]"]
                     },
                     {
+                        "command": "generate-random-integer",
+                        "value": "barcode1|||10000|||99999"
+                    },
+                    {
                         "command": "set-value",
                         "selectors": ["android|||//android.widget.EditText"],
                         "position": 1,
-                        "value": "11111"
+                        "value": "{{barcode1}}"
                     },
                     {
                         "command": "click",
@@ -413,7 +426,7 @@
                     },
                     {
                         "command": "assert-is-displayed",
-                        "selectors": ["android|||//android.widget.TextView[@text=\"Pallet 11111\"]"]
+                        "selectors": ["android|||//android.widget.TextView[@text=\"Pallet {{barcode1}}\"]"]
                     },
                     {
                         "command": "click",
@@ -424,10 +437,14 @@
                         "value": 300
                     },
                     {
+                        "command": "generate-random-integer",
+                        "value": "barcode2|||10000|||99999"
+                    },
+                    {
                         "command": "set-value",
                         "selectors": ["android|||//android.widget.EditText"],
                         "position": 1,
-                        "value": "22222"
+                        "value": "{{barcode2}}"
                     },
                     {
                         "command": "click",
@@ -439,8 +456,9 @@
                         "value": 1000
                     },
                     {
-                        "command": "scroll-down",
-                        "value": 3
+                        "command": "scroll-down-to-element",
+                        "selectors": ["android|||//android.widget.Button[@text=\"SAVE\"]"],
+                        "value": 3000
                     },
                     {
                         "command": "click",
@@ -467,7 +485,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 200
+                        "value": 300
                     },
                     {
                         "command": "click",
@@ -475,7 +493,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 200
+                        "value": 500
                     },
                     {
                         "command": "click",

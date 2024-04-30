@@ -7,9 +7,12 @@ class TestRunner {
     #suite = null;
     #driver = null;
 
+    #variables = {};
+
     constructor(options) {
         this.#conf = RunConfiguration.factory(options.runConfiguration);
         this.#suite = new TestSuite(options.testSuite);
+        this.#variables = options.variables ?? {};
     }
 
     async startSession() {
@@ -34,7 +37,7 @@ class TestRunner {
 
             await this.startSession();
 
-            await this.#suite.run(this.#driver);
+            await this.#suite.run(this.#driver, this.#variables);
             let suiteResult = await this.#suite.report();
 
             await this.closeSession();
