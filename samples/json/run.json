@@ -21,6 +21,13 @@
                 "name": "Setup base url",
                 "steps": [
                     {
+                        "command": "wait-for-exist",
+                        "selectors": [
+                            "android|||//android.widget.ImageView[@resource-id=\"com.agritask.mobile.android:id/loginBrandLogoImageView\"]"
+                        ],
+                        "value": 5000
+                    },
+                    {
                         "command": "multiple-clicks",
                         "selectors": [
                             "android|||//android.widget.ImageView[@resource-id=\"com.agritask.mobile.android:id/loginBrandLogoImageView\"]"
@@ -28,8 +35,11 @@
                         "value": 3
                     },
                     {
-                        "command": "pause",
-                        "value": 500
+                        "command": "wait-for-exist",
+                        "selectors": [
+                            "android|||//androidx.recyclerview.widget.RecyclerView[@resource-id=\"com.agritask.mobile.android:id/recycler_view\"]/android.widget.LinearLayout[5]/android.widget.RelativeLayout"
+                        ],
+                        "value": 5000
                     },
                     {
                         "command": "click",
@@ -39,7 +49,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 300
+                        "value": 1000
                     },
                     {
                         "command": "set-value",
@@ -66,6 +76,12 @@
                 "name": "Login failed: missing username",
                 "steps": [
                     {
+                        "command": "wait-for-exist",
+                        "selectors": [
+                            "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginButton\"]"
+                        ]
+                    },
+                    {
                         "command": "click",
                         "selectors": [
                             "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginButton\"]"
@@ -89,6 +105,12 @@
             {
                 "name": "Login failed: missing password",
                 "steps": [
+                    {
+                        "command": "wait-for-exist",
+                        "selectors": [
+                            "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
+                        ]
+                    },
                     {
                         "command": "set-value",
                         "selectors": [
@@ -120,6 +142,12 @@
             {
                 "name": "Login failed: wrong username or password",
                 "steps": [
+                    {
+                        "command": "wait-for-exist",
+                        "selectors": [
+                            "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
+                        ]
+                    },
                     {
                         "command": "set-value",
                         "selectors": [
@@ -160,7 +188,7 @@
                 "name": "Login success",
                 "steps": [
                     {
-                        "command": "click",
+                        "command": "wait-for-exist",
                         "selectors": [
                             "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
                         ]
@@ -171,12 +199,6 @@
                             "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
                         ],
                         "value": "franortsts"
-                    },
-                    {
-                        "command": "click",
-                        "selectors": [
-                            "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editPassword\"]"
-                        ]
                     },
                     {
                         "command": "set-value",
@@ -208,6 +230,12 @@
                 "name": "Validate login & initial sync",
                 "steps": [
                     {
+                        "command": "wait-for-exist",
+                        "selectors": [
+                            "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[5]/android.widget.ImageView"
+                        ]
+                    },
+                    {
                         "command": "click",
                         "selectors": [
                             "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[5]/android.widget.ImageView"
@@ -215,7 +243,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 1000
+                        "value": 2000
                     },
                     {
                         "command": "assert-text",
@@ -264,7 +292,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 300
+                        "value": 1000
                     },
                     {
                         "command": "scroll-down-to-element",
@@ -275,7 +303,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 100
+                        "value": 1000
                     },
                     {
                         "command": "click",
@@ -285,7 +313,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 100
+                        "value": 1000
                     },
                     {
                         "command": "click",
@@ -293,7 +321,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 100
+                        "value": 1000
                     },
                     {
                         "command": "click",
@@ -301,7 +329,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 100
+                        "value": 1000
                     },
                     {
                         "command": "click",
@@ -309,7 +337,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 100
+                        "value": 1000
                     },
                     {
                         "command": "click",
@@ -317,7 +345,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 100
+                        "value": 1000
                     },
                     {
                         "command": "click",
@@ -325,7 +353,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 100
+                        "value": 1000
                     },
                     {
                         "command": "click",
@@ -333,7 +361,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 100
+                        "value": 1000
                     },
                     {
                         "command": "click",
@@ -342,7 +370,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 1000
+                        "value": 2000
                     },
                     {
                         "command": "click",
@@ -352,7 +380,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 100
+                        "value": 1000
                     },
                     {
                         "command": "click",
@@ -361,7 +389,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 1000
+                        "value": 2000
                     },
                     {
                         "command": "click",
@@ -369,7 +397,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 100
+                        "value": 1000
                     },
                     {
                         "command": "assert-is-displayed",
@@ -382,7 +410,7 @@
                     {
                         "command": "scroll-down-to-element",
                         "selectors": ["android|||//android.widget.EditText"],
-                        "value": 3000
+                        "value": 5000
                     },
                     {
                         "command": "set-value",
@@ -400,7 +428,7 @@
                     {
                         "command": "scroll-down-to-element",
                         "selectors": ["android|||//android.widget.TextView[@text=\"    Barcode #1\"]"],
-                        "value": 3000
+                        "value": 5000
                     },
                     {
                         "command": "assert-is-displayed",
@@ -417,12 +445,17 @@
                         "value": "{{barcode1}}"
                     },
                     {
+                        "command": "scroll-down-to-element",
+                        "selectors": ["android|||//android.widget.Button[@text=\"ADD PACKAGES\"]"],
+                        "value": 5000
+                    },
+                    {
                         "command": "click",
                         "selectors": ["android|||//android.widget.Button[@text=\"ADD PACKAGES\"]"]
                     },
                     {
                         "command": "pause",
-                        "value": 100
+                        "value": 1000
                     },
                     {
                         "command": "assert-is-displayed",
@@ -434,7 +467,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 300
+                        "value": 1000
                     },
                     {
                         "command": "generate-random-integer",
@@ -458,7 +491,7 @@
                     {
                         "command": "scroll-down-to-element",
                         "selectors": ["android|||//android.widget.Button[@text=\"SAVE\"]"],
-                        "value": 3000
+                        "value": 5000
                     },
                     {
                         "command": "click",
@@ -466,7 +499,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 100
+                        "value": 1000
                     },
                     {
                         "command": "click",
@@ -485,7 +518,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 300
+                        "value": 1000
                     },
                     {
                         "command": "click",
@@ -493,7 +526,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 500
+                        "value": 1000
                     },
                     {
                         "command": "click",
@@ -503,7 +536,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 200
+                        "value": 1000
                     },
                     {
                         "command": "click",
@@ -511,7 +544,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 200
+                        "value": 1000
                     },
                     {
                         "command": "wait-for-exist",
@@ -532,7 +565,6 @@
             },
             {
                 "name": "Logout",
-                "skip": true,
                 "steps": [
                     {
                         "command": "click",
@@ -542,7 +574,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 300
+                        "value": 1000
                     },
                     {
                         "command": "assert-text",
@@ -556,7 +588,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 300
+                        "value": 1000
                     },
                     {
                         "command": "assert-text",
@@ -571,7 +603,7 @@
                     },
                     {
                         "command": "pause",
-                        "value": 300
+                        "value": 1000
                     },
                     {
                         "command": "assert-is-displayed",
