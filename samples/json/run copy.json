@@ -1,0 +1,78 @@
+{
+    "runConfiguration": {
+        "runType": "mobile",
+        "organization": "testorg",
+        "appium": {
+            "port": 4723,
+            "host": "localhost",
+            "platformName": "Android",
+            "automationName": "UiAutomator2",
+            "deviceName": "Android",
+            "app": "s3://android/tms.android.agritask-agritask-release-9.0.0.34859.apk",
+            "appPackage": "com.agritask.mobile.android",
+            "appActivity": "com.scantask.tms.droid.tasker.gis.MapActivity2"
+        }
+    },
+    "testSuite": {
+        "name": "Suite",
+        "waitBetweenTest": 0,
+        "stopOnFailure": true,
+        "tests": [
+            {
+                "name": "Setup base url",
+                "steps": [
+                    {
+                        "command": "wait-for-exist",
+                        "selectors": [
+                            "android|||//android.widget.ImageView[@resource-id=\"com.agritask.mobile.android:id/loginBrandLogoImageView\"]"
+                        ],
+                        "value": 5000
+                    },
+                    {
+                        "command": "multiple-clicks",
+                        "selectors": [
+                            "android|||//android.widget.ImageView[@resource-id=\"com.agritask.mobile.android:id/loginBrandLogoImageView\"]"
+                        ],
+                        "value": 3
+                    },
+                    {
+                        "command": "wait-for-exist",
+                        "selectors": [
+                            "android|||//androidx.recyclerview.widget.RecyclerView[@resource-id=\"com.agritask.mobile.android:id/recycler_view\"]/android.widget.LinearLayout[5]/android.widget.RelativeLayout"
+                        ],
+                        "value": 5000
+                    },
+                    {
+                        "command": "click",
+                        "selectors": [
+                            "android|||//androidx.recyclerview.widget.RecyclerView[@resource-id=\"com.agritask.mobile.android:id/recycler_view\"]/android.widget.LinearLayout[5]/android.widget.RelativeLayout"
+                        ]
+                    },
+                    {
+                        "command": "pause",
+                        "value": 1000
+                    },
+                    {
+                        "command": "set-value",
+                        "selectors": ["android|||//android.widget.EditText[@resource-id=\"android:id/edit\"]"],
+                        "value": "https://br.pescout.com/b/mobile"
+                    },
+                    {
+                        "command": "click",
+                        "selectors": ["android|||//android.widget.Button[@resource-id=\"android:id/button1\"]"]
+                    },
+                    {
+                        "command": "pause",
+                        "value": 1000
+                    },
+                    {
+                        "command": "click",
+                        "selectors": [
+                            "android|||//android.widget.ImageButton[@resource-id=\"com.agritask.mobile.android:id/manager_frag_button_back\"]"
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

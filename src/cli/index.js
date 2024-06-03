@@ -1,15 +1,14 @@
 const commander = require('commander');
 //import * as dotenv from 'dotenv';
 const fs = require('fs');
-const TestRunner = require('./models/test-runner.js');
-
-//dotenv.config({ path: __dirname + '/.env' });
+const TestRunner = require('../models/test-runner.js');
+const { getRunConfiguration } = require('../models/test-run-configuration.js');
 
 commander
     .version('0.0.1', '-v, --version')
     .usage('[OPTIONS]...')
     .description('A basic CLI tool')
-    .requiredOption('-c, --conf <run-configuration.json>', 'Provide run configuration file')
+    .options('-c, --conf <options.json>', 'Provide options file')
     .parse(process.argv);
 
 async function init() {
@@ -23,7 +22,10 @@ async function init() {
         const data = fs.readFileSync(file, 'utf-8');
         jsonData = JSON.parse(data);
     } else {
-        //check queue
+        const organization = process.env.ORGANIZATION;
+        const runId = process.env.RUN_ID;
+
+        jsonData = getRunConfiguration(organization, runId);
     }
 
     const testRunner = new TestRunner(jsonData);
