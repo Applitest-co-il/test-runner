@@ -65,6 +65,7 @@ class TestSuite {
         let failed = 0;
         let skipped = 0;
         let pending = 0;
+        let errors = [];
         for (let i = 0; i < this.#tests.length; i++) {
             const test = this.#tests[i];
             let error = '';
@@ -74,7 +75,9 @@ class TestSuite {
                     break;
                 case 'failed':
                     failed++;
-                    error = `failed in step ${test.lastStep + 1} with error "${test.errorDetails}"`;
+                    errors.push(
+                        `fail in test ${i} "${test.name}" in step ${test.lastStep + 1} with error "${test.errorDetails}"`
+                    );
                     break;
                 case 'pending':
                     pending++;
@@ -87,13 +90,22 @@ class TestSuite {
         }
         console.log('===============\n\n');
         console.log(`Passed: ${passed}\nFailed: ${failed}\nSkipped: ${skipped}\nPending: ${pending}`);
+        console.log(`Errors: ${errors.length == 0 ? 'None' : ''}`);
+        for (let i = 0; i < errors.length; i++) {
+            console.error(`- ${errors[i]}`);
+        }
         console.log('===============\n');
 
-        if (failed > 0) {
-            return false;
-        }
-
-        return true;
+        const output = {
+            name: this.#name,
+            success: failed === 0 && pending === 0,
+            passed: passed,
+            failed: failed,
+            skipped: skipped,
+            pending: pending,
+            errors: errors
+        };
+        return output;
     }
 }
 

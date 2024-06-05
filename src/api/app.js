@@ -36,23 +36,28 @@ app.patch('/test-runner', async (req, res) => {
             res.status(500).send('App download failed');
             return;
         }
+        options.runConfiguration.appium.app = appLocalPath;
     }
 
-    const testRunner = new TestRunner(options);
-    const result = testRunner.run();
-    if (!result) {
-        res.status(500).send('Test run failed');
-        return;
-    }
+    setTimeout(() => startRunner(options), 0);
 
-    res.send('Test runner completed');
+    res.status(200).send('Test runner started');
 });
 
+async function startRunner(options) {
+    const testRunner = new TestRunner(options);
+    const result = await testRunner.run();
+    if (!result) {
+        console.log('Test run failed');
+    }
+}
+
 async function downloadApp(orgId, appPlatform, appName) {
-    const existLocalApp = fs.existsSync(`${process.cwd()}/downloads/${appName}`);
+    const appLocalPath = `${process.cwd()}/downloads/${appName}`;
+    const existLocalApp = fs.existsSync(appLocalPath);
     if (existLocalApp) {
-        console.log('App already downloaded');
-        return `${process.cwd()}/downloads/${appName}`;
+        console.log(`App ${appLocalPath} already downloaded`);
+        return appLocalPath;
     }
 
     let token = await tokenClient.getIntraComToken();
@@ -92,7 +97,7 @@ async function downloadApp(orgId, appPlatform, appName) {
                 writer.on('error', reject);
             });
             return promise.then(() => {
-                console.log('File downloaded successfully');
+                console.log(`File downloaded successfully ${appLocalPath}`);
                 return appLocalPath;
             });
         })

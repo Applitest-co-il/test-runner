@@ -4,15 +4,21 @@ const { RunConfiguration } = require('./test-run-configuration');
 
 class TestRunner {
     #conf = null;
-    #suite = null;
     #driver = null;
 
+    #suites = [];
     #variables = {};
 
     constructor(options) {
         this.#conf = RunConfiguration.factory(options.runConfiguration);
-        this.#suite = new TestSuite(options.testSuite);
         this.#variables = options.variables ?? {};
+
+        if (options.suites) {
+            for (let i = 0; i < options.suites.length; i++) {
+                const suite = new TestSuite(options.suites[i]);
+                this.#suites.push(suite);
+            }
+        }
     }
 
     async startSession() {
@@ -37,17 +43,28 @@ class TestRunner {
 
             await this.startSession();
 
-            await this.#suite.run(this.#driver, this.#variables);
-            let suiteResult = await this.#suite.report();
+            let suiteResults = [];
+            for (let i = 0; i < this.#suites.length; i++) {
+                const suite = this.#suites[i];
+                await suite.run(this.#driver, this.#variables);
+                let suiteResult = await suite.report();
+                suiteResults.push(suiteResult);
+            }
 
             await this.closeSession();
 
             console.log('Test run complete');
 
-            return suiteResult;
+            let outputResult = true;
+            for (let i = 0; i < suiteResults.length; i++) {
+                outputResult &= suiteResults[i].success;
+            }
+
+            return outputResult;
         } catch (error) {
             console.error('Error running test:', error);
         }
+        return false;
     }
 }
 
