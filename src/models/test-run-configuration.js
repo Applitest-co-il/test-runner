@@ -30,7 +30,7 @@ class RunConfiguration {
         this.#runType = options.runType ?? 'mobile';
         this.#farm = options.farm ?? process.env.AM_FARM ?? 'local';
         this.#logLevel = options.logLevel ?? 'info';
-        this.#reset = options.reset ?? true;
+        this.#reset = options.appium.reset ?? true;
         this.#hostname = options.appium.host ?? 'localhost';
         this.#port = options.appium.port ?? 4723;
     }
