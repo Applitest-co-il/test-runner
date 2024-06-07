@@ -66,9 +66,17 @@ class TestSuite {
         let skipped = 0;
         let pending = 0;
         let errors = [];
+        let testDetails = [];
+
         for (let i = 0; i < this.#tests.length; i++) {
             const test = this.#tests[i];
-            let error = '';
+
+            let testDetail = {
+                name: test.name,
+                status: test.status,
+                failedStep: 0,
+                error: ''
+            };
             switch (test.status) {
                 case 'passed':
                     passed++;
@@ -76,8 +84,10 @@ class TestSuite {
                 case 'failed':
                     failed++;
                     errors.push(
-                        `fail in test ${i} "${test.name}" in step ${test.lastStep + 1} with error "${test.errorDetails}"`
+                        `Test ${i + 1} "${test.name}" - fail in step ${test.lastStep + 1} with error "${test.errorDetails}"`
                     );
+                    testDetail.failedStep = test.lastStep;
+                    testDetail.error = test.errorDetails;
                     break;
                 case 'pending':
                     pending++;
@@ -86,7 +96,7 @@ class TestSuite {
                     skipped++;
                     break;
             }
-            console.log(`Test ${i + 1} - ${test.name}: ${test.status.toUpperCase()} ${error}`);
+            testDetails.push(testDetail);
         }
         console.log('===============\n\n');
         console.log(`Passed: ${passed}\nFailed: ${failed}\nSkipped: ${skipped}\nPending: ${pending}`);
@@ -99,11 +109,14 @@ class TestSuite {
         const output = {
             name: this.#name,
             success: failed === 0 && pending === 0,
-            passed: passed,
-            failed: failed,
-            skipped: skipped,
-            pending: pending,
-            errors: errors
+            summary: {
+                total: this.#tests.length,
+                passed: passed,
+                failed: failed,
+                skipped: skipped,
+                pending: pending
+            },
+            details: testDetails
         };
         return output;
     }

@@ -41,26 +41,22 @@ class TestRunner {
         try {
             console.log('Starting run...');
 
-            await this.startSession();
-
             let suiteResults = [];
+
             for (let i = 0; i < this.#suites.length; i++) {
+                await this.startSession();
+
                 const suite = this.#suites[i];
                 await suite.run(this.#driver, this.#variables);
                 let suiteResult = await suite.report();
                 suiteResults.push(suiteResult);
-            }
 
-            await this.closeSession();
+                await this.closeSession();
+            }
 
             console.log('Test run complete');
 
-            let outputResult = true;
-            for (let i = 0; i < suiteResults.length; i++) {
-                outputResult &= suiteResults[i].success;
-            }
-
-            return outputResult;
+            return suiteResults;
         } catch (error) {
             console.error('Error running test:', error);
         }

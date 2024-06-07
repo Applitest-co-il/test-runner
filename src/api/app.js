@@ -39,17 +39,40 @@ app.patch('/test-runner', async (req, res) => {
         options.runConfiguration.appium.app = appLocalPath;
     }
 
-    setTimeout(() => startRunner(options), 0);
+    const output = await startRunner(options);
 
-    res.status(200).send('Test runner started');
+    res.status(200).json(output);
 });
 
 async function startRunner(options) {
     const testRunner = new TestRunner(options);
-    const result = await testRunner.run();
-    if (!result) {
-        console.log('Test run failed');
+    const suiteResults = await testRunner.run();
+
+    let success = true;
+    let summary = {
+        suites: suiteResults.length,
+        total: 0,
+        passed: 0,
+        failed: 0,
+        skipped: 0,
+        pending: 0
+    };
+    for (let i = 0; i < suiteResults.length; i++) {
+        success = success && suiteResults[i].success;
+        summary.total += suiteResults[i].summary.total;
+        summary.passed += suiteResults[i].summary.passed;
+        summary.failed += suiteResults[i].summary.failed;
+        summary.skipped += suiteResults[i].summary.skipped;
+        summary.pending += suiteResults[i].summary.pending;
     }
+
+    const output = {
+        success: success,
+        summary: summary,
+        suiteResults: suiteResults
+    };
+
+    return output;
 }
 
 async function downloadApp(orgId, appPlatform, appName) {
