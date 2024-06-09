@@ -227,7 +227,7 @@
                 ]
             },
             {
-                "name": "Validate login & initial sync",
+                "name": "Validate sync",
                 "steps": [
                     {
                         "command": "wait-for-exist",
@@ -566,6 +566,12 @@
             {
                 "name": "Logout",
                 "steps": [
+                    {
+                        "command": "wait-for-exist",
+                        "selectors": [
+                            "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[5]/android.widget.ImageView"
+                        ]
+                    },
                     {
                         "command": "click",
                         "selectors": [
