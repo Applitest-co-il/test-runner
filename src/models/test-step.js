@@ -15,7 +15,14 @@ class TestStep {
     #errorDetails = '';
 
     static #commands = [
+        //generic
         'pause',
+
+        //variables
+        'set-variable',
+        'generate-random-integer',
+
+        //actions
         'click',
         'multiple-clicks',
         'set-value',
@@ -24,8 +31,9 @@ class TestStep {
         'scroll-up-to-element',
         'scroll-down-to-element',
         'press-key',
+
+        //assertions
         'wait-for-exist',
-        'generate-random-integer',
         'assert-is-displayed',
         'assert-text'
     ];
@@ -73,6 +81,10 @@ class TestStep {
 
     get errorDetails() {
         return this.#errorDetails;
+    }
+
+    get variables() {
+        return this.#variables;
     }
 
     #requiresItem(command) {
@@ -146,9 +158,20 @@ class TestStep {
             }
 
             switch (this.#command) {
+                //generic
                 case 'pause':
                     await this.#pause(driver);
                     break;
+
+                //variables
+                case 'generate-random-integer':
+                    await this.#generateRandomInteger();
+                    break;
+                case 'set-variable':
+                    await this.#setVariable(driver);
+                    break;
+
+                //actions
                 case 'click':
                     await this.#click(item);
                     break;
@@ -160,9 +183,6 @@ class TestStep {
                     break;
                 case 'press-key':
                     await this.#pressKey(driver, this.#value);
-                    break;
-                case 'wait-for-exist':
-                    await this.#waitForExist(driver);
                     break;
                 case 'scroll-up':
                     await this.#scrollUp(driver);
@@ -176,8 +196,10 @@ class TestStep {
                 case 'scroll-down-to-element':
                     await this.#scrollDownToElement(driver);
                     break;
-                case 'generate-random-integer':
-                    await this.#generateRandomInteger();
+
+                //assertions
+                case 'wait-for-exist':
+                    await this.#waitForExist(driver);
                     break;
                 case 'assert-is-displayed':
                     await this.#assertIsDisplayed(item);
@@ -347,11 +369,36 @@ class TestStep {
         this.#variables[varName] = randomValue;
     }
 
+    async #setVariable(driver) {
+        const varParts = this.#value.split('|||');
+        if (varParts.length < 1) {
+            throw new TestRunnerError(`Invalid set variable value format`);
+        }
+
+        const varName = varParts[0];
+        let varValue = null;
+        if (varParts.length == 2) {
+            varValue = varParts[1];
+        } else {
+            if (!this.#selectors || this.#selectors.length === 0) {
+                throw new TestRunnerError(
+                    `SetVariable::Selectors is required to set variable if value do not contain it`
+                );
+            }
+            let item = await this.#selectItem(driver);
+            if (!item) {
+                throw new TestRunnerError(`SetVariable::Item is not found to set variable`);
+            }
+            varValue = await item.getText();
+        }
+        this.#variables[varName] = varValue;
+    }
+
     async #assertIsDisplayed(item) {
         // Implement assert is displayed logic
         let isDisplayed = await item.isDisplayed();
         if (!isDisplayed) {
-            throw new TestRunnerError(`Item is not displayed`);
+            throw new TestRunnerError(`AssertIsDisplayed::Item is not displayed`);
         }
     }
 
@@ -359,7 +406,7 @@ class TestStep {
         // Implement assert text logic
         let text = await item.getText();
         if (text !== this.#value) {
-            throw new TestRunnerError(`Text "${text}" does not match expected value "${this.#value}"`);
+            throw new TestRunnerError(`AssertText::Text "${text}" does not match expected value "${this.#value}"`);
         }
     }
 

@@ -37,6 +37,10 @@ class TestSuite {
         return this.#tests;
     }
 
+    get variables() {
+        return this.#variables;
+    }
+
     async run(driver, variables) {
         const tests = this.#tests;
 
@@ -48,10 +52,13 @@ class TestSuite {
                 continue;
             }
 
-            await test.run(driver, this.#variables);
+            await test.run(driver, this.variables);
             if (this.#stopOnFailure && test.status === 'failed') {
                 break;
             }
+
+            mergeVariables(this.#variables, test.variables);
+
             if (this.#waitBetweenTests > 0) {
                 await driver.pause(this.#waitBetweenTests);
             }

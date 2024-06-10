@@ -20,11 +20,10 @@ function replaceVariables(text, variables) {
 }
 
 function mergeVariables(baseVariables, newVariables) {
-    let mergedVariables = { ...baseVariables };
+    if (newVariables === null || typeof newVariables !== 'object') return baseVariables;
     Object.keys(newVariables).forEach((key) => {
-        mergedVariables[key] = newVariables[key];
+        baseVariables[key] = newVariables[key];
     });
-    baseVariables = mergedVariables;
     return baseVariables;
 }
 

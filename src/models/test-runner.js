@@ -1,6 +1,7 @@
 const { TestRunnerError } = require('../helpers/test-errors');
 const TestSuite = require('./test-suite');
 const { RunConfiguration } = require('./test-run-configuration');
+const { mergeVariables } = require('../helpers/utils');
 
 class TestRunner {
     #conf = null;
@@ -19,6 +20,10 @@ class TestRunner {
                 this.#suites.push(suite);
             }
         }
+    }
+
+    get variables() {
+        return this.#variables;
     }
 
     async startSession() {
@@ -47,7 +52,10 @@ class TestRunner {
                 await this.startSession();
 
                 const suite = this.#suites[i];
-                await suite.run(this.#driver, this.#variables);
+                await suite.run(this.#driver, this.variables);
+
+                mergeVariables(this.#variables, suite.variables);
+
                 let suiteResult = await suite.report();
                 suiteResults.push(suiteResult);
 

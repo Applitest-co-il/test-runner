@@ -59,6 +59,10 @@ class TestDefinition {
         return '';
     }
 
+    get variables() {
+        return this.#variables;
+    }
+
     async run(driver, variables) {
         const steps = this.#steps;
 
@@ -66,12 +70,13 @@ class TestDefinition {
 
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
-            const success = await step.run(driver, this.#variables);
+            const success = await step.run(driver, this.variables);
             if (!success) {
                 this.#status = 'failed';
                 this.#lastStep = i;
                 break;
             }
+            mergeVariables(this.#variables, step.variables);
         }
         if (this.#status === 'pending') {
             this.#status = 'passed';
