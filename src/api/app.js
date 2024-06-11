@@ -4,7 +4,6 @@ const fs = require('fs');
 const axios = require('axios');
 require('dotenv').config({ path: './.env', debug: true });
 
-const tokenClient = require('../models/proxies/am/token.js');
 const TestRunner = require('../models/test-runner.js');
 
 const app = express();
@@ -26,12 +25,11 @@ app.patch('/test-runner', async (req, res) => {
         return;
     }
 
-    if (options?.runConfiguration?.appium?.app?.startsWith('s3://')) {
-        const appPlatform = options.runConfiguration.appium.platformName.toLowerCase();
-        const appName = options.runConfiguration.appium.app.split('/').pop();
-        const orgId = options.runConfiguration.organization;
+    if (options?.runConfiguration?.appium?.app?.startsWith('s3:')) {
+        const appName = options.runConfiguration.appium.appName;
+        const url = options.runConfiguration.appium.app.replace('s3:', '');
 
-        const appLocalPath = await downloadApp(orgId, appPlatform, appName);
+        const appLocalPath = await downloadApp(url, appName);
         if (!appLocalPath) {
             res.status(500).send('App download failed');
             return;
@@ -75,7 +73,7 @@ async function startRunner(options) {
     return output;
 }
 
-async function downloadApp(orgId, appPlatform, appName) {
+async function downloadApp(url, appName) {
     const appLocalPath = `${process.cwd()}/downloads/${appName}`;
     const existLocalApp = fs.existsSync(appLocalPath);
     if (existLocalApp) {
@@ -83,52 +81,23 @@ async function downloadApp(orgId, appPlatform, appName) {
         return appLocalPath;
     }
 
-    let token = await tokenClient.getIntraComToken();
-    if (!token) {
-        console.error('Token could not be retrieved');
-        return null;
-    }
-
-    let options = {
+    const downloadResponse = await axios({
+        url: url,
         method: 'GET',
-        url: `${process.env.PUBLIC_API_BASE_URL}/v1/organizations/${orgId}/upload/mobile-apps/${appPlatform}/${appName}/url`,
-        headers: {
-            'x-api-jwt': token
-        }
-    };
-    const response = await axios
-        .request(options)
-        .then(async function (response) {
-            const signedUrl = response.data.url;
-            if (!signedUrl) {
-                console.error('Signed URL not found');
-                return null;
-            }
+        responseType: 'stream'
+    });
 
-            const downloadResponse = await axios({
-                url: signedUrl,
-                method: 'GET',
-                responseType: 'stream'
-            });
+    const writer = fs.createWriteStream(appLocalPath);
+    downloadResponse.data.pipe(writer);
 
-            const appLocalPath = `${process.cwd()}/downloads/${appName}`;
-            const writer = fs.createWriteStream(appLocalPath);
-            downloadResponse.data.pipe(writer);
-
-            const promise = new Promise((resolve, reject) => {
-                writer.on('finish', resolve);
-                writer.on('error', reject);
-            });
-            return promise.then(() => {
-                console.log(`File downloaded successfully ${appLocalPath}`);
-                return appLocalPath;
-            });
-        })
-        .catch(function (error) {
-            console.error(`Error: ${error}`);
-            return null;
-        });
-    return response;
+    const promise = new Promise((resolve, reject) => {
+        writer.on('finish', resolve);
+        writer.on('error', reject);
+    });
+    return promise.then(() => {
+        console.log(`File downloaded successfully ${appLocalPath}`);
+        return appLocalPath;
+    });
 }
 
 app.listen(8282, () => {

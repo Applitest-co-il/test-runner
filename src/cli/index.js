@@ -9,6 +9,7 @@ commander
     .usage('[OPTIONS]...')
     .description('A basic CLI tool')
     .options('-c, --conf <options.json>', 'Provide options file')
+    .options('-u, --url <url>', 'Provide URL for retrieving configuration file')
     .parse(process.argv);
 
 async function init() {
@@ -22,10 +23,6 @@ async function init() {
         const data = fs.readFileSync(file, 'utf-8');
         jsonData = JSON.parse(data);
     } else {
-        const organization = process.env.ORGANIZATION;
-        const runId = process.env.RUN_ID;
-
-        jsonData = getRunConfiguration(organization, runId);
     }
 
     const testRunner = new TestRunner(jsonData);
