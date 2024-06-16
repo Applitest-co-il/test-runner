@@ -4,12 +4,14 @@
     "description": "applitest manager test runner",
     "scripts": {
         "test": "node --inspect ./src/index.js --conf ./samples/json/test.json",
-        "cli:start": "node ./src/index.js --conf ./samples/json/run.json",
+        "start": "node ./src/cli/index.js",
+        "cli:start": "node ./src/cli/index.js --conf ./samples/json/run.json",
         "cli:start:debug": "node --inspect  ./src/cli/index.js --conf ./samples/json/run.json",
         "api": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./src/api/start-api.ps1",
         "api:start": "node ./src/api/app.js",
         "api:start:debug": "node --inspect ./src/api/app.js",
-        "api:start:dev:debug": "nodemon --inspect ./src/api/app.js"
+        "api:start:dev:debug": "nodemon --inspect ./src/api/app.js",
+        "build": "@powershell -NoProfile -Command ./build.ps1"
     },
     "repository": {
         "type": "git",
