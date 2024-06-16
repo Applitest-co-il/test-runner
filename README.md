@@ -12,6 +12,7 @@ This app allows to run appium tests send as json file in applitest manager forma
 
 ## Running the app
 
+-   Clone repository on your computer
 -   Go to main directory of the project or Open terminal in visual code
 -   npm install
 -   npm run api
