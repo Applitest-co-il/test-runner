@@ -2,7 +2,7 @@
 
 This app allows to run appium tests send as json file in applitest manager format
 
-## Installation
+## Pre-requisites
 
 -   Install NodeJs and NPM - Follow [this link](https://nodejs.org/en)
 -   Install Appium - Follow [this link](https://appium.io/docs/en/2.0/quickstart/install/)
