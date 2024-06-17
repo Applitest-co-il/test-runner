@@ -42,7 +42,14 @@ where:
 
 Variables:
 
-Selectors and values can include dynamic variables defined as {{<variable name>}}
+Selectors and values can include dynamic variables defined as {{\<variable name\>}}
+
+Selectors:
+
+You can use either xpath (default) or id selectors
+
+-   xpath: //\<xpath of element(s)\>
+-   id: id=\<id of element\>
 
 ### List of commands
 
@@ -58,13 +65,13 @@ Pause:
 Set variable:
 
 -   command: set-variable
--   value: <varaiable name>[|||<static value to set>]
+-   value: \<variaable name\>[|||\<static value to set\>]
 -   selectors: optional - selector where to capture value
 
 Generate Random Integer:
 
 -   command: generate-random-integer
--   value: <variable name>|||<min value>|||<max value>
+-   value: \<variable name\>|||\<min value\>|||\<max value\>
 
 #### Actions
 
