@@ -1,3 +1,4 @@
+const { TestDefinitionError } = require('../helpers/test-errors');
 const { mergeVariables } = require('../helpers/utils');
 const TestStep = require('./test-step');
 
@@ -67,6 +68,10 @@ class TestDefinition {
         const steps = this.#steps;
 
         mergeVariables(this.#variables, variables);
+
+        if (steps.length == 0) {
+            throw new TestDefinitionError(`Test "${this.#name}" has no steps`);
+        }
 
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
