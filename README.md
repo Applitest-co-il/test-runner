@@ -144,4 +144,4 @@ Assert element matches specific number:
 -   command: assert-number
 -   selectors: element to assert
 -   value: target number
--   operator: ==, <, >, <=, >=, !=
+-   operator: ==, <, >, <=, >=, != - default: ==
