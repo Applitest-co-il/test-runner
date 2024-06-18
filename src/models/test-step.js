@@ -7,6 +7,7 @@ class TestStep {
     #selectors = null;
     #position = -1;
     #value = null;
+    #operator = null;
 
     #selectorsPerPlatform = {};
     #variables = null;
@@ -35,14 +36,23 @@ class TestStep {
         //assertions
         'wait-for-exist',
         'assert-is-displayed',
-        'assert-text'
+        'assert-text',
+        'assert-number'
     ];
-    static #commandsRequiredItem = ['click', 'multiple-clicks', 'set-value', 'assert-is-displayed', 'assert-text'];
+    static #commandsRequiredItem = [
+        'click',
+        'multiple-clicks',
+        'set-value',
+        'assert-is-displayed',
+        'assert-text',
+        'assert-number'
+    ];
     static #commandsRequiredValue = [
         'multiple-clicks',
         'set-value',
         'press-key',
         'assert-text',
+        'assert-number',
         'scroll-up',
         'scroll-down',
         'scroll-up-to-element',
@@ -77,6 +87,10 @@ class TestStep {
 
     get status() {
         return this.#status;
+    }
+
+    get operator() {
+        return this.#operator;
     }
 
     get errorDetails() {
@@ -207,6 +221,11 @@ class TestStep {
                 case 'assert-text':
                     await this.#assertText(item);
                     break;
+                case 'assert-number':
+                    await this.#assertNumber(item);
+                    break;
+
+                //default
                 default:
                     this.#errorDetails = `Command ${this.#command} is not a valid one`;
                     return false;
@@ -275,15 +294,20 @@ class TestStep {
     async #waitForExist(driver) {
         // Implement wait for exist logic
         let timeout = this.#value ?? 5000;
-        let that = this;
-        await driver.waitUntil(
-            async () => {
-                let item = await that.#selectItem(driver);
-                return !item ? false : true;
-            },
-            { timeout: timeout, interval: 1000 }
-        );
-        //await driver.waitForExist(this.#selectors[0], this.#value);
+        try {
+            let that = this;
+            await driver.waitUntil(
+                async () => {
+                    let item = await that.#selectItem(driver);
+                    return !item ? false : true;
+                },
+                { timeout: timeout, interval: 1000 }
+            );
+        } catch (e) {
+            throw new TestRunnerError(
+                `Element "${this.#selectors.join(',')}" did not appear on screen up to ${timeout}ms`
+            );
+        }
     }
 
     async #verticalScroll(driver, count, down = true) {
@@ -404,9 +428,72 @@ class TestStep {
 
     async #assertText(item) {
         // Implement assert text logic
-        let text = await item.getText();
-        if (text !== this.#value) {
-            throw new TestRunnerError(`AssertText::Text "${text}" does not match expected value "${this.#value}"`);
+        const text = await item.getText();
+        const actualValue = replaceVariables(this.#value, this.#variables);
+        const operator = this.operator ? this.operator : '==';
+        let result = false;
+        switch (operator) {
+            case '==':
+                result = text === actualValue;
+                break;
+            case '!=':
+                result = text != actualValue;
+                break;
+            case 'starts-with':
+                result = text.startsWith(actualValue);
+                break;
+            case 'contains':
+                result = text.indexOf(actualValue) >= 0;
+                break;
+            case 'ends-with':
+                result = text.endsWith(actualValue);
+                break;
+        }
+        if (!result) {
+            throw new TestRunnerError(
+                `AssertText::Text "${text}" does not match expected value "${actualValue}" using operator "${operator}"`
+            );
+        }
+    }
+
+    async #assertNumber(item) {
+        const text = await item.getText();
+        const number = +text;
+        if (isNaN(number)) {
+            throw new TestRunnerError(`AssertNumber::Text "${text}" is not a valid number`);
+        }
+
+        const actualValue = replaceVariables(this.#value, this.#variables);
+        const actualNumber = +actualValue;
+        if (isNaN(actualNumber)) {
+            throw new TestRunnerError(`AssertNumber::value "${this.value}" is not a valid number`);
+        }
+        const operator = this.operator ? this.operator : '==';
+        let result = false;
+        switch (operator) {
+            case '==':
+                result = number == actualNumber;
+                break;
+            case '!=':
+                result = number != actualNumber;
+                break;
+            case '>':
+                result = number > actualNumber;
+                break;
+            case '>=':
+                result = number >= actualNumber;
+                break;
+            case '<':
+                result = number < actualNumber;
+                break;
+            case '<=':
+                result = number <= actualNumber;
+                break;
+        }
+        if (!result) {
+            throw new TestRunnerError(
+                `AssertNumber::Text "${text}" does not match expected value "${actualValue}" using operator "${operator}"`
+            );
         }
     }
 

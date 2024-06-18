@@ -38,7 +38,8 @@ where:
 -   command: command to execute
 -   value: provides information required to execute coomand
 -   selectors: list of selectors
--   position: in case selector matches and array of elements, the position of the target element
+-   position: optional - in case selector matches and array of elements, the position of the target element
+-   operator: optional - in case command suports multiple operators, ability to indicate the one to use
 
 Variables:
 
@@ -65,7 +66,7 @@ Pause:
 Set variable:
 
 -   command: set-variable
--   value: \<variaable name\>[|||\<static value to set\>]
+-   value: \<variable name\>[|||\<static value to set\>]
 -   selectors: optional - selector where to capture value
 
 Generate Random Integer:
@@ -131,8 +132,16 @@ Assert element is displayed:
 -   command: assert-is-displayed
 -   selectors: element to assert
 
-Assert element equals text:
+Assert element matches a specific text:
 
 -   command: assert-text
 -   selectors: element to assert
 -   value: target text
+-   operator: ==, !=, starts-with, ends-with, contains - default: ==
+
+Assert element matches specific number:
+
+-   command: assert-number
+-   selectors: element to assert
+-   value: target number
+-   operator: ==, <, >, <=, >=, !=
