@@ -445,6 +445,9 @@ class TestStep {
             case 'contains':
                 result = text.indexOf(actualValue) >= 0;
                 break;
+            case 'not-contains':
+                result = text.indexOf(actualValue) == -1;
+                break;
             case 'ends-with':
                 result = text.endsWith(actualValue);
                 break;
