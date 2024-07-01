@@ -28,7 +28,7 @@ class RunConfiguration {
 
     constructor(options) {
         this.#runType = options.runType ?? 'mobile';
-        this.#farm = options.farm ?? process.env.AM_FARM ?? 'local';
+        this.#farm = options.farm ?? process.env.TR_FARM ?? 'local';
         this.#logLevel = options.logLevel ?? 'info';
         this.#reset = options.appium.reset ?? true;
         this.#hostname = options.appium.host ?? 'localhost';

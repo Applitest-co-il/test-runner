@@ -33,9 +33,9 @@ async function init() {
         }
         const data = fs.readFileSync(localConf, 'utf-8');
         jsonData = JSON.parse(data);
-    } else if (process.env.AM_URL) {
+    } else if (process.env.TR_TEST_CONF_URL) {
         console.log(`Using configuration from environment variable: ${process.env.AM_URL}`);
-        const localConf = await downloadFile(process.env.AM_URL, 'options.json');
+        const localConf = await downloadFile(process.env.TR_TEST_CONF_URL, 'options.json');
         if (!localConf) {
             console.error('Configuration could not be retrieved');
             throw new Error('No configuration provided');
