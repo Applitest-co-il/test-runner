@@ -1,3 +1,4 @@
+const { parse } = require('dotenv');
 const { TestDefinitionError, TestItemNotFoundError, TestRunnerError } = require('../helpers/test-errors');
 const { replaceVariables } = require('../helpers/utils');
 
@@ -293,7 +294,7 @@ class TestStep {
 
     async #waitForExist(driver) {
         // Implement wait for exist logic
-        let timeout = this.#value ?? 5000;
+        let timeout = this.#value ? parseInt(this.#value) : 5000;
         try {
             let that = this;
             await driver.waitUntil(
@@ -310,7 +311,8 @@ class TestStep {
         }
     }
 
-    async #verticalScroll(driver, count, down = true) {
+    async #verticalScroll(driver, down = true) {
+        const count = this.#value ? parseInt(this.#value) : 1;
         const startPercentage = down ? 90 : 10;
         const endPercentage = down ? 10 : 90;
         const anchorPercentage = 50;
@@ -351,24 +353,24 @@ class TestStep {
     }
 
     async #scrollUp(driver) {
-        await this.#verticalScroll(driver, this.#value, false);
+        await this.#verticalScroll(driver, false);
     }
 
     async #scrollDown(driver) {
-        await this.#verticalScroll(driver, this.#value, true);
+        await this.#verticalScroll(driver, true);
     }
 
-    async #scrollToElement(driver, timeout, down = true) {
-        const startTimeStamp = new Date().getTime();
-        let timeSpan = 0;
-        while (timeSpan < timeout) {
+    async #scrollToElement(driver, down = true) {
+        let count = 0;
+        let maxCount = this.#value ? parseInt(this.#value) : 1;
+        while (count < maxCount) {
             let item = await this.#selectItem(driver);
             if (!item) {
                 this.#verticalScroll(driver, 1, down);
             } else {
                 break;
             }
-            timeSpan = new Date().getTime() - startTimeStamp;
+            count++;
         }
     }
 
