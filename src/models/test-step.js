@@ -1,4 +1,3 @@
-const { parse } = require('dotenv');
 const { TestDefinitionError, TestItemNotFoundError, TestRunnerError } = require('../helpers/test-errors');
 const { replaceVariables } = require('../helpers/utils');
 
@@ -197,7 +196,7 @@ class TestStep {
                     await this.#setValue(item);
                     break;
                 case 'press-key':
-                    await this.#pressKey(driver, this.#value);
+                    await this.#pressKey(driver);
                     break;
                 case 'scroll-up':
                     await this.#scrollUp(driver);
@@ -287,8 +286,9 @@ class TestStep {
         await item.setValue(actualValue);
     }
 
-    async #pressKey(driver, key) {
+    async #pressKey(driver) {
         // Implement press key logic
+        let key = parseInt(this.#value);
         await driver.pressKeyCode(key);
     }
 
