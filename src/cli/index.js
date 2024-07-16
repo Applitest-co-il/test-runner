@@ -1,5 +1,4 @@
 const commander = require('commander');
-//import * as dotenv from 'dotenv';
 const fs = require('fs');
 
 const { downloadFile } = require('../helpers/download-file.js');
@@ -19,6 +18,12 @@ async function init() {
     const options = commander.opts();
     let jsonData = {};
 
+    console.log('Checking configuration...');
+    console.log(`CONF: ${options.conf}`);
+    console.log(`URL: ${options.url}`);
+    console.log(`TR_TEST_CONF_URL: ${process.env.TR_TEST_CONF_URL}`);
+    console.log(`TR_FARM: ${process.env.TR_FARM}`);
+
     if (options.conf) {
         console.log(`Using configuration from file: ${options.conf}`);
         const file = options.conf;
@@ -34,7 +39,7 @@ async function init() {
         const data = fs.readFileSync(localConf, 'utf-8');
         jsonData = JSON.parse(data);
     } else if (process.env.TR_TEST_CONF_URL) {
-        console.log(`Using configuration from environment variable: ${process.env.AM_URL}`);
+        console.log(`Using configuration from environment variable: ${process.env.TR_TEST_CONF_URL}`);
         const localConf = await downloadFile(process.env.TR_TEST_CONF_URL, 'options.json');
         if (!localConf) {
             console.error('Configuration could not be retrieved');
@@ -48,7 +53,7 @@ async function init() {
     }
 
     const output = await runTests(jsonData);
-    const reportPath = `${process.env.DEVICEFARM_LOG_DIR ? process.env.DEVICEFARM_LOG_DIR : '.'}/report.json`;
+    const reportPath = `${process.env.DEVICEFARM_LOG_DIR ? process.env.DEVICEFARM_LOG_DIR : './reports/'}/report.json`;
     fs.writeFileSync(reportPath, JSON.stringify(output, null, 2));
 }
 

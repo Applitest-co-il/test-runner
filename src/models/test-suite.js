@@ -2,6 +2,7 @@ const { mergeVariables } = require('../helpers/utils');
 const TestDefinition = require('./test-definition');
 
 class TestSuite {
+    #id = '';
     #name = '';
     #waitBetweenTests = 0;
     #stopOnFailure = false;
@@ -9,7 +10,8 @@ class TestSuite {
     #tests = [];
 
     constructor(options) {
-        this.#name = options.name;
+        this.#id = options.id ?? '';
+        this.#name = options.name ?? '';
         this.#waitBetweenTests = options.waitBetweenTests ?? 0;
         this.#stopOnFailure = options.stopOnFailure ?? false;
         this.#variables = options.variables ?? {};
@@ -27,6 +29,10 @@ class TestSuite {
             let testDefinition = new TestDefinition(test);
             this.#tests.push(testDefinition);
         }
+    }
+
+    get id() {
+        return this.#id;
     }
 
     get name() {
@@ -79,9 +85,11 @@ class TestSuite {
             const test = this.#tests[i];
 
             let testDetail = {
+                id: test.id,
+                suiteId: this.#id,
                 name: test.name,
                 status: test.status,
-                failedStep: 0,
+                failedStep: -1,
                 error: ''
             };
             switch (test.status) {
@@ -90,9 +98,6 @@ class TestSuite {
                     break;
                 case 'failed':
                     failed++;
-                    errors.push(
-                        `Test ${i + 1} "${test.name}" - fail in step ${test.lastStep + 1} with error "${test.errorDetails}"`
-                    );
                     testDetail.failedStep = test.lastStep;
                     testDetail.error = test.errorDetails;
                     break;
@@ -114,6 +119,7 @@ class TestSuite {
         console.log('===============\n');
 
         const output = {
+            id: this.#id,
             name: this.#name,
             success: failed === 0 && pending === 0,
             summary: {

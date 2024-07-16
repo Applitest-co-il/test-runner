@@ -9,11 +9,22 @@ async function downloadFile(url, fileName) {
         return fileLocalPath;
     }
 
-    const downloadResponse = await axios({
-        url: url,
-        method: 'GET',
-        responseType: 'stream'
-    });
+    console.log(`Downloading file from ${url} to ${fileLocalPath}`);
+
+    let downloadResponse = null;
+    try {
+        downloadResponse = await axios({
+            url: url,
+            method: 'GET',
+            responseType: 'stream'
+        });
+    } catch (error) {
+        console.error(`Error downloading file ${url}: ${error}`);
+        return null;
+    }
+
+    console.log(`Download response status: ${downloadResponse.status}`);
+    console.log(`Starting saving file to ${fileLocalPath}`);
 
     const writer = fs.createWriteStream(fileLocalPath);
     downloadResponse.data.pipe(writer);
