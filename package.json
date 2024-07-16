@@ -5,6 +5,7 @@
     "scripts": {
         "test": "node --inspect ./src/index.js --conf ./samples/json/test.json",
         "start": "node ./src/cli/index.js",
+        "cli": "node ./src/cli/index.js",
         "cli:start": "node ./src/cli/index.js --conf ./samples/json/run.json",
         "cli:start:debug": "node --inspect  ./src/cli/index.js --conf ./samples/json/run.json",
         "api": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./src/api/start-api.ps1",
@@ -29,13 +30,12 @@
     },
     "homepage": "https://github.com/Applitest-co-il/test-runner#readme",
     "dependencies": {
-        "@danielyaghil/aws-helpers": "^0.9.60",
         "axios": "^1.7.2",
         "commander": "^11.1.0",
         "cors": "^2.8.5",
         "dotenv": "^16.4.5",
         "express": "^4.19.2",
-        "webdriverio": "^8.36.1"
+        "webdriverio": "^8.39.1"
     },
     "devDependencies": {
         "eslint": "^8.57.0",
