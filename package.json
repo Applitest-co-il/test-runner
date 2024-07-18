@@ -1,6 +1,6 @@
 {
     "name": "test-runner",
-    "version": "0.9.1",
+    "version": "0.9.2",
     "description": "applitest manager test runner",
     "scripts": {
         "test": "node --inspect ./src/index.js --conf ./samples/json/test.json",

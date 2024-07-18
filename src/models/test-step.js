@@ -248,6 +248,7 @@ class TestStep {
         // Implement item selection logic
         let selectors = this.#selectorsForPlatform(driver.capabilities.platformName.toLowerCase());
         let item = null;
+        this.#usedSelectors = '';
         for (let i = 0; i < selectors.length; i++) {
             const selector = replaceVariables(selectors[i], this.#variables);
             if (this.#usedSelectors.length > 0) {

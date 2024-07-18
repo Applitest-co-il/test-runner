@@ -8,4 +8,5 @@ Copy-Item -Path "./downloads/.keep" -Destination "./dist/bin/downloads"
 Copy-Item -Path "./reports/.keep" -Destination "./dist/bin/downloads" 
 Copy-Item -Path "./src/*" -Destination "./dist/bin/src" -Recurse
 Copy-Item -Path "./package*" -Destination "./dist/bin" 
+Copy-Item -Path "./LICENSE" -Destination "./dist/bin"
 Compress-Archive -Path "./dist/bin/*" -DestinationPath "./dist/test-runner.zip"
