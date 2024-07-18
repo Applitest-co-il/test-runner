@@ -89,7 +89,7 @@ class TestSuite {
                 suiteId: this.#id,
                 name: test.name,
                 status: test.status,
-                failedStep: -1,
+                failedStep: {},
                 error: ''
             };
             switch (test.status) {
@@ -98,8 +98,13 @@ class TestSuite {
                     break;
                 case 'failed':
                     failed++;
-                    testDetail.failedStep = test.lastStep;
-                    testDetail.error = test.errorDetails;
+                    testDetail.failedStep = {
+                        sequence: test.lastStep,
+                        command: test.steps[test.lastStep].command,
+                        target: test.steps[test.lastStep].usedSelector,
+                        error: test.steps[test.lastStep].errorDetails,
+                        url: ''
+                    };
                     break;
                 case 'pending':
                     pending++;

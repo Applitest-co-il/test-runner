@@ -4,7 +4,7 @@ const { replaceVariables } = require('../helpers/utils');
 class TestStep {
     #sequence = 0;
     #command = '';
-    #selectors = null;
+    #selectors = [];
     #position = -1;
     #value = null;
     #operator = null;
@@ -13,6 +13,7 @@ class TestStep {
     #variables = null;
 
     #status = 'pending';
+    #usedSelectors = '';
     #errorDetails = '';
 
     static #commands = [
@@ -93,6 +94,10 @@ class TestStep {
         return this.#operator;
     }
 
+    get usedSelector() {
+        return this.#usedSelectors;
+    }
+
     get errorDetails() {
         return this.#errorDetails;
     }
@@ -168,7 +173,7 @@ class TestStep {
         try {
             const item = this.#requiresItem(this.#command) ? await this.#selectItem(driver) : 'noIem';
             if (!item) {
-                throw new TestItemNotFoundError(`Item with selectors [${this.#selectors.join(',')}]  not found`);
+                throw new TestItemNotFoundError(`Item with selectors [${this.#usedSelectors}]  not found`);
             }
 
             switch (this.#command) {
@@ -245,6 +250,11 @@ class TestStep {
         let item = null;
         for (let i = 0; i < selectors.length; i++) {
             const selector = replaceVariables(selectors[i], this.#variables);
+            if (this.#usedSelectors.length > 0) {
+                this.#usedSelectors += ',';
+            }
+            this.#usedSelectors += `"${selector}"`;
+
             if (this.#position == -1) {
                 item = await driver.$(selector);
             } else {
@@ -306,7 +316,7 @@ class TestStep {
             );
         } catch (e) {
             throw new TestRunnerError(
-                `Element "${this.#selectors.join(',')}" did not appear on screen up to ${timeout}ms`
+                `Element with selector [${this.#usedSelectors}] did not appear on screen up to ${timeout}ms`
             );
         }
     }
@@ -385,11 +395,24 @@ class TestStep {
     async #generateRandomInteger() {
         const randomParts = this.#value.split('|||');
         if (randomParts.length !== 3) {
-            throw new TestRunnerError(`Invalid random value format`);
+            throw new TestRunnerError(
+                `GenerateRandowInteger::Invalid random value format "${this.#value}" - format should be "<var name>|||<min value>|||<max value>" `
+            );
         }
         const varName = randomParts[0];
         const minValue = parseInt(randomParts[1]);
         const maxValue = parseInt(randomParts[2]);
+
+        if (isNaN(minValue) || isNaN(maxValue)) {
+            throw new TestRunnerError(
+                `GenerateRandowInteger::Min and Max values in "${this.#value}" should be numbers`
+            );
+        }
+        if (minValue >= maxValue) {
+            throw new TestRunnerError(
+                `GenerateRandowInteger::Min value "${minValue}" should be less than Max value "${maxValue} - for reference value is "${this.#value}`
+            );
+        }
 
         const randomValue = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
         this.#variables[varName] = randomValue;
@@ -398,7 +421,9 @@ class TestStep {
     async #setVariable(driver) {
         const varParts = this.#value.split('|||');
         if (varParts.length < 1) {
-            throw new TestRunnerError(`Invalid set variable value format`);
+            throw new TestRunnerError(
+                `SetVariable::Invalid set variable value format "${this.#value}" - format should be "<var name>|||<var value>"`
+            );
         }
 
         const varName = varParts[0];
@@ -408,12 +433,14 @@ class TestStep {
         } else {
             if (!this.#selectors || this.#selectors.length === 0) {
                 throw new TestRunnerError(
-                    `SetVariable::Selectors is required to set variable if value do not contain it`
+                    `SetVariable::Selectors is required to set variable for "${varName}" if value do not contain it`
                 );
             }
             let item = await this.#selectItem(driver);
             if (!item) {
-                throw new TestRunnerError(`SetVariable::Item is not found to set variable`);
+                throw new TestRunnerError(
+                    `SetVariable::Item with selectors [${this.#usedSelectors}] was not found and this could not set his value into variable "${varName}"`
+                );
             }
             varValue = await item.getText();
         }
@@ -424,7 +451,9 @@ class TestStep {
         // Implement assert is displayed logic
         let isDisplayed = await item.isDisplayed();
         if (!isDisplayed) {
-            throw new TestRunnerError(`AssertIsDisplayed::Item is not displayed`);
+            throw new TestRunnerError(
+                `AssertIsDisplayed::Item with selectors [${this.#usedSelectors}] was not found or is not displayed`
+            );
         }
     }
 
@@ -456,7 +485,7 @@ class TestStep {
         }
         if (!result) {
             throw new TestRunnerError(
-                `AssertText::Text "${text}" does not match expected value "${actualValue}" using operator "${operator}"`
+                `AssertText::Text "${text}" does not match expected value "${actualValue}" using operator "${operator} on element with selectors [${this.#usedSelectors}]"`
             );
         }
     }
@@ -465,13 +494,15 @@ class TestStep {
         const text = await item.getText();
         const number = +text;
         if (isNaN(number)) {
-            throw new TestRunnerError(`AssertNumber::Text "${text}" is not a valid number`);
+            throw new TestRunnerError(
+                `AssertNumber::Text "${text}" is not a valid number on element with selectors [${this.#usedSelectors}]`
+            );
         }
 
         const actualValue = replaceVariables(this.#value, this.#variables);
         const actualNumber = +actualValue;
         if (isNaN(actualNumber)) {
-            throw new TestRunnerError(`AssertNumber::value "${this.value}" is not a valid number`);
+            throw new TestRunnerError(`AssertNumber::Provided value "${this.value}" is not a valid number`);
         }
         const operator = this.operator ? this.operator : '==';
         let result = false;
@@ -497,7 +528,7 @@ class TestStep {
         }
         if (!result) {
             throw new TestRunnerError(
-                `AssertNumber::Text "${text}" does not match expected value "${actualValue}" using operator "${operator}"`
+                `AssertNumber::Text "${text}" does not match expected value "${actualValue}" using operator "${operator}" on element with selectors [${this.#usedSelectors}]`
             );
         }
     }
