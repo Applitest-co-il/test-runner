@@ -21,6 +21,8 @@ class RunConfiguration {
         switch (options.runType) {
             case 'mobile':
                 return new RunConfigurationMobile(options);
+            case 'web':
+                return new RunConfigurationWeb(options);
             default:
                 throw new TestRunnerConfigurationError('Invalid run type provided');
         }
@@ -30,12 +32,12 @@ class RunConfiguration {
         this.#runType = options.runType ?? 'mobile';
         this.#farm = options.farm ?? process.env.TR_FARM ?? 'local';
         this.#logLevel = options.logLevel ?? 'info';
-        this.#reset = options.appium.reset ?? true;
-        this.#hostname = options.appium.host ?? 'localhost';
-        this.#port = options.appium.port ?? 4723;
+        this.#reset = options.reset ?? true;
+        this.#hostname = options.host ?? 'localhost';
+        this.#port = options.port ?? 4723;
     }
 
-    get testType() {
+    get runType() {
         return this.#runType;
     }
 
@@ -63,20 +65,23 @@ class RunConfiguration {
         return null;
     }
 
-    get driver() {
-        return null;
-    }
-
     capabilityPropertyName(name) {
         return name;
     }
 
     async startSession() {
-        console.log('Starting session...');
+        let driver = await remote(this.conf);
+        if (!driver) {
+            console.error('Driver could not be set');
+            throw new TestRunnerConfigurationError('Driver could not be set');
+        }
+        return driver;
     }
 
-    async closeSession() {
-        console.log('Closing session...');
+    async closeSession(driver) {
+        if (driver) {
+            await driver.deleteSession();
+        }
     }
 }
 
@@ -91,6 +96,7 @@ class RunConfigurationMobile extends RunConfiguration {
 
     constructor(options) {
         super(options);
+
         this.#platformName = options.appium.platformName ?? 'Android';
         this.#automationName = options.appium.automationName ?? 'UiAutomator2';
         this.#deviceName = options.appium.deviceName ?? 'Android';
@@ -135,24 +141,49 @@ class RunConfigurationMobile extends RunConfiguration {
     capabilityPropertyName(name) {
         return `appium:${name}`;
     }
+}
 
-    async startSession() {
-        let driver = await remote(this.conf);
-        if (!driver) {
-            console.error('Driver could not be set');
-            throw new TestRunnerConfigurationError('Driver could not be set');
+class RunConfigurationWeb extends RunConfiguration {
+    #browserName = '';
+    #browserVersion = '';
+    #resolution = '1920x1080';
+    #startUrl = '';
+
+    constructor(options) {
+        super(options);
+
+        this.#browserName = options.browser.name ?? 'chrome';
+        this.#browserVersion = options.browser.version ?? '';
+        this.#resolution = options.browser.resolution ?? '1920x1080';
+        this.#startUrl = options.browser.startUrl ?? '';
+
+        if (!this.#startUrl) {
+            throw new TestRunnerConfigurationError('No start URL provided');
         }
-        return driver;
     }
 
-    async closeSession(driver) {
-        if (driver) {
-            await driver.deleteSession();
+    get conf() {
+        let wdio = {
+            logLevel: this.logLevel,
+            capabilities: {}
+        };
+
+        if (this.farm === 'local') {
+            wdio.capabilities['browserName'] = this.#browserName;
         }
+
+        return wdio;
+    }
+
+    async startSession() {
+        let driver = await super.startSession();
+        await driver.url(this.#startUrl);
+        return driver;
     }
 }
 
 module.exports = {
     RunConfiguration,
-    RunConfigurationMobile
+    RunConfigurationMobile,
+    RunConfigurationWeb
 };
