@@ -1,0 +1,42 @@
+{
+    "runConfiguration": {
+        "runType": "web",
+        "browser": {
+            "name": "chrome",
+            "startUrl": "https://www.google.com/?hl=en"
+        }
+    },
+    "suites": [
+        {
+            "name": "Suite",
+            "waitBetweenTest": 0,
+            "stopOnFailure": true,
+            "tests": [
+                {
+                    "name": "Open search",
+                    "steps": [
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": ["aria/Search"],
+                            "value": 5000
+                        },
+                        {
+                            "command": "set-value",
+                            "selectors": ["aria/Search"],
+                            "value": "Test search"
+                        },
+                        {
+                            "command": "pause",
+                            "value": 10000
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
