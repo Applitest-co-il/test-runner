@@ -19,6 +19,7 @@ class TestStep {
     static #commands = [
         //generic
         'pause',
+        'toggle-location-services',
 
         //variables
         'set-variable',
@@ -58,7 +59,8 @@ class TestStep {
         'scroll-down',
         'scroll-up-to-element',
         'scroll-down-to-element',
-        'generate-random-integer'
+        'generate-random-integer',
+        'toggle-location-services'
     ];
 
     constructor(sequence, step) {
@@ -229,6 +231,10 @@ class TestStep {
                 case 'assert-number':
                     await this.#assertNumber(item);
                     break;
+                case 'toggle-location-services':  
+                    await this.#toggleLocationServices(driver);
+                    break;
+                
 
                 //default
                 default:
@@ -487,6 +493,21 @@ class TestStep {
         if (!result) {
             throw new TestRunnerError(
                 `AssertText::Text "${text}" does not match expected value "${actualValue}" using operator "${operator} on element with selectors [${this.#usedSelectors}]"`
+            );
+        }
+    }
+
+    async #toggleLocationServices(driver) {
+        const value = replaceVariables(this.#value, this.#variables);
+        const command = value === 'on'
+            ? 'settings put secure location_providers_allowed +gps'
+            : 'settings put secure location_providers_allowed -gps';
+
+        try {
+            await driver.execute('mobile: shell', { command });
+        } catch (error) {
+            throw new TestRunnerError(
+                `ToggleLocationServices::Failed to toggle location services to "${value}". Error: ${error.message}`
             );
         }
     }
