@@ -164,12 +164,24 @@ class RunConfigurationWeb extends RunConfiguration {
 
     get conf() {
         let wdio = {
+            connectionRetryTimeout: 180000,
             logLevel: this.logLevel,
-            capabilities: {}
+            capabilities: {
+                browserName: this.#browserName
+            }
         };
 
         if (this.farm === 'local') {
             wdio.capabilities['browserName'] = this.#browserName;
+        }
+
+        if (this.farm === 'aws') {
+            // Implement AWS capabilities
+            let url = new URL(process.env.TR_FARM_SESSION_URL);
+            wdio.protocol = 'https';
+            wdio.port = 443;
+            wdio.hostname = url.hostname;
+            wdio.path = url.pathname;
         }
 
         return wdio;
