@@ -26,11 +26,6 @@
                             "value": 5000
                         },
                         {
-                            "command": "set-value",
-                            "selectors": ["aria/Search"],
-                            "value": "Test search"
-                        },
-                        {
                             "command": "pause",
                             "value": 10000
                         }

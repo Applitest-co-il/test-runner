@@ -148,6 +148,7 @@ class RunConfigurationWeb extends RunConfiguration {
     #browserVersion = '';
     #resolution = '1920x1080';
     #startUrl = '';
+    #incognito = false;
 
     constructor(options) {
         super(options);
@@ -156,6 +157,7 @@ class RunConfigurationWeb extends RunConfiguration {
         this.#browserVersion = options.browser.version ?? '';
         this.#resolution = options.browser.resolution ?? '1920x1080';
         this.#startUrl = options.browser.startUrl ?? '';
+        this.#incognito = options.browser.incognito ?? false;
 
         if (!this.#startUrl) {
             throw new TestRunnerConfigurationError('No start URL provided');
@@ -170,6 +172,23 @@ class RunConfigurationWeb extends RunConfiguration {
                 browserName: this.#browserName
             }
         };
+
+        // Apply browser-specific options
+        if (this.#browserName === 'chrome') {
+            wdio.capabilities['goog:chromeOptions'] = {
+                args: ['--start-maximized']
+            };
+            if (this.#incognito) {
+                wdio.capabilities['goog:chromeOptions'].args.push('--incognito');
+            }
+        } else if (this.#browserName === 'firefox') {
+            wdio.capabilities['moz:firefoxOptions'] = {
+                args: []
+            };
+            if (this.#incognito) {
+                wdio.capabilities['moz:firefoxOptions'].args.push('-private-window');
+            }
+        }
 
         if (this.farm === 'local') {
             wdio.capabilities['browserName'] = this.#browserName;
@@ -190,6 +209,14 @@ class RunConfigurationWeb extends RunConfiguration {
     async startSession() {
         let driver = await super.startSession();
         await driver.url(this.#startUrl);
+
+        // Maximize or set window size based on browser
+        if (this.#browserName === 'firefox') {
+            await driver.maximizeWindow();  // Maximize Firefox window
+        } else if (this.#browserName === 'chrome') {
+            // Chrome is already maximized via 'start-maximized' argument
+        }
+
         return driver;
     }
 }
