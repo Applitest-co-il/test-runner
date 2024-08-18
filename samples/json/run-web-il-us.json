@@ -18,51 +18,47 @@
                     "steps": [
                         {
                             "command": "set-variable",
-                            "value": "username|||testrowuser2@gmail.com",
+                            "value": "username|||testrowuser1@gmail.com",
                             "operator": null
                         },
                         {
                             "command": "set-variable",
                             "value": "password|||DAZN2024",
                             "operator": null
-                        },  
+                        },
                         {
                             "command": "wait-for-exist",
                             "selectors": ["//div[@id=\"onetrust-button-group\"]/button"],
                             "value": "10000"
-                            
                         },
 
                         {
                             "command": "click",
                             "selectors": ["//div[@id=\"onetrust-button-group\"]/button"]
-                            
                         },
                         {
                             "command": "click",
                             "selectors": ["//button[text()=\"Sign in\"]"],
                             "value": "10000"
-                            
-                        },  
+                        },
                         {
                             "command": "wait-for-exist",
                             "selectors": ["#email"],
                             "value": "10000"
-                            
                         },
                         {
                             "command": "set-value",
                             "selectors": ["#email"],
                             "value": "{{username}}"
-                        },      
+                        },
                         {
                             "command": "set-value",
                             "selectors": ["#password"],
                             "value": "{{password}}"
-                        },  
+                        },
                         {
                             "command": "click",
-                            "selectors":["//button[@type='submit']"]
+                            "selectors": ["//button[@type='submit']"]
                         },
                         {
                             "command": "wait-for-exist",
@@ -72,16 +68,16 @@
                         {
                             "command": "click",
                             "selectors": ["svg[data-test-id='CLOSE_ICON']"]
-                        }, 
+                        },
                         {
                             "command": "wait-for-exist",
-                            "selectors": ["//article[@data-test-id='TILE_0_2 TILE_LIVE']"],
+                            "selectors": ["//article[@data-test-id='TILE_0_3 TILE_LIVE']"],
                             "value": "10000"
                         },
                         {
                             "command": "click",
-                            "selectors": ["article[data-test-id='TILE_0_2 TILE_LIVE'] > a"]
-                        }, 
+                            "selectors": ["article[data-test-id='TILE_0_3 TILE_LIVE'] > a"]
+                        },
                         {
                             "command": "wait-for-exist",
                             "selectors": ["//button[@data-test-id='WATCH_LIVE_BUTTON']"],
@@ -89,13 +85,17 @@
                         },
                         {
                             "command": "click",
-                            "selectors": ["//button[@data-test-id='WATCH_LIVE_BUTTON']"]                         
-                        },    
+                            "selectors": ["//button[@data-test-id='WATCH_LIVE_BUTTON']"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 20000
+                        },
                         {
                             "command": "wait-for-exist",
                             "selectors": ["//div[@data-test-id='BAR BAR_LIVE']"],
                             "value": "10000"
-                        },                               
+                        },
                         {
                             "command": "pause",
                             "value": 20000
