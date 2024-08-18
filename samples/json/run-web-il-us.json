@@ -75,12 +75,12 @@
                         }, 
                         {
                             "command": "wait-for-exist",
-                            "selectors": ["//article[@data-test-id='TILE_0_2 TILE_LIVE']"],
+                            "selectors": ["//article[@data-test-id=\"TILE_0_3 TILE_LIVE\"]/descendant::span"],
                             "value": "10000"
                         },
                         {
                             "command": "click",
-                            "selectors": ["article[data-test-id='TILE_0_2 TILE_LIVE'] > a"]
+                            "selectors": ["//article[@data-test-id=\"TILE_0_3 TILE_LIVE\"]/descendant::span"]
                         }, 
                         {
                             "command": "wait-for-exist",
