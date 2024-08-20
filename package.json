@@ -7,7 +7,7 @@
         "start": "node ./src/cli/index.js",
         "cli": "node ./src/cli/index.js",
         "cli:start": "node ./src/cli/index.js --conf ./samples/json/run.json",
-        "cli:start:web": "node --inspect  ./src/cli/index.js --conf ./samples/json/run-web-il-us.json",
+        "cli:start:web": "node --inspect  ./src/cli/index.js --conf ./samples/json/run-web.json",
         "api": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./src/api/start-api.ps1",
         "api:start": "node ./src/api/app.js",
         "api:start:debug": "node --inspect ./src/api/app.js",
