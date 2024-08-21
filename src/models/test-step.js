@@ -1,6 +1,87 @@
 const { TestDefinitionError, TestItemNotFoundError, TestRunnerError } = require('../helpers/test-errors');
 const { replaceVariables } = require('../helpers/utils');
 
+class TestCondition {
+    #type = '';
+    #selector = '';
+    #script = '';
+    #value = '';
+
+    constructor(condition) {
+        this.#type = condition.type;
+        this.#selector = condition.selector;
+        this.#script = condition.script;
+        this.#value = condition.value;
+    }
+
+    isValid() {
+        if (!this.#type) {
+            throw new TestDefinitionError('Condition type is required');
+        }
+
+        switch (this.#type) {
+            case 'exist':
+                if (!this.#selector) {
+                    throw new TestDefinitionError('Selector is required for exist condition');
+                }
+                break;
+            case 'script':
+                if (!this.#script) {
+                    throw new TestDefinitionError('Script is required for script condition');
+                }
+                break;
+            case 'value':
+                if (!this.#selector) {
+                    throw new TestDefinitionError('Selector is required for value condition');
+                }
+                if (!this.#value) {
+                    throw new TestDefinitionError('Value is required for value condition');
+                }
+                break;
+            default:
+                throw new TestDefinitionError(`Condition type ${this.#type} is not a valid one`);
+        }
+
+        return true;
+    }
+
+    async evaluate(driver, variables) {
+        switch (this.#type) {
+            case 'exist':
+                return await this.#existCheck(driver, variables);
+            case 'script':
+                return await this.#scriptCheck(driver, variables);
+            case 'value':
+                return await this.#valueCheck(driver, variables);
+            default:
+                throw new TestDefinitionError(`Condition type ${this.#type} is not a valid one`);
+        }
+    }
+
+    async #existCheck(driver, variables) {
+        let selector = replaceVariables(this.#selector, variables);
+        let item = await driver.$(selector);
+        return item && !item.error;
+    }
+
+    async #scriptCheck(driver, variables) {
+        let script = replaceVariables(this.#script, variables);
+        let result = await driver.execute(script);
+        return result;
+    }
+
+    async #valueCheck(driver, variables) {
+        let selector = replaceVariables(this.#selector, variables);
+        let item = await driver.$(selector);
+        if (!item || item.error) {
+            return false;
+        }
+        let text = await item.getText();
+        let value = replaceVariables(this.#value, variables);
+        return text === value;
+    }
+}
+
 class TestStep {
     #sequence = 0;
     #command = '';
@@ -16,12 +97,16 @@ class TestStep {
     #usedSelectors = '';
     #errorDetails = '';
 
+    #condition = null;
+
     static #commands = [
         //generic
         'pause',
+        'navigate',
 
         //variables
         'set-variable',
+        'set-variable-from-script',
         'generate-random-integer',
 
         //actions
@@ -33,6 +118,7 @@ class TestStep {
         'scroll-up-to-element',
         'scroll-down-to-element',
         'press-key',
+        'execute-script',
 
         //assertions
         'wait-for-exist',
@@ -58,7 +144,11 @@ class TestStep {
         'scroll-down',
         'scroll-up-to-element',
         'scroll-down-to-element',
-        'generate-random-integer'
+        'generate-random-integer',
+        'execute-script',
+        'set-variable',
+        'set-variable-from-script',
+        'navigate'
     ];
 
     constructor(sequence, step) {
@@ -67,6 +157,8 @@ class TestStep {
         this.#selectors = step.selectors;
         this.#position = step.position ?? -1;
         this.#value = step.value;
+        this.#operator = step.operator;
+        this.#condition = step.condition ? new TestCondition(step.condition) : null;
 
         this.#build();
         this.#isValid();
@@ -119,12 +211,48 @@ class TestStep {
             throw new TestDefinitionError(`Command is required for step ${this.#sequence}`);
         }
 
+        if (!TestStep.#commands.includes(this.#command)) {
+            throw new TestDefinitionError(`Command ${this.#command} is not a valid one - step ${this.#sequence}`);
+        }
+
         if (this.#requiresItem(this.#command) && (!this.#selectors || this.#selectors.length === 0)) {
             throw new TestDefinitionError(`Selectors is required for step ${this.#sequence}`);
         }
 
         if (this.#requiresValue(this.#command) && !this.#value) {
             throw new TestDefinitionError(`Value is required for step ${this.#sequence}`);
+        }
+
+        if (this.#command === 'execute-script') {
+            if (!this.#operator || this.#operator === 'sync') {
+                if (!this.#value.includes('return')) {
+                    throw new TestDefinitionError(
+                        `ExecuteScript::Script for step ${this.#sequence} should contain "return" to indicate to the system the script has completed and with what output`
+                    );
+                }
+            } else if (this.#operator === 'async') {
+                if (!this.#value.includes('callback')) {
+                    throw new TestDefinitionError(
+                        `ExecuteAsyncScript::Script for step ${this.#sequence} should contain call to "callback" function with return value has paramter to indicate to the system the script has completed and with what output`
+                    );
+                }
+            } else {
+                throw new TestDefinitionError(
+                    `ExecuteScript::Script for step ${this.#sequence} has invalid operator "${this.#operator} (should be only 'sync' or 'async')`
+                );
+            }
+        }
+
+        if (this.command === 'execute-async-script') {
+            if (!this.#value.includes('callback')) {
+                throw new TestDefinitionError(
+                    `ExecuteAsyncScript::Script for step ${this.#sequence} should contain call to "callback" function with return value has paramter to indicate to the system the script has completed and with what output`
+                );
+            }
+        }
+
+        if (this.#condition) {
+            this.#condition.isValid();
         }
 
         return true;
@@ -171,6 +299,15 @@ class TestStep {
         this.#variables = variables;
 
         try {
+            if (this.#condition) {
+                let conditionResult = await this.#condition.evaluate(driver, variables);
+                if (!conditionResult) {
+                    this.#status = 'skipped';
+                    console.log(`TestStep::Condition for step ${this.#sequence} was not met - step skipped`);
+                    return true;
+                }
+            }
+
             const item = this.#requiresItem(this.#command) ? await this.#selectItem(driver) : 'noIem';
             if (!item) {
                 throw new TestItemNotFoundError(`Item with selectors [${this.#usedSelectors}]  not found`);
@@ -181,6 +318,9 @@ class TestStep {
                 case 'pause':
                     await this.#pause(driver);
                     break;
+                case 'navigate':
+                    await this.#navigate(driver);
+                    break;
 
                 //variables
                 case 'generate-random-integer':
@@ -188,6 +328,9 @@ class TestStep {
                     break;
                 case 'set-variable':
                     await this.#setVariable(driver);
+                    break;
+                case 'set-variable-from-script':
+                    await this.#setVariableFromScript(driver);
                     break;
 
                 //actions
@@ -214,6 +357,9 @@ class TestStep {
                     break;
                 case 'scroll-down-to-element':
                     await this.#scrollDownToElement(driver);
+                    break;
+                case 'execute-script':
+                    await this.#executeScript(driver);
                     break;
 
                 //assertions
@@ -277,6 +423,17 @@ class TestStep {
     async #pause(driver) {
         // Implement pause logic
         await driver.pause(this.#value);
+    }
+
+    async #navigate(driver) {
+        const url = replaceVariables(this.#value, this.#variables);
+
+        if (this.#operator === 'new') {
+            await driver.newWindow(url);
+            return;
+        } else {
+            await driver.url(url);
+        }
     }
 
     async #click(item) {
@@ -446,6 +603,54 @@ class TestStep {
             varValue = await item.getText();
         }
         this.#variables[varName] = varValue;
+        console.log(
+            `Variables::Variables are ${JSON.stringify(this.#variables)} following addition of "${varName}" with value "${varValue}"`
+        );
+    }
+
+    async #setVariableFromScript(driver) {
+        const varParts = this.#value.split('|||');
+        if (varParts.length < 2) {
+            throw new TestRunnerError(
+                `SetVariableFromScript::Invalid set variable value format "${this.#value}" - format should be "<var name>|||<script>"`
+            );
+        }
+
+        const varName = varParts[0];
+        const script = varParts[1];
+
+        this.#value = script;
+        const varValue = await this.#executeScript(driver);
+        this.#variables[varName] = varValue;
+        console.log(
+            `Variables::Variables are ${JSON.stringify(this.#variables)} following addition of "${varName}" with value "${varValue}"`
+        );
+    }
+
+    async #executeScript(driver) {
+        const script = replaceVariables(this.#value, this.#variables);
+        try {
+            if (this.#operator === 'async') {
+                const asyncScript = `var callback = arguments[arguments.length - 1]; ${script};`;
+                const result = await driver.executeAsync(asyncScript);
+                if (!result) {
+                    throw new TestRunnerError(`ExecuteAsyncScript::Script: script for step ${this.#sequence} returns`);
+                }
+                console.log(`ExecuteScript::Script: async script for step ${this.#sequence} returns ${result}`);
+                return result;
+            } else {
+                const result = await driver.execute(script);
+                if (!result) {
+                    throw new TestRunnerError(`ExecuteScript::Script: script for step ${this.#sequence} returns`);
+                }
+                console.log(`ExecuteScript::Script: script for step ${this.#sequence} returns ${result}`);
+                return result;
+            }
+        } catch (error) {
+            throw new TestRunnerError(
+                `ExecuteScript::Script: script for step ${this.#sequence} failed with error ${error}`
+            );
+        }
     }
 
     async #assertIsDisplayed(item) {

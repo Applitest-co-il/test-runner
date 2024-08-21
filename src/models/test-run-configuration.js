@@ -149,6 +149,7 @@ class RunConfigurationWeb extends RunConfiguration {
     #resolution = '1920x1080';
     #startUrl = '';
     #incognito = false;
+    #startMaximized = false;
 
     constructor(options) {
         super(options);
@@ -158,6 +159,7 @@ class RunConfigurationWeb extends RunConfiguration {
         this.#resolution = options.browser.resolution ?? '1920x1080';
         this.#startUrl = options.browser.startUrl ?? '';
         this.#incognito = options.browser.incognito ?? false;
+        this.#startMaximized = options.browser.startMaximized ?? false;
 
         if (!this.#startUrl) {
             throw new TestRunnerConfigurationError('No start URL provided');
@@ -176,8 +178,11 @@ class RunConfigurationWeb extends RunConfiguration {
         // Apply browser-specific options
         if (this.#browserName === 'chrome') {
             wdio.capabilities['goog:chromeOptions'] = {
-                args: ['--start-maximized']
+                args: []
             };
+            if (this.#startMaximized) {
+                wdio.capabilities['goog:chromeOptions'].args.push('--start-maximized');
+            }
             if (this.#incognito) {
                 wdio.capabilities['goog:chromeOptions'].args.push('--incognito');
             }
@@ -194,11 +199,15 @@ class RunConfigurationWeb extends RunConfiguration {
             wdio.capabilities['browserName'] = this.#browserName;
         }
 
-        if (this.farm === 'aws') {
+        if (this.farm === 'remote') {
             // Implement AWS capabilities
             let url = new URL(process.env.TR_FARM_SESSION_URL);
-            wdio.protocol = 'https';
-            wdio.port = 443;
+            wdio.protocol = url.protocol.replace(':', '');
+            if (url.port) {
+                wdio.port = parseInt(url.port);
+            } else if (url.protocol === 'https:') {
+                wdio.port = 443;
+            }
             wdio.hostname = url.hostname;
             wdio.path = url.pathname;
         }
@@ -212,7 +221,7 @@ class RunConfigurationWeb extends RunConfiguration {
 
         // Maximize or set window size based on browser
         if (this.#browserName === 'firefox') {
-            await driver.maximizeWindow();  // Maximize Firefox window
+            await driver.maximizeWindow(); // Maximize Firefox window
         } else if (this.#browserName === 'chrome') {
             // Chrome is already maximized via 'start-maximized' argument
         }
