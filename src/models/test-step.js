@@ -527,6 +527,8 @@ class TestStep {
                 result = number <= actualNumber;
                 break;
         }
+
+        
         if (!result) {
             throw new TestRunnerError(
                 `AssertNumber::Text "${text}" does not match expected value "${actualValue}" using operator "${operator}" on element with selectors [${this.#usedSelectors}]`

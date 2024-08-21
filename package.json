@@ -6,7 +6,7 @@
         "test": "node --inspect ./src/index.js --conf ./samples/json/test.json",
         "start": "node ./src/cli/index.js",
         "cli": "node ./src/cli/index.js",
-        "cli:start": "node ./src/cli/index.js --conf ./samples/json/run.json",
+        "cli:start": "node --inspect ./src/cli/index.js --conf ./samples/json/mobile-dazn.json",
         "cli:start:web": "node --inspect  ./src/cli/index.js --conf ./samples/json/run-web-il-us.json",
         "api": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./src/api/start-api.ps1",
         "api:start": "node ./src/api/app.js",
