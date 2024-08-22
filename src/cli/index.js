@@ -1,3 +1,4 @@
+require('dotenv').config({ path: './.env', debug: true });
 const commander = require('commander');
 const fs = require('fs');
 

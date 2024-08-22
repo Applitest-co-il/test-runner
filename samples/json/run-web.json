@@ -1,0 +1,125 @@
+{
+    "runConfiguration": {
+        "runType": "web",
+        "browser": {
+            "name": "chrome",
+            "startUrl": "https://www.google.com/?hl=he"
+        }
+    },
+    "suites": [
+        {
+            "name": "Suite",
+            "waitBetweenTest": 0,
+            "stopOnFailure": true,
+            "tests": [
+                {
+                    "name": "Samples",
+                    "steps": [
+                        {
+                            "command": "pause",
+                            "value": 100
+                        },
+                        {
+                            "command": "execute-script",
+                            "value": "let x = 10; setTimeout(() => {x = 20; callback(x)}, 2000);",
+                            "operator": "async"
+                        },
+                        {
+                            "command": "pause",
+                            "value": 200
+                        },
+                        {
+                            "command": "execute-script",
+                            "value": "let x = 10; return x;"
+                        },
+                        {
+                            "command": "pause",
+                            "value": 200
+                        },
+                        {
+                            "command": "set-variable-from-script",
+                            "value": "SV|||let x = 10; return x;"
+                        },
+                        {
+                            "command": "set-variable-from-script",
+                            "value": "SVA|||let x = 10; setTimeout(() => {x = 20; callback(x)}, 2000);",
+                            "operator": "async"
+                        },
+                        {
+                            "command": "pause",
+                            "value": 200
+                        },
+                        {
+                            "condition": {
+                                "type": "exist",
+                                "selector": "//a[text()=\"English\"]"
+                            },
+                            "command": "click",
+                            "selectors": ["//a[text()=\"English\"]"]
+                        },
+                        {
+                            "condition": {
+                                "type": "value",
+                                "selector": "//a",
+                                "value": "English"
+                            },
+                            "command": "click",
+                            "selectors": ["//a[text()=\"English\"]"]
+                        },
+                        {
+                            "condition": {
+                                "type": "script",
+                                "script": "return true;"
+                            },
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "condition": {
+                                "type": "script",
+                                "script": "return false;"
+                            },
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": ["aria/Search"],
+                            "value": 5000
+                        },
+                        {
+                            "command": "set-value",
+                            "selectors": ["aria/Search"],
+                            "value": "webdriverio"
+                        },
+                        {
+                            "command": "pause",
+                            "value": 500
+                        },
+                        {
+                            "command": "navigate",
+                            "value": "https://cnn.com"
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "navigate",
+                            "value": "https://nytimes.com",
+                            "operator": "new"
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -21,6 +21,8 @@ class RunConfiguration {
         switch (options.runType) {
             case 'mobile':
                 return new RunConfigurationMobile(options);
+            case 'web':
+                return new RunConfigurationWeb(options);
             default:
                 throw new TestRunnerConfigurationError('Invalid run type provided');
         }
@@ -30,12 +32,12 @@ class RunConfiguration {
         this.#runType = options.runType ?? 'mobile';
         this.#farm = options.farm ?? process.env.TR_FARM ?? 'local';
         this.#logLevel = options.logLevel ?? 'info';
-        this.#reset = options.appium.reset ?? true;
-        this.#hostname = options.appium.host ?? 'localhost';
-        this.#port = options.appium.port ?? 4723;
+        this.#reset = options.reset ?? true;
+        this.#hostname = options.host ?? 'localhost';
+        this.#port = options.port ?? 4723;
     }
 
-    get testType() {
+    get runType() {
         return this.#runType;
     }
 
@@ -63,20 +65,23 @@ class RunConfiguration {
         return null;
     }
 
-    get driver() {
-        return null;
-    }
-
     capabilityPropertyName(name) {
         return name;
     }
 
     async startSession() {
-        console.log('Starting session...');
+        let driver = await remote(this.conf);
+        if (!driver) {
+            console.error('Driver could not be set');
+            throw new TestRunnerConfigurationError('Driver could not be set');
+        }
+        return driver;
     }
 
-    async closeSession() {
-        console.log('Closing session...');
+    async closeSession(driver) {
+        if (driver) {
+            await driver.deleteSession();
+        }
     }
 }
 
@@ -91,6 +96,7 @@ class RunConfigurationMobile extends RunConfiguration {
 
     constructor(options) {
         super(options);
+
         this.#platformName = options.appium.platformName ?? 'Android';
         this.#automationName = options.appium.automationName ?? 'UiAutomator2';
         this.#deviceName = options.appium.deviceName ?? 'Android';
@@ -135,24 +141,97 @@ class RunConfigurationMobile extends RunConfiguration {
     capabilityPropertyName(name) {
         return `appium:${name}`;
     }
+}
 
-    async startSession() {
-        let driver = await remote(this.conf);
-        if (!driver) {
-            console.error('Driver could not be set');
-            throw new TestRunnerConfigurationError('Driver could not be set');
+class RunConfigurationWeb extends RunConfiguration {
+    #browserName = '';
+    #browserVersion = '';
+    #resolution = '1920x1080';
+    #startUrl = '';
+    #incognito = false;
+    #startMaximized = false;
+
+    constructor(options) {
+        super(options);
+
+        this.#browserName = options.browser.name ?? 'chrome';
+        this.#browserVersion = options.browser.version ?? '';
+        this.#resolution = options.browser.resolution ?? '1920x1080';
+        this.#startUrl = options.browser.startUrl ?? '';
+        this.#incognito = options.browser.incognito ?? false;
+        this.#startMaximized = options.browser.startMaximized ?? false;
+
+        if (!this.#startUrl) {
+            throw new TestRunnerConfigurationError('No start URL provided');
         }
-        return driver;
     }
 
-    async closeSession(driver) {
-        if (driver) {
-            await driver.deleteSession();
+    get conf() {
+        let wdio = {
+            connectionRetryTimeout: 180000,
+            logLevel: this.logLevel,
+            capabilities: {
+                browserName: this.#browserName
+            }
+        };
+
+        // Apply browser-specific options
+        if (this.#browserName === 'chrome') {
+            wdio.capabilities['goog:chromeOptions'] = {
+                args: []
+            };
+            if (this.#startMaximized) {
+                wdio.capabilities['goog:chromeOptions'].args.push('--start-maximized');
+            }
+            if (this.#incognito) {
+                wdio.capabilities['goog:chromeOptions'].args.push('--incognito');
+            }
+        } else if (this.#browserName === 'firefox') {
+            wdio.capabilities['moz:firefoxOptions'] = {
+                args: []
+            };
+            if (this.#incognito) {
+                wdio.capabilities['moz:firefoxOptions'].args.push('-private-window');
+            }
         }
+
+        if (this.farm === 'local') {
+            wdio.capabilities['browserName'] = this.#browserName;
+        }
+
+        if (this.farm === 'remote') {
+            // Implement AWS capabilities
+            let url = new URL(process.env.TR_FARM_SESSION_URL);
+            wdio.protocol = url.protocol.replace(':', '');
+            if (url.port) {
+                wdio.port = parseInt(url.port);
+            } else if (url.protocol === 'https:') {
+                wdio.port = 443;
+            }
+            wdio.hostname = url.hostname;
+            wdio.path = url.pathname;
+        }
+
+        return wdio;
+    }
+
+    async startSession() {
+        let driver = await super.startSession();
+        await driver.url(this.#startUrl);
+
+        // Maximize or set window size based on browser
+        if (this.#browserName === 'firefox') {
+            await driver.maximizeWindow(); // Maximize Firefox window
+        } else if (this.#browserName === 'chrome') {
+            // Chrome is already maximized via 'start-maximized' argument
+        }
+
+        return driver;
     }
 }
 
 module.exports = {
     RunConfiguration,
-    RunConfigurationMobile
+    RunConfigurationMobile,
+    RunConfigurationWeb
 };
