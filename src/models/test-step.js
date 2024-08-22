@@ -499,18 +499,20 @@ class TestStep {
 
     async #toggleLocationServices(driver) {
         const value = replaceVariables(this.#value, this.#variables);
-        const command = value === 'on'
-            ? 'settings put secure location_providers_allowed +gps'
-            : 'settings put secure location_providers_allowed -gps';
-
+    
         try {
-            await driver.execute('mobile: shell', { command });
+            if (value === 'on') {
+                await driver.toggleLocationServices(); // Enables GPS
+            } else {
+                await driver.toggleLocationServices(); // Disables GPS
+            }
         } catch (error) {
             throw new TestRunnerError(
                 `ToggleLocationServices::Failed to toggle location services to "${value}". Error: ${error.message}`
             );
         }
     }
+    
 
     async #assertNumber(item) {
         const text = await item.getText();
