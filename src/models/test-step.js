@@ -20,6 +20,7 @@ class TestStep {
         //generic
         'pause',
         'toggle-location-services',
+        'toggle-airplane-mode',
 
         //variables
         'set-variable',
@@ -233,6 +234,9 @@ class TestStep {
                     break;
                 case 'toggle-location-services':  
                     await this.#toggleLocationServices(driver);
+                    break;
+                case 'toggle-airplane-mode':  
+                    await this.#toggleAirplaneMode(driver);
                     break;
                 
 
@@ -512,8 +516,22 @@ class TestStep {
             );
         }
     }
-    
 
+    async #toggleAirplaneMode(driver) {
+        const value = replaceVariables(this.#value, this.#variables);
+        const command = value === 'on'
+            ? 'settings put global airplane_mode_on 1'
+            : 'settings put global airplane_mode_on 0';
+    
+        try {
+            await driver.execute('mobile: shell', { command });
+        } catch (error) {
+            throw new TestRunnerError(
+                `ToggleAirplaneMode::Failed to toggle airplane mode to "${value}". Error: ${error.message}`
+            );
+        }
+    }
+    
     async #assertNumber(item) {
         const text = await item.getText();
         const number = +text;
