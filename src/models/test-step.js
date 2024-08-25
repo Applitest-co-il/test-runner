@@ -122,6 +122,7 @@ class TestStep {
 
         //assertions
         'wait-for-exist',
+        'wait-for-not-exist',
         'assert-is-displayed',
         'assert-text',
         'assert-number'
@@ -366,6 +367,9 @@ class TestStep {
                 case 'wait-for-exist':
                     await this.#waitForExist(driver);
                     break;
+                case 'wait-for-not-exist':
+                    await this.#waitForNotExist(driver);
+                    break;
                 case 'assert-is-displayed':
                     await this.#assertIsDisplayed(item);
                     break;
@@ -478,6 +482,24 @@ class TestStep {
             );
         }
     }
+    async #waitForNotExist(driver) {
+        // Implement wait for not exist logic
+        let timeout = this.#value ? parseInt(this.#value) : 5000;
+        try {
+          let that = this;
+          await driver.waitUntil(
+            async () => {
+              let item = await that.#selectItem(driver);
+              return !item || item.error;
+            },
+            { timeout: timeout, interval: 1000 }
+          );
+        } catch (e) {
+          throw new TestRunnerError(
+            `Element with selector [${this.#usedSelectors}] did not disappear on screen up to ${timeout}ms`
+          );
+        }
+      }
 
     async #verticalScroll(driver, down = true) {
         const count = this.#value ? parseInt(this.#value) : 1;

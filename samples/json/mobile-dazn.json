@@ -72,7 +72,7 @@
                                 "android|||//android.widget.ImageView[@content-desc=\"background image\"]"
                             ],
                             "value": "30000"
-                        },                    
+                        },                                        
                         {
                             "command": "click",
                             "selectors": [
@@ -82,14 +82,14 @@
                         {
                             "command": "wait-for-exist",
                             "selectors": [
-                                "android|||//android.widget.FrameLayout[@content-desc=\"059cd723-c1c3-4b52-97f0-c07b749919c93okj5lq01okqn39tcv15wd0hi\"]/android.view.ViewGroup"
+                                "android|||//android.widget.FrameLayout[@content-desc=\"059cd723-c1c3-4b52-97f0-c07b749919c9e2htj955ufwklbkr5rpl13jaa\"]/android.view.ViewGroup"
                             ],
                             "value": "10000"
                         },
                         {
                             "command": "click",
                             "selectors": [
-                                "android|||//android.widget.FrameLayout[@content-desc=\"059cd723-c1c3-4b52-97f0-c07b749919c93okj5lq01okqn39tcv15wd0hi\"]/android.view.ViewGroup"
+                                "android|||//android.widget.FrameLayout[@content-desc=\"059cd723-c1c3-4b52-97f0-c07b749919c9e2htj955ufwklbkr5rpl13jaa\"]/android.view.ViewGroup"
                             ]
                         }
                     ]
