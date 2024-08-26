@@ -38,6 +38,14 @@ class TestCondition {
                     throw new TestDefinitionError('Value is required for value condition');
                 }
                 break;
+            case 'property':
+                    if (!this.#selector) {
+                        throw new TestDefinitionError('Selector is required for property condition');
+                    }
+                    if (!this.#value) {
+                        throw new TestDefinitionError('Property and value are required for property condition');
+                    }
+                    break;
             default:
                 throw new TestDefinitionError(`Condition type ${this.#type} is not a valid one`);
         }
@@ -125,7 +133,9 @@ class TestStep {
         'wait-for-not-exist',
         'assert-is-displayed',
         'assert-text',
-        'assert-number'
+        'assert-number',
+        'assert-css-property',
+        'assert-attribute'
     ];
     static #commandsRequiredItem = [
         'click',
@@ -133,7 +143,9 @@ class TestStep {
         'set-value',
         'assert-is-displayed',
         'assert-text',
-        'assert-number'
+        'assert-number',
+        'assert-css-property',
+        'assert-attribute'
     ];
     static #commandsRequiredValue = [
         'multiple-clicks',
@@ -379,6 +391,12 @@ class TestStep {
                 case 'assert-number':
                     await this.#assertNumber(item);
                     break;
+                case 'assert-css-property':
+                    await this.#assertCssProperty(item);
+                    break;
+                case 'assert-attribute':
+                    await this.#assertAttribute(item);
+                    break;    
 
                 //default
                 default:
@@ -501,6 +519,59 @@ class TestStep {
         }
       }
 
+      async #assertCssProperty(item) {
+        const property = this.#value.property;
+        const expectedValue = this.#value.expectedValue.replace(/\s+/g, '').toLowerCase();
+    
+        if (!property || !expectedValue) {
+            throw new TestDefinitionError(`Property and expected value must be provided for 'assert-css-property'`);
+        }
+    
+        // Fetch the actual value of the CSS property
+        const actualValue = await item.getCSSProperty(property);
+        const actualFormattedValue = actualValue.value.replace(/\s+/g, '').toLowerCase();
+    
+        // Debugging information
+        console.log(`Actual value: '${actualFormattedValue}', Expected value: '${expectedValue}'`);
+    
+        // Compare the expected and actual values
+        if (actualFormattedValue !== expectedValue) {
+            throw new TestRunnerError(
+                `Assertion failed: CSS property '${property}' is '${actualFormattedValue}', expected '${expectedValue}'`
+            );
+        }
+    
+        console.log(`Assertion passed: CSS property '${property}' is '${expectedValue}'`);
+    }
+
+    async #assertAttribute(item) {
+        const attribute = this.#value.attribute;
+        const expectedValue = this.#value.expectedValue.replace(/\s+/g, '').toLowerCase();
+    
+        if (!attribute || !expectedValue) {
+            throw new TestDefinitionError(`Attribute and expected value must be provided for 'assert-attribute'`);
+        }
+    
+        // Fetch the actual value of the attribute
+        const actualValue = await item.getAttribute(attribute);
+        const actualFormattedValue = actualValue.replace(/\s+/g, '').toLowerCase();
+    
+        // Debugging information
+        console.log(`Actual value: '${actualFormattedValue}', Expected value: '${expectedValue}'`);
+    
+        // Compare the expected and actual values
+        if (actualFormattedValue !== expectedValue) {
+            throw new TestRunnerError(
+                `Assertion failed: Attribute '${attribute}' is '${actualFormattedValue}', expected '${expectedValue}'`
+            );
+        }
+    
+        console.log(`Assertion passed: Attribute '${attribute}' is '${expectedValue}'`);
+    }
+    
+    
+    
+    
     async #verticalScroll(driver, down = true) {
         const count = this.#value ? parseInt(this.#value) : 1;
         const startPercentage = down ? 90 : 10;

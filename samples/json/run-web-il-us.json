@@ -19,7 +19,7 @@
                     "steps": [
                         {
                             "command": "set-variable",
-                            "value": "username|||testrowuser2@gmail.com",
+                            "value": "username|||testrowuser1@gmail.com",
                             "operator": null
                         },
                         {
@@ -32,11 +32,21 @@
                             "value": "live-id|||TILE_0_3 TILE_LIVE",
                             "operator": null
                         },
+
                         {
                             "command": "wait-for-exist",
                             "selectors": ["//div[@id=\"onetrust-button-group\"]/button"],
                             "value": "10000"
                         },
+                        {
+                            "command": "assert-css-property",
+                            "selectors": ["//div[@id=\"onetrust-button-group\"]/button"],
+                            "value": {
+                                "property": "font-style",
+                                "expectedValue": "normal" 
+                            }
+                        },
+                        
                         {
                             "command": "click",
                             "selectors": ["//div[@id=\"onetrust-button-group\"]/button"]
@@ -80,9 +90,9 @@
                         {
                             "command": "scroll-down-to-element",
                             "selectors": [
-                              "//h2[text()='Live Now']/following::article[1]"
+                              "//article[@data-test-id='{{live-id}}']"
                             ],
-                            "value": "1",
+                            "value": "2",
                             "operator": null
                         },
                         {
@@ -135,9 +145,13 @@
                             "value": "2000" 
                         },
                         {
+                            "command": "click",
+                            "selectors": ["svg[class='icon dismiss']"]
+                        },
+                        {
                             "command": "set-value",
                             "selectors": ["//textarea[@data-testid='chat-input-textarea']"],
-                            "value": "Great game"
+                            "value": "Nice move"
                         },
                         {
                             "command": "wait-for-exist",
@@ -149,10 +163,40 @@
                             "selectors": ["svg[data-testid='send-message-button']"]
                         },
                         {
+                            "command": "pause",
+                            "value": 3000
+                        },
+                        {
+                            "condition": {
+                                "type": "exist",
+                                "selector": "//div[@data-testid='welcome-modal-container']"
+                            },
+                            "command": "set-value",
+                            "selectors": ["//input[@data-testid='text-input']"],
+                            "value": "Nick fan"
+                        },
+                        {
+                            "condition": {
+                                "type": "exist",
+                                "selector": "//input[@data-testid='text-input']/following::input[@type='checkbox'][1]"
+                            },
+                            "command": "click",
+                            "selectors": ["svg[class='tick']"]
+                        },
+                        {
+                            "condition": {
+                                "type": "exist",
+                                "selector": "//div[text()='Join now']/parent::button"
+                            },
+                            "command": "click",
+                            "selectors": ["//div[text()='Join now']/parent::button"]
+                        },
+                        {
                             "command": "wait-for-exist",
-                            "selectors": ["//div[@data-testid='message-text' and text()='Great game']"],
+                            "selectors": ["//div[@data-testid='message-text' and text()='Nice move']"],
                             "value": "3000"
                         },
+
                         {
                             "command": "pause",
                             "value": 10000
