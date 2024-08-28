@@ -508,13 +508,13 @@ class TestStep {
             await driver.waitUntil(
                 async () => {
                     let item = await that.#selectItem(driver);
-                    return !item || item.error;
+                    return !item;
                 },
                 { timeout: timeout, interval: 1000 }
             );
         } catch (e) {
             throw new TestRunnerError(
-                `Element with selector [${this.#usedSelectors}] did not disappear on screen up to ${timeout}ms`
+                `Element with selector [${this.#usedSelectors}] did not disappear off screen up to ${timeout}ms`
             );
         }
     }
