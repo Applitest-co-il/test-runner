@@ -39,13 +39,13 @@ class TestCondition {
                 }
                 break;
             case 'property':
-                    if (!this.#selector) {
-                        throw new TestDefinitionError('Selector is required for property condition');
-                    }
-                    if (!this.#value) {
-                        throw new TestDefinitionError('Property and value are required for property condition');
-                    }
-                    break;
+                if (!this.#selector) {
+                    throw new TestDefinitionError('Selector is required for property condition');
+                }
+                if (!this.#value) {
+                    throw new TestDefinitionError('Property and value are required for property condition');
+                }
+                break;
             default:
                 throw new TestDefinitionError(`Condition type ${this.#type} is not a valid one`);
         }
@@ -396,7 +396,7 @@ class TestStep {
                     break;
                 case 'assert-attribute':
                     await this.#assertAttribute(item);
-                    break;    
+                    break;
 
                 //default
                 default:
@@ -504,74 +504,21 @@ class TestStep {
         // Implement wait for not exist logic
         let timeout = this.#value ? parseInt(this.#value) : 5000;
         try {
-          let that = this;
-          await driver.waitUntil(
-            async () => {
-              let item = await that.#selectItem(driver);
-              return !item || item.error;
-            },
-            { timeout: timeout, interval: 1000 }
-          );
+            let that = this;
+            await driver.waitUntil(
+                async () => {
+                    let item = await that.#selectItem(driver);
+                    return !item || item.error;
+                },
+                { timeout: timeout, interval: 1000 }
+            );
         } catch (e) {
-          throw new TestRunnerError(
-            `Element with selector [${this.#usedSelectors}] did not disappear on screen up to ${timeout}ms`
-          );
-        }
-      }
-
-      async #assertCssProperty(item) {
-        const property = this.#value.property;
-        const expectedValue = this.#value.expectedValue.replace(/\s+/g, '').toLowerCase();
-    
-        if (!property || !expectedValue) {
-            throw new TestDefinitionError(`Property and expected value must be provided for 'assert-css-property'`);
-        }
-    
-        // Fetch the actual value of the CSS property
-        const actualValue = await item.getCSSProperty(property);
-        const actualFormattedValue = actualValue.value.replace(/\s+/g, '').toLowerCase();
-    
-        // Debugging information
-        console.log(`Actual value: '${actualFormattedValue}', Expected value: '${expectedValue}'`);
-    
-        // Compare the expected and actual values
-        if (actualFormattedValue !== expectedValue) {
             throw new TestRunnerError(
-                `Assertion failed: CSS property '${property}' is '${actualFormattedValue}', expected '${expectedValue}'`
+                `Element with selector [${this.#usedSelectors}] did not disappear on screen up to ${timeout}ms`
             );
         }
-    
-        console.log(`Assertion passed: CSS property '${property}' is '${expectedValue}'`);
     }
 
-    async #assertAttribute(item) {
-        const attribute = this.#value.attribute;
-        const expectedValue = this.#value.expectedValue.replace(/\s+/g, '').toLowerCase();
-    
-        if (!attribute || !expectedValue) {
-            throw new TestDefinitionError(`Attribute and expected value must be provided for 'assert-attribute'`);
-        }
-    
-        // Fetch the actual value of the attribute
-        const actualValue = await item.getAttribute(attribute);
-        const actualFormattedValue = actualValue.replace(/\s+/g, '').toLowerCase();
-    
-        // Debugging information
-        console.log(`Actual value: '${actualFormattedValue}', Expected value: '${expectedValue}'`);
-    
-        // Compare the expected and actual values
-        if (actualFormattedValue !== expectedValue) {
-            throw new TestRunnerError(
-                `Assertion failed: Attribute '${attribute}' is '${actualFormattedValue}', expected '${expectedValue}'`
-            );
-        }
-    
-        console.log(`Assertion passed: Attribute '${attribute}' is '${expectedValue}'`);
-    }
-    
-    
-    
-    
     async #verticalScroll(driver, down = true) {
         const count = this.#value ? parseInt(this.#value) : 1;
         const startPercentage = down ? 90 : 10;
@@ -826,10 +773,61 @@ class TestStep {
                 break;
         }
 
-        
         if (!result) {
             throw new TestRunnerError(
                 `AssertNumber::Text "${text}" does not match expected value "${actualValue}" using operator "${operator}" on element with selectors [${this.#usedSelectors}]`
+            );
+        }
+    }
+
+    async #assertCssProperty(item) {
+        const propertyParts = this.#value.split('|||');
+        if (propertyParts.length !== 2) {
+            throw new TestRunnerError(
+                `AssertCssProperty::Invalid value format "${this.#value}" - format should be "<property name>|||<expected value>" `
+            );
+        }
+        const property = propertyParts[0];
+        const expectedValue = propertyParts[1].replace(/\s+/g, '').toLowerCase();
+        if (!property || !expectedValue) {
+            throw new TestRunnerError(
+                `AssertCssProperty::Property and expected value must be defined "${this.#value}" > "${property}" > "${expectedValue}"`
+            );
+        }
+
+        // Fetch the actual value of the CSS property
+        const actualValue = await item.getCSSProperty(property);
+        const actualFormattedValue = actualValue.value.replace(/\s+/g, '').toLowerCase();
+
+        // Compare the expected and actual values
+        if (actualFormattedValue !== expectedValue) {
+            throw new TestRunnerError(
+                `Assertion failed: CSS property '${property}' is '${actualFormattedValue}', expected '${expectedValue}'`
+            );
+        }
+    }
+
+    async #assertAttribute(item) {
+        const attributeParts = this.#value.split('|||');
+        if (attributeParts.length !== 2) {
+            throw new TestRunnerError(
+                `AssertAttribute::Invalid value format "${this.#value}" - format should be "<attribute name>|||<expected value>" `
+            );
+        }
+        const attribute = attributeParts[0];
+        const expectedValue = attributeParts[1].replace(/\s+/g, '').toLowerCase();
+        if (!attribute || !expectedValue) {
+            throw new TestRunnerError(`Attribute and expected value must be provided for 'assert-attribute'`);
+        }
+
+        // Fetch the actual value of the attribute
+        const actualValue = await item.getAttribute(attribute);
+        const actualFormattedValue = actualValue.replace(/\s+/g, '').toLowerCase();
+
+        // Compare the expected and actual values
+        if (actualFormattedValue !== expectedValue) {
+            throw new TestRunnerError(
+                `Assertion failed: Attribute '${attribute}' is '${actualFormattedValue}', expected '${expectedValue}'`
             );
         }
     }
