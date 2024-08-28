@@ -38,6 +38,14 @@ class TestCondition {
                     throw new TestDefinitionError('Value is required for value condition');
                 }
                 break;
+            case 'property':
+                if (!this.#selector) {
+                    throw new TestDefinitionError('Selector is required for property condition');
+                }
+                if (!this.#value) {
+                    throw new TestDefinitionError('Property and value are required for property condition');
+                }
+                break;
             default:
                 throw new TestDefinitionError(`Condition type ${this.#type} is not a valid one`);
         }
@@ -122,19 +130,25 @@ class TestStep {
 
         //assertions
         'wait-for-exist',
+        'wait-for-not-exist',
         'assert-is-displayed',
         'assert-text',
-        'assert-number'
+        'assert-number',
+        'assert-css-property',
+        'assert-attribute'
     ];
-    static #commandsRequiredItem = [
+    static #commandsRequireItem = [
         'click',
         'multiple-clicks',
         'set-value',
         'assert-is-displayed',
         'assert-text',
-        'assert-number'
+        'assert-number',
+        'assert-css-property',
+        'assert-attribute'
     ];
-    static #commandsRequiredValue = [
+    static #commandsRequireSelector = [...TestStep.#commandsRequireItem, 'wait-for-exist', 'wait-for-not-exist'];
+    static #commandsRequireValue = [
         'multiple-clicks',
         'set-value',
         'press-key',
@@ -199,11 +213,15 @@ class TestStep {
     }
 
     #requiresItem(command) {
-        return TestStep.#commandsRequiredItem.includes(command);
+        return TestStep.#commandsRequireItem.includes(command);
+    }
+
+    #requiresSelector(command) {
+        return TestStep.#commandsRequireSelector.includes(command);
     }
 
     #requiresValue(command) {
-        return TestStep.#commandsRequiredValue.includes(command);
+        return TestStep.#commandsRequireValue.includes(command);
     }
 
     #isValid() {
@@ -215,8 +233,8 @@ class TestStep {
             throw new TestDefinitionError(`Command ${this.#command} is not a valid one - step ${this.#sequence}`);
         }
 
-        if (this.#requiresItem(this.#command) && (!this.#selectors || this.#selectors.length === 0)) {
-            throw new TestDefinitionError(`Selectors is required for step ${this.#sequence}`);
+        if (this.#requiresSelector(this.#command) && !this.#selectors && this.#selectors.length === 0) {
+            throw new TestDefinitionError(`Selector is required for step ${this.#sequence}`);
         }
 
         if (this.#requiresValue(this.#command) && !this.#value) {
@@ -366,6 +384,9 @@ class TestStep {
                 case 'wait-for-exist':
                     await this.#waitForExist(driver);
                     break;
+                case 'wait-for-not-exist':
+                    await this.#waitForNotExist(driver);
+                    break;
                 case 'assert-is-displayed':
                     await this.#assertIsDisplayed(item);
                     break;
@@ -374,6 +395,12 @@ class TestStep {
                     break;
                 case 'assert-number':
                     await this.#assertNumber(item);
+                    break;
+                case 'assert-css-property':
+                    await this.#assertCssProperty(item);
+                    break;
+                case 'assert-attribute':
+                    await this.#assertAttribute(item);
                     break;
 
                 //default
@@ -475,6 +502,24 @@ class TestStep {
         } catch (e) {
             throw new TestRunnerError(
                 `Element with selector [${this.#usedSelectors}] did not appear on screen up to ${timeout}ms`
+            );
+        }
+    }
+    async #waitForNotExist(driver) {
+        // Implement wait for not exist logic
+        let timeout = this.#value ? parseInt(this.#value) : 5000;
+        try {
+            let that = this;
+            await driver.waitUntil(
+                async () => {
+                    let item = await that.#selectItem(driver);
+                    return !item;
+                },
+                { timeout: timeout, interval: 1000 }
+            );
+        } catch (e) {
+            throw new TestRunnerError(
+                `Element with selector [${this.#usedSelectors}] did not disappear off screen up to ${timeout}ms`
             );
         }
     }
@@ -733,10 +778,61 @@ class TestStep {
                 break;
         }
 
-        
         if (!result) {
             throw new TestRunnerError(
                 `AssertNumber::Text "${text}" does not match expected value "${actualValue}" using operator "${operator}" on element with selectors [${this.#usedSelectors}]`
+            );
+        }
+    }
+
+    async #assertCssProperty(item) {
+        const propertyParts = this.#value.split('|||');
+        if (propertyParts.length !== 2) {
+            throw new TestRunnerError(
+                `AssertCssProperty::Invalid value format "${this.#value}" - format should be "<property name>|||<expected value>" `
+            );
+        }
+        const property = propertyParts[0];
+        const expectedValue = propertyParts[1].replace(/\s+/g, '').toLowerCase();
+        if (!property || !expectedValue) {
+            throw new TestRunnerError(
+                `AssertCssProperty::Property and expected value must be defined "${this.#value}" > "${property}" > "${expectedValue}"`
+            );
+        }
+
+        // Fetch the actual value of the CSS property
+        const actualValue = await item.getCSSProperty(property);
+        const actualFormattedValue = actualValue.value.replace(/\s+/g, '').toLowerCase();
+
+        // Compare the expected and actual values
+        if (actualFormattedValue !== expectedValue) {
+            throw new TestRunnerError(
+                `Assertion failed: CSS property '${property}' is '${actualFormattedValue}', expected '${expectedValue}'`
+            );
+        }
+    }
+
+    async #assertAttribute(item) {
+        const attributeParts = this.#value.split('|||');
+        if (attributeParts.length !== 2) {
+            throw new TestRunnerError(
+                `AssertAttribute::Invalid value format "${this.#value}" - format should be "<attribute name>|||<expected value>" `
+            );
+        }
+        const attribute = attributeParts[0];
+        const expectedValue = attributeParts[1].replace(/\s+/g, '').toLowerCase();
+        if (!attribute || !expectedValue) {
+            throw new TestRunnerError(`Attribute and expected value must be provided for 'assert-attribute'`);
+        }
+
+        // Fetch the actual value of the attribute
+        const actualValue = await item.getAttribute(attribute);
+        const actualFormattedValue = actualValue.replace(/\s+/g, '').toLowerCase();
+
+        // Compare the expected and actual values
+        if (actualFormattedValue !== expectedValue) {
+            throw new TestRunnerError(
+                `Assertion failed: Attribute '${attribute}' is '${actualFormattedValue}', expected '${expectedValue}'`
             );
         }
     }

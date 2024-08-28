@@ -30,8 +30,17 @@
                             "selectors": [
                                 "android|||//android.widget.ImageView[@content-desc='logoImage']"
                             ],
-                            "value": 10000
+                            "value": 15000
                         },
+                        {
+                            "command": "assert-attribute",
+                            "selectors": ["android|||//android.view.View[1]/android.widget.Button"],
+                            "value": {
+                                "attribute": "displayed",
+                                "expectedValue": "false"
+                            }
+                        },
+                        
                         {
                             "command": "click",
                             "selectors": [
@@ -72,7 +81,7 @@
                                 "android|||//android.widget.ImageView[@content-desc=\"background image\"]"
                             ],
                             "value": "30000"
-                        },
+                        },                                        
                         {
                             "command": "click",
                             "selectors": [
