@@ -41,12 +41,9 @@
                         {
                             "command": "assert-css-property",
                             "selectors": ["//div[@id=\"onetrust-button-group\"]/button"],
-                            "value": {
-                                "property": "font-style",
-                                "expectedValue": "normal" 
-                            }
+                            "value": "font-style|||normal"
                         },
-                        
+
                         {
                             "command": "click",
                             "selectors": ["//div[@id=\"onetrust-button-group\"]/button"]
@@ -89,9 +86,7 @@
                         },
                         {
                             "command": "scroll-down-to-element",
-                            "selectors": [
-                              "//article[@data-test-id='{{live-id}}']"
-                            ],
+                            "selectors": ["//article[@data-test-id='{{live-id}}']"],
                             "value": "2",
                             "operator": null
                         },
@@ -142,7 +137,7 @@
                         {
                             "command": "wait-for-not-exist",
                             "selectors": ["svg[class='send-icon active']"],
-                            "value": "2000" 
+                            "value": "2000"
                         },
                         {
                             "command": "click",
