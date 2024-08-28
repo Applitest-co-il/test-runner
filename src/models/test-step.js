@@ -137,7 +137,7 @@ class TestStep {
         'assert-css-property',
         'assert-attribute'
     ];
-    static #commandsRequiredItem = [
+    static #commandsRequireItem = [
         'click',
         'multiple-clicks',
         'set-value',
@@ -147,7 +147,8 @@ class TestStep {
         'assert-css-property',
         'assert-attribute'
     ];
-    static #commandsRequiredValue = [
+    static #commandsRequireSelector = [...TestStep.#commandsRequireItem, 'wait-for-exist', 'wait-for-not-exist'];
+    static #commandsRequireValue = [
         'multiple-clicks',
         'set-value',
         'press-key',
@@ -212,11 +213,15 @@ class TestStep {
     }
 
     #requiresItem(command) {
-        return TestStep.#commandsRequiredItem.includes(command);
+        return TestStep.#commandsRequireItem.includes(command);
+    }
+
+    #requiresSelector(command) {
+        return TestStep.#commandsRequireSelector.includes(command);
     }
 
     #requiresValue(command) {
-        return TestStep.#commandsRequiredValue.includes(command);
+        return TestStep.#commandsRequireValue.includes(command);
     }
 
     #isValid() {
@@ -228,8 +233,8 @@ class TestStep {
             throw new TestDefinitionError(`Command ${this.#command} is not a valid one - step ${this.#sequence}`);
         }
 
-        if (this.#requiresItem(this.#command) && (!this.#selectors || this.#selectors.length === 0)) {
-            throw new TestDefinitionError(`Selectors is required for step ${this.#sequence}`);
+        if (this.#requiresSelector(this.#command) && !this.#selectors && this.#selectors.length === 0) {
+            throw new TestDefinitionError(`Selector is required for step ${this.#sequence}`);
         }
 
         if (this.#requiresValue(this.#command) && !this.#value) {
