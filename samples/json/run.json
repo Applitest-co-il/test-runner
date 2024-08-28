@@ -12,613 +12,615 @@
             "appActivity": "com.scantask.tms.droid.tasker.gis.MapActivity2"
         }
     },
-    "testSuite": {
-        "name": "Suite",
-        "waitBetweenTest": 0,
-        "stopOnFailure": true,
-        "tests": [
-            {
-                "name": "Setup base url",
-                "steps": [
-                    {
-                        "command": "wait-for-exist",
-                        "selectors": [
-                            "android|||//android.widget.ImageView[@resource-id=\"com.agritask.mobile.android:id/loginBrandLogoImageView\"]"
-                        ],
-                        "value": 5000
-                    },
-                    {
-                        "command": "multiple-clicks",
-                        "selectors": [
-                            "android|||//android.widget.ImageView[@resource-id=\"com.agritask.mobile.android:id/loginBrandLogoImageView\"]"
-                        ],
-                        "value": 3
-                    },
-                    {
-                        "command": "wait-for-exist",
-                        "selectors": [
-                            "android|||//androidx.recyclerview.widget.RecyclerView[@resource-id=\"com.agritask.mobile.android:id/recycler_view\"]/android.widget.LinearLayout[5]/android.widget.RelativeLayout"
-                        ],
-                        "value": 5000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": [
-                            "android|||//androidx.recyclerview.widget.RecyclerView[@resource-id=\"com.agritask.mobile.android:id/recycler_view\"]/android.widget.LinearLayout[5]/android.widget.RelativeLayout"
-                        ]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "set-value",
-                        "selectors": ["android|||//android.widget.EditText[@resource-id=\"android:id/edit\"]"],
-                        "value": "https://br.pescout.com/b/mobile"
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.Button[@resource-id=\"android:id/button1\"]"]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": [
-                            "android|||//android.widget.ImageButton[@resource-id=\"com.agritask.mobile.android:id/manager_frag_button_back\"]"
-                        ]
-                    }
-                ]
-            },
-            {
-                "name": "Login failed: missing username",
-                "steps": [
-                    {
-                        "command": "wait-for-exist",
-                        "selectors": [
-                            "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginButton\"]"
-                        ]
-                    },
-                    {
-                        "command": "click",
-                        "selectors": [
-                            "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginButton\"]"
-                        ]
-                    },
-                    {
-                        "command": "wait-for-exist",
-                        "selectors": [
-                            "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
-                        ]
-                    },
-                    {
-                        "command": "assert-text",
-                        "selectors": [
-                            "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
-                        ],
-                        "value": "Please enter a valid username"
-                    }
-                ]
-            },
-            {
-                "name": "Login failed: missing password",
-                "steps": [
-                    {
-                        "command": "wait-for-exist",
-                        "selectors": [
-                            "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
-                        ]
-                    },
-                    {
-                        "command": "set-value",
-                        "selectors": [
-                            "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
-                        ],
-                        "value": "franortsts"
-                    },
-                    {
-                        "command": "click",
-                        "selectors": [
-                            "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginButton\"]"
-                        ]
-                    },
-                    {
-                        "command": "wait-for-exist",
-                        "selectors": [
-                            "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
-                        ]
-                    },
-                    {
-                        "command": "assert-text",
-                        "selectors": [
-                            "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
-                        ],
-                        "value": "Please enter a valid password"
-                    }
-                ]
-            },
-            {
-                "name": "Login failed: wrong username or password",
-                "steps": [
-                    {
-                        "command": "wait-for-exist",
-                        "selectors": [
-                            "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
-                        ]
-                    },
-                    {
-                        "command": "set-value",
-                        "selectors": [
-                            "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
-                        ],
-                        "value": "franortsts"
-                    },
-                    {
-                        "command": "set-value",
-                        "selectors": [
-                            "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editPassword\"]"
-                        ],
-                        "value": "wrongpassword"
-                    },
-                    {
-                        "command": "click",
-                        "selectors": [
-                            "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginButton\"]"
-                        ]
-                    },
-                    {
-                        "command": "wait-for-exist",
-                        "selectors": [
-                            "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
-                        ],
-                        "value": 10000
-                    },
-                    {
-                        "command": "assert-text",
-                        "selectors": [
-                            "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
-                        ],
-                        "value": "Invalid username or password"
-                    }
-                ]
-            },
-            {
-                "name": "Login success",
-                "steps": [
-                    {
-                        "command": "wait-for-exist",
-                        "selectors": [
-                            "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
-                        ]
-                    },
-                    {
-                        "command": "set-value",
-                        "selectors": [
-                            "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
-                        ],
-                        "value": "franortsts"
-                    },
-                    {
-                        "command": "set-value",
-                        "selectors": [
-                            "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editPassword\"]"
-                        ],
-                        "value": "AppliPass!@1"
-                    },
-                    {
-                        "command": "press-key",
-                        "value": 66
-                    },
-                    {
-                        "command": "click",
-                        "selectors": [
-                            "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginButton\"]"
-                        ]
-                    },
-                    {
-                        "command": "wait-for-exist",
-                        "selectors": [
-                            "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[5]/android.widget.ImageView"
-                        ],
-                        "value": 40000
-                    }
-                ]
-            },
-            {
-                "name": "Validate sync",
-                "steps": [
-                    {
-                        "command": "wait-for-exist",
-                        "selectors": [
-                            "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[5]/android.widget.ImageView"
-                        ]
-                    },
-                    {
-                        "command": "click",
-                        "selectors": [
-                            "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[5]/android.widget.ImageView"
-                        ]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 2000
-                    },
-                    {
-                        "command": "assert-text",
-                        "selectors": ["android|||//android.widget.TextView"],
-                        "position": 0,
-                        "value": "Settings"
-                    },
-                    {
-                        "command": "assert-text",
-                        "selectors": ["android|||//android.widget.TextView"],
-                        "position": 1,
-                        "value": "Franor Test"
-                    },
-                    {
-                        "command": "wait-for-exist",
-                        "selectors": ["android|||//android.widget.TextView[@text=\"Last synchronized: Now\"]"],
-                        "value": 30000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": [
-                            "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[1]/android.widget.ImageView"
-                        ]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 3000
-                    }
-                ]
-            },
-            {
-                "name": "Record data",
-                "steps": [
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.ImageButton"]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 3000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.ListView//android.widget.TextView"],
-                        "position": 3
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "scroll-down-to-element",
-                        "selectors": [
-                            "android|||//android.widget.TextView[@text=\" Warehouse test grower - Warehouse \"]"
-                        ],
-                        "value": 3000
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": [
-                            "android|||//android.widget.TextView[@text=\" Warehouse test grower - Warehouse \"]"
-                        ]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.TextView[@text=\"Receiving in warehouse\"]"]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.Button[@text=\"PACKAGED\"]"]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.Button[@text=\"NO SCANNER\"]"]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.Button[@text=\"RECEIVE NEW MATERIAL\"]"]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.Button[@text=\"RECEIVE PACKAGE\"]"]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.RadioButton[@text=\"Pallet packages\"]"]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.Spinner"],
-                        "position": 0
-                    },
-                    {
-                        "command": "pause",
-                        "value": 2000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": [
-                            "android|||//android.widget.ListView//android.widget.TextView[@text=\"ARMAZENAGEM LUFT\"]"
-                        ]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.Spinner"],
-                        "position": 1
-                    },
-                    {
-                        "command": "pause",
-                        "value": 2000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.TextView[@text=\"0012-22-1165\"]"]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "assert-is-displayed",
-                        "selectors": ["android|||//android.widget.TextView[@text=\"Material:\"]"]
-                    },
-                    {
-                        "command": "assert-is-displayed",
-                        "selectors": ["android|||//android.widget.TextView[@text=\"MALATHION 1000EC\"]"]
-                    },
-                    {
-                        "command": "scroll-down-to-element",
-                        "selectors": ["android|||//android.widget.EditText"],
-                        "value": 5000
-                    },
-                    {
-                        "command": "set-value",
-                        "selectors": ["android|||//android.widget.EditText"],
-                        "value": "1"
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.Button[@text=\"OK\"]"]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "scroll-down-to-element",
-                        "selectors": ["android|||//android.widget.TextView[@text=\"    Barcode #1\"]"],
-                        "value": 5000
-                    },
-                    {
-                        "command": "assert-is-displayed",
-                        "selectors": ["android|||//android.widget.TextView[@text=\"    Barcode #1\"]"]
-                    },
-                    {
-                        "command": "generate-random-integer",
-                        "value": "barcode1|||10000|||99999"
-                    },
-                    {
-                        "command": "set-value",
-                        "selectors": ["android|||//android.widget.EditText"],
-                        "position": 1,
-                        "value": "{{barcode1}}"
-                    },
-                    {
-                        "command": "scroll-down-to-element",
-                        "selectors": ["android|||//android.widget.Button[@text=\"ADD PACKAGES\"]"],
-                        "value": 5000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.Button[@text=\"ADD PACKAGES\"]"]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "assert-is-displayed",
-                        "selectors": ["android|||//android.widget.TextView[@text=\"Pallet {{barcode1}}\"]"]
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.ImageButton[@content-desc=\"Add barcode\"]"]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "generate-random-integer",
-                        "value": "barcode2|||10000|||99999"
-                    },
-                    {
-                        "command": "set-value",
-                        "selectors": ["android|||//android.widget.EditText"],
-                        "position": 1,
-                        "value": "{{barcode2}}"
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.Button[@text=\"OK\"]"],
-                        "position": 1
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "scroll-down-to-element",
-                        "selectors": ["android|||//android.widget.Button[@text=\"SAVE\"]"],
-                        "value": 5000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.Button[@text=\"SAVE\"]"]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": [
-                            "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/bt_complete\"]"
-                        ]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.HorizontalScrollView//android.widget.ImageView"],
-                        "position": 3
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.TextView[@text=\"Home\"]"]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": [
-                            "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[5]/android.widget.ImageView"
-                        ]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.TextView[@text=\"Resync\"]"]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "wait-for-exist",
-                        "selectors": ["android|||//android.widget.TextView[@text=\"Last synchronized: Now\"]"],
-                        "value": 30000
-                    },
-                    {
-                        "command": "click",
-                        "selectors": [
-                            "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[1]/android.widget.ImageView"
-                        ]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 3000
-                    }
-                ]
-            },
-            {
-                "name": "Logout",
-                "steps": [
-                    {
-                        "command": "wait-for-exist",
-                        "selectors": [
-                            "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[5]/android.widget.ImageView"
-                        ]
-                    },
-                    {
-                        "command": "click",
-                        "selectors": [
-                            "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[5]/android.widget.ImageView"
-                        ]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "assert-text",
-                        "selectors": ["android|||//android.widget.TextView"],
-                        "position": 0,
-                        "value": "Settings"
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.TextView[@text=\"Logout\"]"]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "assert-text",
-                        "selectors": [
-                            "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/alertTitle\"]"
-                        ],
-                        "value": "Logout"
-                    },
-                    {
-                        "command": "click",
-                        "selectors": ["android|||//android.widget.Button[@resource-id=\"android:id/button1\"]"]
-                    },
-                    {
-                        "command": "pause",
-                        "value": 1000
-                    },
-                    {
-                        "command": "assert-is-displayed",
-                        "selectors": [
-                            "android|||//android.widget.ImageView[@resource-id=\"com.agritask.mobile.android:id/loginBrandLogoImageView\"]"
-                        ]
-                    }
-                ]
-            }
-        ]
-    }
+    "suites": [
+        {
+            "name": "Suite",
+            "waitBetweenTest": 0,
+            "stopOnFailure": true,
+            "tests": [
+                {
+                    "name": "Setup base url",
+                    "steps": [
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": [
+                                "android|||//android.widget.ImageView[@resource-id=\"com.agritask.mobile.android:id/loginBrandLogoImageView\"]"
+                            ],
+                            "value": 5000
+                        },
+                        {
+                            "command": "multiple-clicks",
+                            "selectors": [
+                                "android|||//android.widget.ImageView[@resource-id=\"com.agritask.mobile.android:id/loginBrandLogoImageView\"]"
+                            ],
+                            "value": 3
+                        },
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": [
+                                "android|||//androidx.recyclerview.widget.RecyclerView[@resource-id=\"com.agritask.mobile.android:id/recycler_view\"]/android.widget.LinearLayout[5]/android.widget.RelativeLayout"
+                            ],
+                            "value": 5000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": [
+                                "android|||//androidx.recyclerview.widget.RecyclerView[@resource-id=\"com.agritask.mobile.android:id/recycler_view\"]/android.widget.LinearLayout[5]/android.widget.RelativeLayout"
+                            ]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "set-value",
+                            "selectors": ["android|||//android.widget.EditText[@resource-id=\"android:id/edit\"]"],
+                            "value": "https://br.pescout.com/b/mobile"
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.Button[@resource-id=\"android:id/button1\"]"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": [
+                                "android|||//android.widget.ImageButton[@resource-id=\"com.agritask.mobile.android:id/manager_frag_button_back\"]"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Login failed: missing username",
+                    "steps": [
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginButton\"]"
+                            ]
+                        },
+                        {
+                            "command": "click",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginButton\"]"
+                            ]
+                        },
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
+                            ]
+                        },
+                        {
+                            "command": "assert-text",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
+                            ],
+                            "value": "Please enter a valid username"
+                        }
+                    ]
+                },
+                {
+                    "name": "Login failed: missing password",
+                    "steps": [
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
+                            ]
+                        },
+                        {
+                            "command": "set-value",
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
+                            ],
+                            "value": "franortsts"
+                        },
+                        {
+                            "command": "click",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginButton\"]"
+                            ]
+                        },
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
+                            ]
+                        },
+                        {
+                            "command": "assert-text",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
+                            ],
+                            "value": "Please enter a valid password"
+                        }
+                    ]
+                },
+                {
+                    "name": "Login failed: wrong username or password",
+                    "steps": [
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
+                            ]
+                        },
+                        {
+                            "command": "set-value",
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
+                            ],
+                            "value": "franortsts"
+                        },
+                        {
+                            "command": "set-value",
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editPassword\"]"
+                            ],
+                            "value": "wrongpassword"
+                        },
+                        {
+                            "command": "click",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginButton\"]"
+                            ]
+                        },
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
+                            ],
+                            "value": 10000
+                        },
+                        {
+                            "command": "assert-text",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
+                            ],
+                            "value": "Invalid username or password"
+                        }
+                    ]
+                },
+                {
+                    "name": "Login success",
+                    "steps": [
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
+                            ]
+                        },
+                        {
+                            "command": "set-value",
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
+                            ],
+                            "value": "franortsts"
+                        },
+                        {
+                            "command": "set-value",
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editPassword\"]"
+                            ],
+                            "value": "AppliPass!@1"
+                        },
+                        {
+                            "command": "press-key",
+                            "value": 66
+                        },
+                        {
+                            "command": "click",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginButton\"]"
+                            ]
+                        },
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": [
+                                "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[5]/android.widget.ImageView"
+                            ],
+                            "value": 40000
+                        }
+                    ]
+                },
+                {
+                    "name": "Validate sync",
+                    "steps": [
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": [
+                                "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[5]/android.widget.ImageView"
+                            ]
+                        },
+                        {
+                            "command": "click",
+                            "selectors": [
+                                "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[5]/android.widget.ImageView"
+                            ]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 2000
+                        },
+                        {
+                            "command": "assert-text",
+                            "selectors": ["android|||//android.widget.TextView"],
+                            "position": 0,
+                            "value": "Settings"
+                        },
+                        {
+                            "command": "assert-text",
+                            "selectors": ["android|||//android.widget.TextView"],
+                            "position": 1,
+                            "value": "Franor Test"
+                        },
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Last synchronized: Now\"]"],
+                            "value": 30000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": [
+                                "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[1]/android.widget.ImageView"
+                            ]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 3000
+                        }
+                    ]
+                },
+                {
+                    "name": "Record data",
+                    "steps": [
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.ImageButton"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 3000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.ListView//android.widget.TextView"],
+                            "position": 3
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "scroll-down-to-element",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@text=\" Warehouse test grower - Warehouse \"]"
+                            ],
+                            "value": 3000
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@text=\" Warehouse test grower - Warehouse \"]"
+                            ]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Receiving in warehouse\"]"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.Button[@text=\"PACKAGED\"]"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.Button[@text=\"NO SCANNER\"]"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.Button[@text=\"RECEIVE NEW MATERIAL\"]"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.Button[@text=\"RECEIVE PACKAGE\"]"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.RadioButton[@text=\"Pallet packages\"]"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.Spinner"],
+                            "position": 0
+                        },
+                        {
+                            "command": "pause",
+                            "value": 2000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": [
+                                "android|||//android.widget.ListView//android.widget.TextView[@text=\"ARMAZENAGEM LUFT\"]"
+                            ]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.Spinner"],
+                            "position": 1
+                        },
+                        {
+                            "command": "pause",
+                            "value": 2000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.TextView[@text=\"0012-22-1165\"]"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "assert-is-displayed",
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Material:\"]"]
+                        },
+                        {
+                            "command": "assert-is-displayed",
+                            "selectors": ["android|||//android.widget.TextView[@text=\"MALATHION 1000EC\"]"]
+                        },
+                        {
+                            "command": "scroll-down-to-element",
+                            "selectors": ["android|||//android.widget.EditText"],
+                            "value": 5000
+                        },
+                        {
+                            "command": "set-value",
+                            "selectors": ["android|||//android.widget.EditText"],
+                            "value": "1"
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.Button[@text=\"OK\"]"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "scroll-down-to-element",
+                            "selectors": ["android|||//android.widget.TextView[@text=\"    Barcode #1\"]"],
+                            "value": 5000
+                        },
+                        {
+                            "command": "assert-is-displayed",
+                            "selectors": ["android|||//android.widget.TextView[@text=\"    Barcode #1\"]"]
+                        },
+                        {
+                            "command": "generate-random-integer",
+                            "value": "barcode1|||10000|||99999"
+                        },
+                        {
+                            "command": "set-value",
+                            "selectors": ["android|||//android.widget.EditText"],
+                            "position": 1,
+                            "value": "{{barcode1}}"
+                        },
+                        {
+                            "command": "scroll-down-to-element",
+                            "selectors": ["android|||//android.widget.Button[@text=\"ADD PACKAGES\"]"],
+                            "value": 5000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.Button[@text=\"ADD PACKAGES\"]"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "assert-is-displayed",
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Pallet {{barcode1}}\"]"]
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.ImageButton[@content-desc=\"Add barcode\"]"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "generate-random-integer",
+                            "value": "barcode2|||10000|||99999"
+                        },
+                        {
+                            "command": "set-value",
+                            "selectors": ["android|||//android.widget.EditText"],
+                            "position": 1,
+                            "value": "{{barcode2}}"
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.Button[@text=\"OK\"]"],
+                            "position": 1
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "scroll-down-to-element",
+                            "selectors": ["android|||//android.widget.Button[@text=\"SAVE\"]"],
+                            "value": 5000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.Button[@text=\"SAVE\"]"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/bt_complete\"]"
+                            ]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.HorizontalScrollView//android.widget.ImageView"],
+                            "position": 3
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Home\"]"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": [
+                                "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[5]/android.widget.ImageView"
+                            ]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Resync\"]"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Last synchronized: Now\"]"],
+                            "value": 30000
+                        },
+                        {
+                            "command": "click",
+                            "selectors": [
+                                "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[1]/android.widget.ImageView"
+                            ]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 3000
+                        }
+                    ]
+                },
+                {
+                    "name": "Logout",
+                    "steps": [
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": [
+                                "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[5]/android.widget.ImageView"
+                            ]
+                        },
+                        {
+                            "command": "click",
+                            "selectors": [
+                                "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[5]/android.widget.ImageView"
+                            ]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "assert-text",
+                            "selectors": ["android|||//android.widget.TextView"],
+                            "position": 0,
+                            "value": "Settings"
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Logout\"]"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "assert-text",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/alertTitle\"]"
+                            ],
+                            "value": "Logout"
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["android|||//android.widget.Button[@resource-id=\"android:id/button1\"]"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 1000
+                        },
+                        {
+                            "command": "assert-is-displayed",
+                            "selectors": [
+                                "android|||//android.widget.ImageView[@resource-id=\"com.agritask.mobile.android:id/loginBrandLogoImageView\"]"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
 }
