@@ -7,7 +7,6 @@ class RunConfiguration {
     #hostname = 'localhost';
     #port = 4723;
     #logLevel = 'info';
-    #reset = true;
 
     static factory(options) {
         if (!options) {
@@ -32,7 +31,6 @@ class RunConfiguration {
         this.#runType = options.runType ?? 'mobile';
         this.#farm = options.farm ?? process.env.TR_FARM ?? 'local';
         this.#logLevel = options.logLevel ?? 'info';
-        this.#reset = options.reset ?? true;
         this.#hostname = options.host ?? 'localhost';
         this.#port = options.port ?? 4723;
     }
@@ -55,10 +53,6 @@ class RunConfiguration {
 
     get logLevel() {
         return this.#logLevel;
-    }
-
-    get reset() {
-        return this.#reset;
     }
 
     get conf() {
@@ -93,6 +87,7 @@ class RunConfigurationMobile extends RunConfiguration {
     #appPackage = '';
     #appActivity = '';
     #autoGrantPermissions = true;
+    #reset = true;
 
     constructor(options) {
         super(options);
@@ -104,6 +99,11 @@ class RunConfigurationMobile extends RunConfiguration {
         this.#appPackage = options.appium.appPackage ?? '';
         this.#appActivity = options.appium.appActivity ?? '';
         this.#autoGrantPermissions = options.appium.autoGrantPermissions ?? true;
+        this.#reset = options.appium.reset ?? true;
+    }
+
+    get reset() {
+        return this.#reset;
     }
 
     get conf() {
