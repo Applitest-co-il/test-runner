@@ -1,0 +1,204 @@
+{
+    "runConfiguration": {
+        "runType": "web",
+        "browser": {
+            "name": "chrome",
+            "startUrl": "https://www.dazn.com/",
+            "incognito": true,
+            "startMaximized": true
+        }
+    },
+    "suites": [
+        {
+            "name": "Suite",
+            "waitBetweenTest": 0,
+            "stopOnFailure": true,
+            "tests": [
+                {
+                    "name": "Fanzone chat",
+                    "steps": [
+                        {
+                            "command": "set-variable",
+                            "value": "username|||testrowuser1@gmail.com",
+                            "operator": null
+                        },
+                        {
+                            "command": "set-variable",
+                            "value": "password|||DAZN2024",
+                            "operator": null
+                        },
+                        {
+                            "command": "set-variable",
+                            "value": "live-id|||TILE_0_3 TILE_LIVE",
+                            "operator": null
+                        },
+
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": ["//div[@id=\"onetrust-button-group\"]/button"],
+                            "value": "10000"
+                        },
+                        {
+                            "command": "assert-css-property",
+                            "selectors": ["//div[@id=\"onetrust-button-group\"]/button"],
+                            "value": "font-style|||normal"
+                        },
+
+                        {
+                            "command": "click",
+                            "selectors": ["//div[@id=\"onetrust-button-group\"]/button"]
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["//button[text()=\"Sign in\"]"],
+                            "value": "10000"
+                        },
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": ["#email"],
+                            "value": "10000"
+                        },
+                        {
+                            "command": "set-value",
+                            "selectors": ["#email"],
+                            "value": "{{username}}"
+                        },
+                        {
+                            "command": "set-value",
+                            "selectors": ["#password"],
+                            "value": "{{password}}"
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["//button[@type='submit']"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 10000
+                        },
+                        {
+                            "condition": {
+                                "type": "exist",
+                                "selector": "//div[@id=\"notification-layer\"]/div"
+                            },
+                            "command": "click",
+                            "selectors": ["svg[data-test-id='CLOSE_ICON']"]
+                        },
+                        {
+                            "command": "scroll-down-to-element",
+                            "selectors": ["//article[@data-test-id='{{live-id}}']"],
+                            "value": "2",
+                            "operator": null
+                        },
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": ["//article[@data-test-id='{{live-id}}']"],
+                            "value": "10000"
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["//article[@data-test-id='{{live-id}}']"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 5000
+                        },
+                        {
+                            "condition": {
+                                "type": "exist",
+                                "selector": "//button[@data-test-id='WATCH_LIVE_BUTTON']"
+                            },
+                            "command": "click",
+                            "selectors": ["//button[@data-test-id='WATCH_LIVE_BUTTON']"]
+                        },
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": ["//div[@data-test-id='CADMIUM_PLAYER']"],
+                            "value": "10000"
+                        },
+                        {
+                            "condition": {
+                                "type": "exist",
+                                "selector": "//div[text()='Yes, I am over 18']/parent::button"
+                            },
+                            "command": "click",
+                            "selectors": ["//div[text()='Yes, I am over 18']/parent::button"]
+                        },
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": ["//span[@data-test-id='FanZone']"],
+                            "value": "15000"
+                        },
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": ["//textarea[@data-testid='chat-input-textarea']"],
+                            "value": "15000"
+                        },
+                        {
+                            "command": "wait-for-not-exist",
+                            "selectors": ["svg[class='send-icon active']"],
+                            "value": "2000"
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["svg[class='icon dismiss']"]
+                        },
+                        {
+                            "command": "set-value",
+                            "selectors": ["//textarea[@data-testid='chat-input-textarea']"],
+                            "value": "Nice move"
+                        },
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": ["svg[class='send-icon active']"],
+                            "value": "3000"
+                        },
+                        {
+                            "command": "click",
+                            "selectors": ["svg[data-testid='send-message-button']"]
+                        },
+                        {
+                            "command": "pause",
+                            "value": 3000
+                        },
+                        {
+                            "condition": {
+                                "type": "exist",
+                                "selector": "//div[@data-testid='welcome-modal-container']"
+                            },
+                            "command": "set-value",
+                            "selectors": ["//input[@data-testid='text-input']"],
+                            "value": "Nick fan"
+                        },
+                        {
+                            "condition": {
+                                "type": "exist",
+                                "selector": "//input[@data-testid='text-input']/following::input[@type='checkbox'][1]"
+                            },
+                            "command": "click",
+                            "selectors": ["svg[class='tick']"]
+                        },
+                        {
+                            "condition": {
+                                "type": "exist",
+                                "selector": "//div[text()='Join now']/parent::button"
+                            },
+                            "command": "click",
+                            "selectors": ["//div[text()='Join now']/parent::button"]
+                        },
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": ["//div[@data-testid='message-text' and text()='Nice move']"],
+                            "value": "3000"
+                        },
+
+                        {
+                            "command": "pause",
+                            "value": 10000
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -18,21 +18,24 @@ app.patch('/test-runner', async (req, res) => {
 
     const options = req.body;
 
-    if (options?.runConfiguration?.runType !== 'mobile') {
+    if (options?.runConfiguration?.runType === 'mobile') {
+        console.log('Received mobile run configuration');
+        if (options?.runConfiguration?.appium?.app?.startsWith('s3:')) {
+            const appName = options.runConfiguration.appium.appName;
+            const url = options.runConfiguration.appium.app.replace('s3:', '');
+
+            const appLocalPath = await downloadFile(url, appName);
+            if (!appLocalPath) {
+                res.status(500).send('App download failed');
+                return;
+            }
+            options.runConfiguration.appium.app = appLocalPath;
+        }
+    } else if (options?.runConfiguration?.runType === 'web') {
+        console.log('Received web run configuration');
+    } else {
         res.status(400).send('Invalid run type - only mobile supported .... so far....');
         return;
-    }
-
-    if (options?.runConfiguration?.appium?.app?.startsWith('s3:')) {
-        const appName = options.runConfiguration.appium.appName;
-        const url = options.runConfiguration.appium.app.replace('s3:', '');
-
-        const appLocalPath = await downloadFile(url, appName);
-        if (!appLocalPath) {
-            res.status(500).send('App download failed');
-            return;
-        }
-        options.runConfiguration.appium.app = appLocalPath;
     }
 
     const output = await runTests(options);

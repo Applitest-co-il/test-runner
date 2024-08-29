@@ -1,6 +1,95 @@
 const { TestDefinitionError, TestItemNotFoundError, TestRunnerError } = require('../helpers/test-errors');
 const { replaceVariables } = require('../helpers/utils');
 
+class TestCondition {
+    #type = '';
+    #selector = '';
+    #script = '';
+    #value = '';
+
+    constructor(condition) {
+        this.#type = condition.type;
+        this.#selector = condition.selector;
+        this.#script = condition.script;
+        this.#value = condition.value;
+    }
+
+    isValid() {
+        if (!this.#type) {
+            throw new TestDefinitionError('Condition type is required');
+        }
+
+        switch (this.#type) {
+            case 'exist':
+                if (!this.#selector) {
+                    throw new TestDefinitionError('Selector is required for exist condition');
+                }
+                break;
+            case 'script':
+                if (!this.#script) {
+                    throw new TestDefinitionError('Script is required for script condition');
+                }
+                break;
+            case 'value':
+                if (!this.#selector) {
+                    throw new TestDefinitionError('Selector is required for value condition');
+                }
+                if (!this.#value) {
+                    throw new TestDefinitionError('Value is required for value condition');
+                }
+                break;
+            case 'property':
+                if (!this.#selector) {
+                    throw new TestDefinitionError('Selector is required for property condition');
+                }
+                if (!this.#value) {
+                    throw new TestDefinitionError('Property and value are required for property condition');
+                }
+                break;
+            default:
+                throw new TestDefinitionError(`Condition type ${this.#type} is not a valid one`);
+        }
+
+        return true;
+    }
+
+    async evaluate(driver, variables) {
+        switch (this.#type) {
+            case 'exist':
+                return await this.#existCheck(driver, variables);
+            case 'script':
+                return await this.#scriptCheck(driver, variables);
+            case 'value':
+                return await this.#valueCheck(driver, variables);
+            default:
+                throw new TestDefinitionError(`Condition type ${this.#type} is not a valid one`);
+        }
+    }
+
+    async #existCheck(driver, variables) {
+        let selector = replaceVariables(this.#selector, variables);
+        let item = await driver.$(selector);
+        return item && !item.error;
+    }
+
+    async #scriptCheck(driver, variables) {
+        let script = replaceVariables(this.#script, variables);
+        let result = await driver.execute(script);
+        return result;
+    }
+
+    async #valueCheck(driver, variables) {
+        let selector = replaceVariables(this.#selector, variables);
+        let item = await driver.$(selector);
+        if (!item || item.error) {
+            return false;
+        }
+        let text = await item.getText();
+        let value = replaceVariables(this.#value, variables);
+        return text === value;
+    }
+}
+
 class TestStep {
     #sequence = 0;
     #command = '';
@@ -16,14 +105,18 @@ class TestStep {
     #usedSelectors = '';
     #errorDetails = '';
 
+    #condition = null;
+
     static #commands = [
         //generic
         'pause',
+        'navigate',
         'toggle-location-services',
         'toggle-airplane-mode',
 
         //variables
         'set-variable',
+        'set-variable-from-script',
         'generate-random-integer',
 
         //actions
@@ -35,22 +128,29 @@ class TestStep {
         'scroll-up-to-element',
         'scroll-down-to-element',
         'press-key',
+        'execute-script',
 
         //assertions
         'wait-for-exist',
+        'wait-for-not-exist',
         'assert-is-displayed',
         'assert-text',
-        'assert-number'
+        'assert-number',
+        'assert-css-property',
+        'assert-attribute'
     ];
-    static #commandsRequiredItem = [
+    static #commandsRequireItem = [
         'click',
         'multiple-clicks',
         'set-value',
         'assert-is-displayed',
         'assert-text',
-        'assert-number'
+        'assert-number',
+        'assert-css-property',
+        'assert-attribute'
     ];
-    static #commandsRequiredValue = [
+    static #commandsRequireSelector = [...TestStep.#commandsRequireItem, 'wait-for-exist', 'wait-for-not-exist'];
+    static #commandsRequireValue = [
         'multiple-clicks',
         'set-value',
         'press-key',
@@ -61,7 +161,11 @@ class TestStep {
         'scroll-up-to-element',
         'scroll-down-to-element',
         'generate-random-integer',
-        'toggle-location-services'
+        'toggle-location-services',
+        'execute-script',
+        'set-variable',
+        'set-variable-from-script',
+        'navigate'
     ];
 
     constructor(sequence, step) {
@@ -70,6 +174,8 @@ class TestStep {
         this.#selectors = step.selectors;
         this.#position = step.position ?? -1;
         this.#value = step.value;
+        this.#operator = step.operator;
+        this.#condition = step.condition ? new TestCondition(step.condition) : null;
 
         this.#build();
         this.#isValid();
@@ -110,11 +216,15 @@ class TestStep {
     }
 
     #requiresItem(command) {
-        return TestStep.#commandsRequiredItem.includes(command);
+        return TestStep.#commandsRequireItem.includes(command);
+    }
+
+    #requiresSelector(command) {
+        return TestStep.#commandsRequireSelector.includes(command);
     }
 
     #requiresValue(command) {
-        return TestStep.#commandsRequiredValue.includes(command);
+        return TestStep.#commandsRequireValue.includes(command);
     }
 
     #isValid() {
@@ -122,12 +232,48 @@ class TestStep {
             throw new TestDefinitionError(`Command is required for step ${this.#sequence}`);
         }
 
-        if (this.#requiresItem(this.#command) && (!this.#selectors || this.#selectors.length === 0)) {
-            throw new TestDefinitionError(`Selectors is required for step ${this.#sequence}`);
+        if (!TestStep.#commands.includes(this.#command)) {
+            throw new TestDefinitionError(`Command ${this.#command} is not a valid one - step ${this.#sequence}`);
+        }
+
+        if (this.#requiresSelector(this.#command) && !this.#selectors && this.#selectors.length === 0) {
+            throw new TestDefinitionError(`Selector is required for step ${this.#sequence}`);
         }
 
         if (this.#requiresValue(this.#command) && !this.#value) {
             throw new TestDefinitionError(`Value is required for step ${this.#sequence}`);
+        }
+
+        if (this.#command === 'execute-script') {
+            if (!this.#operator || this.#operator === 'sync') {
+                if (!this.#value.includes('return')) {
+                    throw new TestDefinitionError(
+                        `ExecuteScript::Script for step ${this.#sequence} should contain "return" to indicate to the system the script has completed and with what output`
+                    );
+                }
+            } else if (this.#operator === 'async') {
+                if (!this.#value.includes('callback')) {
+                    throw new TestDefinitionError(
+                        `ExecuteAsyncScript::Script for step ${this.#sequence} should contain call to "callback" function with return value has paramter to indicate to the system the script has completed and with what output`
+                    );
+                }
+            } else {
+                throw new TestDefinitionError(
+                    `ExecuteScript::Script for step ${this.#sequence} has invalid operator "${this.#operator} (should be only 'sync' or 'async')`
+                );
+            }
+        }
+
+        if (this.command === 'execute-async-script') {
+            if (!this.#value.includes('callback')) {
+                throw new TestDefinitionError(
+                    `ExecuteAsyncScript::Script for step ${this.#sequence} should contain call to "callback" function with return value has paramter to indicate to the system the script has completed and with what output`
+                );
+            }
+        }
+
+        if (this.#condition) {
+            this.#condition.isValid();
         }
 
         return true;
@@ -174,6 +320,15 @@ class TestStep {
         this.#variables = variables;
 
         try {
+            if (this.#condition) {
+                let conditionResult = await this.#condition.evaluate(driver, variables);
+                if (!conditionResult) {
+                    this.#status = 'skipped';
+                    console.log(`TestStep::Condition for step ${this.#sequence} was not met - step skipped`);
+                    return true;
+                }
+            }
+
             const item = this.#requiresItem(this.#command) ? await this.#selectItem(driver) : 'noIem';
             if (!item) {
                 throw new TestItemNotFoundError(`Item with selectors [${this.#usedSelectors}]  not found`);
@@ -184,6 +339,9 @@ class TestStep {
                 case 'pause':
                     await this.#pause(driver);
                     break;
+                case 'navigate':
+                    await this.#navigate(driver);
+                    break;
 
                 //variables
                 case 'generate-random-integer':
@@ -191,6 +349,9 @@ class TestStep {
                     break;
                 case 'set-variable':
                     await this.#setVariable(driver);
+                    break;
+                case 'set-variable-from-script':
+                    await this.#setVariableFromScript(driver);
                     break;
 
                 //actions
@@ -218,10 +379,16 @@ class TestStep {
                 case 'scroll-down-to-element':
                     await this.#scrollDownToElement(driver);
                     break;
+                case 'execute-script':
+                    await this.#executeScript(driver);
+                    break;
 
                 //assertions
                 case 'wait-for-exist':
                     await this.#waitForExist(driver);
+                    break;
+                case 'wait-for-not-exist':
+                    await this.#waitForNotExist(driver);
                     break;
                 case 'assert-is-displayed':
                     await this.#assertIsDisplayed(item);
@@ -232,13 +399,18 @@ class TestStep {
                 case 'assert-number':
                     await this.#assertNumber(item);
                     break;
-                case 'toggle-location-services':  
+                case 'assert-css-property':
+                    await this.#assertCssProperty(item);
+                    break;
+                case 'assert-attribute':
+                    await this.#assertAttribute(item);
+                    break;
+                case 'toggle-location-services':
                     await this.#toggleLocationServices(driver);
                     break;
-                case 'toggle-airplane-mode':  
+                case 'toggle-airplane-mode':
                     await this.#toggleAirplaneMode(driver);
                     break;
-                
 
                 //default
                 default:
@@ -289,6 +461,17 @@ class TestStep {
         await driver.pause(this.#value);
     }
 
+    async #navigate(driver) {
+        const url = replaceVariables(this.#value, this.#variables);
+
+        if (this.#operator === 'new') {
+            await driver.newWindow(url);
+            return;
+        } else {
+            await driver.url(url);
+        }
+    }
+
     async #click(item) {
         // Implement click logic
         await item.click();
@@ -328,6 +511,24 @@ class TestStep {
         } catch (e) {
             throw new TestRunnerError(
                 `Element with selector [${this.#usedSelectors}] did not appear on screen up to ${timeout}ms`
+            );
+        }
+    }
+    async #waitForNotExist(driver) {
+        // Implement wait for not exist logic
+        let timeout = this.#value ? parseInt(this.#value) : 5000;
+        try {
+            let that = this;
+            await driver.waitUntil(
+                async () => {
+                    let item = await that.#selectItem(driver);
+                    return !item;
+                },
+                { timeout: timeout, interval: 1000 }
+            );
+        } catch (e) {
+            throw new TestRunnerError(
+                `Element with selector [${this.#usedSelectors}] did not disappear off screen up to ${timeout}ms`
             );
         }
     }
@@ -456,6 +657,54 @@ class TestStep {
             varValue = await item.getText();
         }
         this.#variables[varName] = varValue;
+        console.log(
+            `Variables::Variables are ${JSON.stringify(this.#variables)} following addition of "${varName}" with value "${varValue}"`
+        );
+    }
+
+    async #setVariableFromScript(driver) {
+        const varParts = this.#value.split('|||');
+        if (varParts.length < 2) {
+            throw new TestRunnerError(
+                `SetVariableFromScript::Invalid set variable value format "${this.#value}" - format should be "<var name>|||<script>"`
+            );
+        }
+
+        const varName = varParts[0];
+        const script = varParts[1];
+
+        this.#value = script;
+        const varValue = await this.#executeScript(driver);
+        this.#variables[varName] = varValue;
+        console.log(
+            `Variables::Variables are ${JSON.stringify(this.#variables)} following addition of "${varName}" with value "${varValue}"`
+        );
+    }
+
+    async #executeScript(driver) {
+        const script = replaceVariables(this.#value, this.#variables);
+        try {
+            if (this.#operator === 'async') {
+                const asyncScript = `var callback = arguments[arguments.length - 1]; ${script};`;
+                const result = await driver.executeAsync(asyncScript);
+                if (!result) {
+                    throw new TestRunnerError(`ExecuteAsyncScript::Script: script for step ${this.#sequence} returns`);
+                }
+                console.log(`ExecuteScript::Script: async script for step ${this.#sequence} returns ${result}`);
+                return result;
+            } else {
+                const result = await driver.execute(script);
+                if (!result) {
+                    throw new TestRunnerError(`ExecuteScript::Script: script for step ${this.#sequence} returns`);
+                }
+                console.log(`ExecuteScript::Script: script for step ${this.#sequence} returns ${result}`);
+                return result;
+            }
+        } catch (error) {
+            throw new TestRunnerError(
+                `ExecuteScript::Script: script for step ${this.#sequence} failed with error ${error}`
+            );
+        }
     }
 
     async #assertIsDisplayed(item) {
@@ -503,7 +752,7 @@ class TestStep {
 
     async #toggleLocationServices(driver) {
         const value = replaceVariables(this.#value, this.#variables);
-    
+
         try {
             if (value === 'on') {
                 await driver.toggleLocationServices(); // Enables GPS
@@ -519,10 +768,9 @@ class TestStep {
 
     async #toggleAirplaneMode(driver) {
         const value = replaceVariables(this.#value, this.#variables);
-        const command = value === 'on'
-            ? 'settings put global airplane_mode_on 1'
-            : 'settings put global airplane_mode_on 0';
-    
+        const command =
+            value === 'on' ? 'settings put global airplane_mode_on 1' : 'settings put global airplane_mode_on 0';
+
         try {
             await driver.execute('mobile: shell', { command });
         } catch (error) {
@@ -531,7 +779,7 @@ class TestStep {
             );
         }
     }
-    
+
     async #assertNumber(item) {
         const text = await item.getText();
         const number = +text;
@@ -568,9 +816,62 @@ class TestStep {
                 result = number <= actualNumber;
                 break;
         }
+
         if (!result) {
             throw new TestRunnerError(
                 `AssertNumber::Text "${text}" does not match expected value "${actualValue}" using operator "${operator}" on element with selectors [${this.#usedSelectors}]`
+            );
+        }
+    }
+
+    async #assertCssProperty(item) {
+        const propertyParts = this.#value.split('|||');
+        if (propertyParts.length !== 2) {
+            throw new TestRunnerError(
+                `AssertCssProperty::Invalid value format "${this.#value}" - format should be "<property name>|||<expected value>" `
+            );
+        }
+        const property = propertyParts[0];
+        const expectedValue = propertyParts[1].replace(/\s+/g, '').toLowerCase();
+        if (!property || !expectedValue) {
+            throw new TestRunnerError(
+                `AssertCssProperty::Property and expected value must be defined "${this.#value}" > "${property}" > "${expectedValue}"`
+            );
+        }
+
+        // Fetch the actual value of the CSS property
+        const actualValue = await item.getCSSProperty(property);
+        const actualFormattedValue = actualValue.value.replace(/\s+/g, '').toLowerCase();
+
+        // Compare the expected and actual values
+        if (actualFormattedValue !== expectedValue) {
+            throw new TestRunnerError(
+                `Assertion failed: CSS property '${property}' is '${actualFormattedValue}', expected '${expectedValue}'`
+            );
+        }
+    }
+
+    async #assertAttribute(item) {
+        const attributeParts = this.#value.split('|||');
+        if (attributeParts.length !== 2) {
+            throw new TestRunnerError(
+                `AssertAttribute::Invalid value format "${this.#value}" - format should be "<attribute name>|||<expected value>" `
+            );
+        }
+        const attribute = attributeParts[0];
+        const expectedValue = attributeParts[1].replace(/\s+/g, '').toLowerCase();
+        if (!attribute || !expectedValue) {
+            throw new TestRunnerError(`Attribute and expected value must be provided for 'assert-attribute'`);
+        }
+
+        // Fetch the actual value of the attribute
+        const actualValue = await item.getAttribute(attribute);
+        const actualFormattedValue = actualValue.replace(/\s+/g, '').toLowerCase();
+
+        // Compare the expected and actual values
+        if (actualFormattedValue !== expectedValue) {
+            throw new TestRunnerError(
+                `Assertion failed: Attribute '${attribute}' is '${actualFormattedValue}', expected '${expectedValue}'`
             );
         }
     }
