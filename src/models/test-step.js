@@ -111,6 +111,8 @@ class TestStep {
         //generic
         'pause',
         'navigate',
+        'toggle-location-services',
+        'toggle-airplane-mode',
 
         //variables
         'set-variable',
@@ -159,6 +161,7 @@ class TestStep {
         'scroll-up-to-element',
         'scroll-down-to-element',
         'generate-random-integer',
+        'toggle-location-services',
         'execute-script',
         'set-variable',
         'set-variable-from-script',
@@ -401,6 +404,12 @@ class TestStep {
                     break;
                 case 'assert-attribute':
                     await this.#assertAttribute(item);
+                    break;
+                case 'toggle-location-services':
+                    await this.#toggleLocationServices(driver);
+                    break;
+                case 'toggle-airplane-mode':
+                    await this.#toggleAirplaneMode(driver);
                     break;
 
                 //default
@@ -737,6 +746,38 @@ class TestStep {
         if (!result) {
             throw new TestRunnerError(
                 `AssertText::Text "${text}" does not match expected value "${actualValue}" using operator "${operator} on element with selectors [${this.#usedSelectors}]"`
+            );
+        }
+    }
+
+    async #toggleLocationServices(driver) {
+        const value = replaceVariables(this.#value, this.#variables);
+        try {
+            if (driver.capabilities.platformName.toLowerCase() === 'android') {
+                // Toggle location services using shell command
+                const toggleCommand =
+                    value === 'on' ? 'settings put secure location_mode 3' : 'settings put secure location_mode 0';
+                await driver.execute('mobile: shell', { command: toggleCommand });
+            }
+        } catch (error) {
+            throw new TestRunnerError(
+                `ToggleLocationServices::Failed to toggle location services to "${value}". Error: ${error.message}`
+            );
+        }
+    }
+
+    async #toggleAirplaneMode(driver) {
+        const value = replaceVariables(this.#value, this.#variables);
+
+        try {
+            if (value === 'on') {
+                await driver.setNetworkConnection(1);
+            } else {
+                await driver.setNetworkConnection(6);
+            }
+        } catch (error) {
+            throw new TestRunnerError(
+                `ToggleAirplaneMode::Failed to toggle airplane mode to "${value}". Error: ${error.message}`
             );
         }
     }
