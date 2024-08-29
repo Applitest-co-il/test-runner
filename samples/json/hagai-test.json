@@ -7,10 +7,8 @@
             "platformName": "Android",
             "automationName": "UiAutomator2",
             "deviceName": "Android",
-            "app": "D:\\code\\android\\agritask\\tms.android.agritask-agritask-release-9.0.0.34888.apk",
-            "appPackage": "com.agritask.mobile.android",
-            "appActivity": "com.scantask.tms.droid.tasker.gis.MapActivity2"           
-            
+            "appPackage": "com.android.settings",
+            "appActivity": ".Settings"
         }
     },
     "suites": [
@@ -23,15 +21,20 @@
                     "name": "Setup base url",
                     "steps": [
                         {
-                            "command": "wait-for-exist",
-                            "selectors": [
-                                "android|||//android.widget.ImageView[@resource-id=\"com.agritask.mobile.android:id/loginBrandLogoImageView\"]"
-                            ],
-                            "value": 5000
+                            "command": "toggle-airplane-mode",
+                            "value": "on"
+                        },
+                        {
+                            "command": "toggle-airplane-mode",
+                            "value": "off"
                         },
                         {
                             "command": "toggle-location-services",
                             "value": "off"
+                        },
+                        {
+                            "command": "toggle-location-services",
+                            "value": "on"
                         }
                     ]
                 }

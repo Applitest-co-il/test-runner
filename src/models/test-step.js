@@ -752,12 +752,12 @@ class TestStep {
 
     async #toggleLocationServices(driver) {
         const value = replaceVariables(this.#value, this.#variables);
-
         try {
-            if (value === 'on') {
-                await driver.toggleLocationServices(); // Enables GPS
-            } else {
-                await driver.toggleLocationServices(); // Disables GPS
+            if (driver.capabilities.platformName.toLowerCase() === 'android') {
+                // Toggle location services using shell command
+                const toggleCommand =
+                    value === 'on' ? 'settings put secure location_mode 3' : 'settings put secure location_mode 0';
+                await driver.execute('mobile: shell', { command: toggleCommand });
             }
         } catch (error) {
             throw new TestRunnerError(
@@ -768,11 +768,13 @@ class TestStep {
 
     async #toggleAirplaneMode(driver) {
         const value = replaceVariables(this.#value, this.#variables);
-        const command =
-            value === 'on' ? 'settings put global airplane_mode_on 1' : 'settings put global airplane_mode_on 0';
 
         try {
-            await driver.execute('mobile: shell', { command });
+            if (value === 'on') {
+                await driver.setNetworkConnection(1);
+            } else {
+                await driver.setNetworkConnection(6);
+            }
         } catch (error) {
             throw new TestRunnerError(
                 `ToggleAirplaneMode::Failed to toggle airplane mode to "${value}". Error: ${error.message}`
