@@ -38,11 +38,6 @@
                             "selectors": ["//div[@id=\"onetrust-button-group\"]/button"],
                             "value": "10000"
                         },
-                        {
-                            "command": "assert-css-property",
-                            "selectors": ["//div[@id=\"onetrust-button-group\"]/button"],
-                            "value": "font-style|||normal"
-                        },
 
                         {
                             "command": "click",

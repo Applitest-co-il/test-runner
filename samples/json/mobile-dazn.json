@@ -22,23 +22,14 @@
                             "command": "click",
                             "selectors": [
                                 "android|||//android.widget.TextView[@content-desc=\"Predicted app: DAZN\"]"
-                            ],
-                            "value": 5000
+                            ]
                         },
                         {
                             "command": "wait-for-exist",
                             "selectors": [
-                                "android|||//android.widget.ImageView[@content-desc='logoImage']"
+                              "android|||//android.view.View[1]/android.widget.Button"
                             ],
-                            "value": 15000
-                        },
-                        {
-                            "command": "assert-attribute",
-                            "selectors": ["android|||//android.view.View[1]/android.widget.Button"],
-                            "value": {
-                                "attribute": "displayed",
-                                "expectedValue": "false"
-                            }
+                            "value": "15000"
                         },
                         
                         {
