@@ -111,6 +111,8 @@ class TestStep {
         //generic
         'pause',
         'navigate',
+
+        //settings
         'toggle-location-services',
         'toggle-airplane-mode',
 
@@ -707,6 +709,38 @@ class TestStep {
         }
     }
 
+    async #toggleLocationServices(driver) {
+        const value = replaceVariables(this.#value, this.#variables);
+        try {
+            if (driver.capabilities.platformName.toLowerCase() === 'android') {
+                // Toggle location services using shell command
+                const toggleCommand =
+                    value === 'on' ? 'settings put secure location_mode 3' : 'settings put secure location_mode 0';
+                await driver.execute('mobile: shell', { command: toggleCommand });
+            }
+        } catch (error) {
+            throw new TestRunnerError(
+                `ToggleLocationServices::Failed to toggle location services to "${value}". Error: ${error.message}`
+            );
+        }
+    }
+
+    async #toggleAirplaneMode(driver) {
+        const value = replaceVariables(this.#value, this.#variables);
+
+        try {
+            if (value === 'on') {
+                await driver.setNetworkConnection(1);
+            } else {
+                await driver.setNetworkConnection(6);
+            }
+        } catch (error) {
+            throw new TestRunnerError(
+                `ToggleAirplaneMode::Failed to toggle airplane mode to "${value}". Error: ${error.message}`
+            );
+        }
+    }
+
     async #assertIsDisplayed(item) {
         // Implement assert is displayed logic
         let isDisplayed = await item.isDisplayed();
@@ -750,38 +784,6 @@ class TestStep {
         }
     }
 
-    async #toggleLocationServices(driver) {
-        const value = replaceVariables(this.#value, this.#variables);
-        try {
-            if (driver.capabilities.platformName.toLowerCase() === 'android') {
-                // Toggle location services using shell command
-                const toggleCommand =
-                    value === 'on' ? 'settings put secure location_mode 3' : 'settings put secure location_mode 0';
-                await driver.execute('mobile: shell', { command: toggleCommand });
-            }
-        } catch (error) {
-            throw new TestRunnerError(
-                `ToggleLocationServices::Failed to toggle location services to "${value}". Error: ${error.message}`
-            );
-        }
-    }
-
-    async #toggleAirplaneMode(driver) {
-        const value = replaceVariables(this.#value, this.#variables);
-
-        try {
-            if (value === 'on') {
-                await driver.setNetworkConnection(1);
-            } else {
-                await driver.setNetworkConnection(6);
-            }
-        } catch (error) {
-            throw new TestRunnerError(
-                `ToggleAirplaneMode::Failed to toggle airplane mode to "${value}". Error: ${error.message}`
-            );
-        }
-    }
-
     async #assertNumber(item) {
         const text = await item.getText();
         const number = +text;
@@ -796,8 +798,9 @@ class TestStep {
         if (isNaN(actualNumber)) {
             throw new TestRunnerError(`AssertNumber::Provided value "${this.value}" is not a valid number`);
         }
-        const operator = this.operator ? this.operator : '==';
+
         let result = false;
+        const operator = this.operator ? this.operator : '==';
         switch (operator) {
             case '==':
                 result = number == actualNumber;
@@ -846,7 +849,18 @@ class TestStep {
         const actualFormattedValue = actualValue.value.replace(/\s+/g, '').toLowerCase();
 
         // Compare the expected and actual values
-        if (actualFormattedValue !== expectedValue) {
+        let result = false;
+        const operator = this.operator ? this.operator : '==';
+        switch (operator) {
+            case '==':
+                result = expectedValue == actualFormattedValue;
+                break;
+            case '!=':
+                result = expectedValue != actualFormattedValue;
+                break;
+        }
+
+        if (!result) {
             throw new TestRunnerError(
                 `Assertion failed: CSS property '${property}' is '${actualFormattedValue}', expected '${expectedValue}'`
             );
@@ -871,7 +885,18 @@ class TestStep {
         const actualFormattedValue = actualValue.replace(/\s+/g, '').toLowerCase();
 
         // Compare the expected and actual values
-        if (actualFormattedValue !== expectedValue) {
+        let result = false;
+        const operator = this.operator ? this.operator : '==';
+        switch (operator) {
+            case '==':
+                result = expectedValue == actualFormattedValue;
+                break;
+            case '!=':
+                result = expectedValue != actualFormattedValue;
+                break;
+        }
+
+        if (!result) {
             throw new TestRunnerError(
                 `Assertion failed: Attribute '${attribute}' is '${actualFormattedValue}', expected '${expectedValue}'`
             );
