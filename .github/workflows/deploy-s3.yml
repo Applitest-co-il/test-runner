@@ -32,7 +32,7 @@ jobs:
               run: npm ci
 
             - name: Build for production
-              run: npm run build
+              run: npm run build:linux
 
             - name: Configure AWS Credentials
               uses: aws-actions/configure-aws-credentials@v2

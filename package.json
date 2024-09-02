@@ -3,18 +3,14 @@
     "version": "0.9.2",
     "description": "applitest manager test runner",
     "scripts": {
-        "test": "node --inspect ./src/index.js --conf ./samples/json/test.json",
-        "start": "node ./src/cli/index.js",
-        "cli": "node ./src/cli/index.js",
-        "cli:start:web": "node --inspect  ./src/cli/index.js --conf ./samples/json/run-web-il-us.json",
-        "cli:start": "node ./src/cli/index.js --conf ./samples/json/hagai-test.json",
-        "cli:start:debug": "node --inspect  ./src/cli/index.js --conf ./samples/json/hagai-test.json",
-        "cli:testaws": "node  ./src/cli/index.js --conf ./hagai-test.json",
+        "cli": "node ./src/cli/index.js -- ",
+        "cli:start:debug": "node --inspect  ./src/cli/index.js -- ",
         "api": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./src/api/start-api.ps1",
         "api:start": "node ./src/api/app.js",
         "api:start:debug": "node --inspect ./src/api/app.js",
         "api:start:dev:debug": "nodemon --inspect ./src/api/app.js",
-        "build": "@powershell -NoProfile -Command ./build.ps1"
+        "build:windows": "@powershell -NoProfile -Command ./build.ps1",
+        "build:linux": "sh ./build.sh"
     },
     "repository": {
         "type": "git",
