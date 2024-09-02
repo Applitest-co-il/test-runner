@@ -22,8 +22,8 @@ cp ./package* ./dist/bin/
 cp ./LICENSE ./dist/bin/
 
 # Compress the bin directory into a zip file
-pushd ./dist
-pushd ./bin
+cd ./dist
+cd ./bin
 zip -r ../test-runner.zip ./*
-popd
-popd
+cd ..
+cd ..
