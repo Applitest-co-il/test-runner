@@ -28,9 +28,6 @@ jobs:
                   node-version: ${{ matrix.node-version }}
                   cache: 'npm'
 
-            - name: Build for production
-              run: npm run build:linux
-
             - name: Configure AWS Credentials
               uses: aws-actions/configure-aws-credentials@v2
               with:
@@ -42,4 +39,4 @@ jobs:
               env:
                   AWS_S3: ${{ secrets.AWS_S3 }}
               run: |
-                  aws s3 sync ./dist/ s3://$AWS_S3/mobile-defaults --exclude "*" --include "*.zip" --content-type "application/zip"
+                  aws s3 sync ./defaults/ s3://$AWS_S3/mobile-defaults --exclude "*" --include "*.yml" --content-type "application/yml"
