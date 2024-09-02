@@ -29,10 +29,9 @@
                         },
                         {
                             "command": "set-variable",
-                            "value": "live-id|||TILE_0_3 TILE_LIVE",
+                            "value": "live-id|||TILE_0_0 TILE_LIVE",
                             "operator": null
                         },
-
                         {
                             "command": "wait-for-exist",
                             "selectors": ["//div[@id=\"onetrust-button-group\"]/button"],
@@ -43,10 +42,26 @@
                             "command": "click",
                             "selectors": ["//div[@id=\"onetrust-button-group\"]/button"]
                         },
+
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": ["//button[text()=\"Sign in\"]"],
+                            "value": "10000"
+                        },
+                        {
+                            "command": "wait-for-not-exist",
+                            "selectors": ["//button[text()=\"Sign in\"]"],
+                            "value": "0"
+                        },
                         {
                             "command": "click",
                             "selectors": ["//button[text()=\"Sign in\"]"],
                             "value": "10000"
+                        },
+                        {
+                            "command": "wait-for-not-exist",
+                            "selectors": ["//button[text()=\"Sign in\"]"],
+                            "value": "5000"
                         },
                         {
                             "command": "wait-for-exist",
@@ -112,6 +127,10 @@
                             "value": "10000"
                         },
                         {
+                            "command": "pause",
+                            "value": 5000
+                        },
+                        {
                             "condition": {
                                 "type": "exist",
                                 "selector": "//div[text()='Yes, I am over 18']/parent::button"
@@ -132,7 +151,7 @@
                         {
                             "command": "wait-for-not-exist",
                             "selectors": ["svg[class='send-icon active']"],
-                            "value": "2000"
+                            "value": "0"
                         },
                         {
                             "command": "click",

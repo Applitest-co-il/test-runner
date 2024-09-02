@@ -67,30 +67,44 @@
                             ]
                         },
                         {
-                            "command": "wait-for-exist",
-                            "selectors": [
-                                "android|||//android.widget.ImageView[@content-desc=\"background image\"]"
-                            ],
-                            "value": "30000"
-                        },                                        
+                            "command": "pause",
+                            "value": 20000
+                        },
                         {
+                            "condition": {
+                                "type": "exist",
+                                "selector": "//android.widget.ImageView[@content-desc=\"background image\"]"
+                            },
                             "command": "click",
-                            "selectors": [
-                                "android|||//android.widget.ImageView[2]"
-                            ]
+                            "selectors": ["android|||//android.widget.ImageView[2]"]
+                            
                         },
                         {
                             "command": "wait-for-exist",
                             "selectors": [
-                                "android|||//android.widget.FrameLayout[@content-desc=\"059cd723-c1c3-4b52-97f0-c07b749919c93okj5lq01okqn39tcv15wd0hi\"]/android.view.ViewGroup"
+                                "android|||//android.widget.FrameLayout[@content-desc=\"059cd723-c1c3-4b52-97f0-c07b749919c9b0thnu2sfdanx5jmbillrveas\"]/android.view.ViewGroup"
                             ],
                             "value": "10000"
                         },
                         {
                             "command": "click",
                             "selectors": [
-                                "android|||//android.widget.FrameLayout[@content-desc=\"059cd723-c1c3-4b52-97f0-c07b749919c93okj5lq01okqn39tcv15wd0hi\"]/android.view.ViewGroup"
+                                "android|||//android.widget.FrameLayout[@content-desc=\"059cd723-c1c3-4b52-97f0-c07b749919c9b0thnu2sfdanx5jmbillrveas\"]/android.view.ViewGroup"
                             ]
+                        },
+                        {
+                            "command": "wait-for-exist",
+                            "selectors": [
+                                "android|||//android.widget.EditText"
+                            ],
+                            "value": "30000"
+                        },
+                        {
+                            "command": "set-value",
+                            "selectors": [
+                                "android|||//android.widget.EditText"
+                            ],
+                            "value": "Great run"
                         }
                     ]
                 }
