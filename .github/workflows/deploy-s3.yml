@@ -45,4 +45,4 @@ jobs:
               env:
                   AWS_S3: ${{ secrets.AWS_S3 }}
               run: |
-                  aws s3 sync ./dist/ s3://$AWS_S3/mobile-defaults --delete --include "*.zip" --content-type "application/zip"
+                  aws s3 sync ./dist/ s3://$AWS_S3/mobile-defaults --exclude "*" --include "*.zip" --content-type "application/zip"
