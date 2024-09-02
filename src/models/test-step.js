@@ -136,6 +136,7 @@ class TestStep {
         'wait-for-exist',
         'wait-for-not-exist',
         'assert-is-displayed',
+        'assert-is-not-displayed',
         'assert-text',
         'assert-number',
         'assert-css-property',
@@ -146,6 +147,7 @@ class TestStep {
         'multiple-clicks',
         'set-value',
         'assert-is-displayed',
+        'assert-is-not-displayed',
         'assert-text',
         'assert-number',
         'assert-css-property',
@@ -394,6 +396,9 @@ class TestStep {
                     break;
                 case 'assert-is-displayed':
                     await this.#assertIsDisplayed(item);
+                    break;
+                case 'assert-is-not-displayed':
+                    await this.#assertIsNotDisplayed(item);
                     break;
                 case 'assert-text':
                     await this.#assertText(item);
@@ -747,6 +752,16 @@ class TestStep {
         if (!isDisplayed) {
             throw new TestRunnerError(
                 `AssertIsDisplayed::Item with selectors [${this.#usedSelectors}] was not found or is not displayed`
+            );
+        }
+    }
+
+    async #assertIsNotDisplayed(item) {
+        // Implement assert is displayed logic
+        let isDisplayed = await item.isDisplayed();
+        if (isDisplayed) {
+            throw new TestRunnerError(
+                `AssertIsNotDisplayed::Item with selectors [${this.#usedSelectors}] was found or is displayed`
             );
         }
     }
