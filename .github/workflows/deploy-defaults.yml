@@ -1,5 +1,5 @@
 # This workflow will deploy to S3 with static site in place
-name: Deploy to S3
+name: Deploy Defaults
 
 on:
     workflow_dispatch:
@@ -8,7 +8,7 @@ on:
         branches:
             - 'main'
         paths:
-            - 'src/**'
+            - 'defaults/**'
 
 jobs:
     deploy-s3:
