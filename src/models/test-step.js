@@ -1,5 +1,6 @@
 const { TestDefinitionError, TestItemNotFoundError, TestRunnerError } = require('../helpers/test-errors');
 const { replaceVariables } = require('../helpers/utils');
+const vmRun = require('@danielyaghil/vm-helper');
 
 class TestCondition {
     #type = '';
@@ -261,17 +262,9 @@ class TestStep {
                         `ExecuteAsyncScript::Script for step ${this.#sequence} should contain call to "callback" function with return value has paramter to indicate to the system the script has completed and with what output`
                     );
                 }
-            } else {
+            } else if (this.#operator !== 'local') {
                 throw new TestDefinitionError(
-                    `ExecuteScript::Script for step ${this.#sequence} has invalid operator "${this.#operator} (should be only 'sync' or 'async')`
-                );
-            }
-        }
-
-        if (this.command === 'execute-async-script') {
-            if (!this.#value.includes('callback')) {
-                throw new TestDefinitionError(
-                    `ExecuteAsyncScript::Script for step ${this.#sequence} should contain call to "callback" function with return value has paramter to indicate to the system the script has completed and with what output`
+                    `ExecuteScript::Script for step ${this.#sequence} has invalid operator "${this.#operator} (should be only 'sync', 'async' or 'local')`
                 );
             }
         }
@@ -699,18 +692,34 @@ class TestStep {
                 }
                 console.log(`ExecuteScript::Script: async script for step ${this.#sequence} returns ${result}`);
                 return result;
-            } else {
+            } else if (this.#operator === 'sync') {
                 const result = await driver.execute(script);
                 if (!result) {
                     throw new TestRunnerError(`ExecuteScript::Script: script for step ${this.#sequence} returns`);
                 }
                 console.log(`ExecuteScript::Script: script for step ${this.#sequence} returns ${result}`);
                 return result;
+            } else {
+                const localScript = script.replace(/return (.*);/, function (match, p1) {
+                    return `console.output(${p1});`;
+                });
+                const result = await vmRun(localScript, this.#variables);
+                if (!result || !result.success) {
+                    throw new TestRunnerError(`ExecuteScript::Script: local script for step ${this.#sequence} failed `);
+                }
+                console.log(
+                    `ExecuteScript::Script: local script for step ${this.#sequence} returns ${JSON.stringify(result)}`
+                );
+                return result.output;
             }
         } catch (error) {
-            throw new TestRunnerError(
-                `ExecuteScript::Script: script for step ${this.#sequence} failed with error ${error}`
-            );
+            if (error instanceof TestRunnerError) {
+                throw error;
+            } else {
+                throw new TestRunnerError(
+                    `ExecuteScript::Script: script for step ${this.#sequence} failed with error ${error}`
+                );
+            }
         }
     }
 
