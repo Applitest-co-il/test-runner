@@ -1,7 +1,7 @@
 {
     "name": "test-runner",
-    "version": "0.9.2",
-    "description": "applitest manager test runner",
+    "version": "0.9.21",
+    "description": "Applitest Manager Test Runner",
     "scripts": {
         "cli": "node ./src/cli/index.js -- ",
         "cli:start:debug": "node --inspect  ./src/cli/index.js -- ",

@@ -16,7 +16,7 @@ class TestRunner {
 
         if (options.suites) {
             for (let i = 0; i < options.suites.length; i++) {
-                const suite = new TestSuite(options.suites[i]);
+                const suite = new TestSuite(options.suites[i], this.#conf);
                 this.#suites.push(suite);
             }
         }

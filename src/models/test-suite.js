@@ -2,6 +2,7 @@ const { mergeVariables } = require('../helpers/utils');
 const TestDefinition = require('./test-definition');
 
 class TestSuite {
+    #conf = null;
     #id = '';
     #name = '';
     #waitBetweenTests = 0;
@@ -9,13 +10,14 @@ class TestSuite {
     #variables = {};
     #tests = [];
 
-    constructor(options) {
-        this.#id = options.id ?? '';
-        this.#name = options.name ?? '';
-        this.#waitBetweenTests = options.waitBetweenTests ?? 0;
-        this.#stopOnFailure = options.stopOnFailure ?? false;
-        this.#variables = options.variables ?? {};
-        this.#buildTests(options.tests);
+    constructor(suite, conf) {
+        this.#conf = conf;
+        this.#id = suite.id ?? '';
+        this.#name = suite.name ?? '';
+        this.#waitBetweenTests = suite.waitBetweenTests ?? 0;
+        this.#stopOnFailure = suite.stopOnFailure ?? false;
+        this.#variables = suite.variables ?? {};
+        this.#buildTests(suite.tests);
     }
 
     #buildTests(tests) {
@@ -26,7 +28,7 @@ class TestSuite {
 
         for (let i = 0; i < tests.length; i++) {
             const test = tests[i];
-            let testDefinition = new TestDefinition(test);
+            let testDefinition = new TestDefinition(test, this.#conf);
             this.#tests.push(testDefinition);
         }
     }

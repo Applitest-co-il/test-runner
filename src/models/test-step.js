@@ -1,97 +1,11 @@
 const { TestDefinitionError, TestItemNotFoundError, TestRunnerError } = require('../helpers/test-errors');
-const { replaceVariables } = require('../helpers/utils');
+const { replaceVariables, prepareLocalScript } = require('../helpers/utils');
+const TestCondition = require('./test-condition');
 const vmRun = require('@danielyaghil/vm-helper');
 
-class TestCondition {
-    #type = '';
-    #selector = '';
-    #script = '';
-    #value = '';
-
-    constructor(condition) {
-        this.#type = condition.type;
-        this.#selector = condition.selector;
-        this.#script = condition.script;
-        this.#value = condition.value;
-    }
-
-    isValid() {
-        if (!this.#type) {
-            throw new TestDefinitionError('Condition type is required');
-        }
-
-        switch (this.#type) {
-            case 'exist':
-                if (!this.#selector) {
-                    throw new TestDefinitionError('Selector is required for exist condition');
-                }
-                break;
-            case 'script':
-                if (!this.#script) {
-                    throw new TestDefinitionError('Script is required for script condition');
-                }
-                break;
-            case 'value':
-                if (!this.#selector) {
-                    throw new TestDefinitionError('Selector is required for value condition');
-                }
-                if (!this.#value) {
-                    throw new TestDefinitionError('Value is required for value condition');
-                }
-                break;
-            case 'property':
-                if (!this.#selector) {
-                    throw new TestDefinitionError('Selector is required for property condition');
-                }
-                if (!this.#value) {
-                    throw new TestDefinitionError('Property and value are required for property condition');
-                }
-                break;
-            default:
-                throw new TestDefinitionError(`Condition type ${this.#type} is not a valid one`);
-        }
-
-        return true;
-    }
-
-    async evaluate(driver, variables) {
-        switch (this.#type) {
-            case 'exist':
-                return await this.#existCheck(driver, variables);
-            case 'script':
-                return await this.#scriptCheck(driver, variables);
-            case 'value':
-                return await this.#valueCheck(driver, variables);
-            default:
-                throw new TestDefinitionError(`Condition type ${this.#type} is not a valid one`);
-        }
-    }
-
-    async #existCheck(driver, variables) {
-        let selector = replaceVariables(this.#selector, variables);
-        let item = await driver.$(selector);
-        return item && !item.error;
-    }
-
-    async #scriptCheck(driver, variables) {
-        let script = replaceVariables(this.#script, variables);
-        let result = await driver.execute(script);
-        return result;
-    }
-
-    async #valueCheck(driver, variables) {
-        let selector = replaceVariables(this.#selector, variables);
-        let item = await driver.$(selector);
-        if (!item || item.error) {
-            return false;
-        }
-        let text = await item.getText();
-        let value = replaceVariables(this.#value, variables);
-        return text === value;
-    }
-}
-
 class TestStep {
+    #conf = null;
+
     #sequence = 0;
     #command = '';
     #selectors = [];
@@ -173,14 +87,16 @@ class TestStep {
         'navigate'
     ];
 
-    constructor(sequence, step) {
+    constructor(sequence, step, conf) {
+        this.#conf = conf;
+
         this.#sequence = sequence;
         this.#command = step.command;
         this.#selectors = step.selectors;
         this.#position = step.position ?? -1;
         this.#value = step.value;
         this.#operator = step.operator;
-        this.#condition = step.condition ? new TestCondition(step.condition) : null;
+        this.#condition = step.condition ? new TestCondition(step.condition, this.#conf) : null;
 
         this.#build();
         this.#isValid();
@@ -700,12 +616,12 @@ class TestStep {
                 console.log(`ExecuteScript::Script: script for step ${this.#sequence} returns ${result}`);
                 return result;
             } else {
-                const localScript = script.replace(/return (.*);/, function (match, p1) {
-                    return `console.output(${p1});`;
-                });
+                const localScript = prepareLocalScript(script);
                 const result = await vmRun(localScript, this.#variables);
                 if (!result || !result.success) {
-                    throw new TestRunnerError(`ExecuteScript::Script: local script for step ${this.#sequence} failed `);
+                    throw new TestRunnerError(
+                        `ExecuteScript::Script: local script for step ${this.#sequence} failed ${result.error}`
+                    );
                 }
                 console.log(
                     `ExecuteScript::Script: local script for step ${this.#sequence} returns ${JSON.stringify(result)}`

@@ -27,8 +27,16 @@ function mergeVariables(baseVariables, newVariables) {
     return baseVariables;
 }
 
+function prepareLocalScript(script) {
+    const localScript = script.replace(/return (.*);/, function (match, p1) {
+        return `console.output(${p1});`;
+    });
+    return localScript;
+}
+
 module.exports = {
     pauseApp,
     replaceVariables,
-    mergeVariables
+    mergeVariables,
+    prepareLocalScript
 };

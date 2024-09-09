@@ -3,6 +3,7 @@ const { mergeVariables } = require('../helpers/utils');
 const TestStep = require('./test-step');
 
 class TestDefinition {
+    #conf = null;
     #id = '';
     #name = '';
     #variables = {};
@@ -13,12 +14,13 @@ class TestDefinition {
     #status = 'pending';
     #lastStep = 0;
 
-    constructor(options) {
-        this.#id = options.id ?? '';
-        this.#name = options.name ?? '';
-        this.#skip = options.skip ?? false;
-        this.#variables = options.variables ?? {};
-        this.#buildSteps(options.steps);
+    constructor(test, conf) {
+        this.#conf = conf;
+        this.#id = test.id ?? '';
+        this.#name = test.name ?? '';
+        this.#skip = test.skip ?? false;
+        this.#variables = test.variables ?? {};
+        this.#buildSteps(test.steps);
     }
 
     #buildSteps(steps) {
@@ -29,7 +31,7 @@ class TestDefinition {
 
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
-            let testStep = new TestStep(i + 1, step);
+            let testStep = new TestStep(i + 1, step, this.#conf);
             this.#steps.push(testStep);
         }
     }
