@@ -146,10 +146,13 @@ class RunConfigurationMobile extends RunConfiguration {
 class RunConfigurationWeb extends RunConfiguration {
     #browserName = '';
     #browserVersion = '';
-    #resolution = '1920x1080';
     #startUrl = '';
     #incognito = false;
     #startMaximized = false;
+    #resolution = '1920x1080';
+    #emulate = '';
+
+    #restoreEmulateFunc = null;
 
     constructor(options) {
         super(options);
@@ -160,6 +163,7 @@ class RunConfigurationWeb extends RunConfiguration {
         this.#startUrl = options.browser.startUrl ?? '';
         this.#incognito = options.browser.incognito ?? false;
         this.#startMaximized = options.browser.startMaximized ?? false;
+        this.#emulate = options.browser.emulate ?? false;
 
         if (!this.#startUrl) {
             throw new TestRunnerConfigurationError('No start URL provided');
@@ -217,14 +221,26 @@ class RunConfigurationWeb extends RunConfiguration {
 
     async startSession() {
         let driver = await super.startSession();
-        await driver.url(this.#startUrl);
 
         // Maximize or set window size based on browser
-        if (this.#browserName === 'firefox') {
-            await driver.maximizeWindow(); // Maximize Firefox window
-        } else if (this.#browserName === 'chrome') {
-            // Chrome is already maximized via 'start-maximized' argument
+        if (this.#startMaximized) {
+            if (this.#browserName === 'firefox') {
+                await driver.maximizeWindow(); // Maximize Firefox window
+            } else if (this.#browserName === 'chrome') {
+                // Chrome is already maximized via 'start-maximized' argument
+            }
         }
+
+        if (this.#emulate) {
+            this.#restoreEmulateFunc = await driver.emulate('device', this.#emulate);
+        } else {
+            if (this.#resolution) {
+                let [width, height] = this.#resolution.split('x');
+                await driver.setWindowSize(parseInt(width), parseInt(height));
+            }
+        }
+
+        await driver.url(this.#startUrl);
 
         return driver;
     }
