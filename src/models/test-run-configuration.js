@@ -7,6 +7,9 @@ class RunConfiguration {
     #hostname = 'localhost';
     #port = 4723;
     #logLevel = 'info';
+    #keepSession = false;
+    #startFromStep = -1;
+    #stopAtStep = -1;
 
     static factory(options) {
         if (!options) {
@@ -33,6 +36,9 @@ class RunConfiguration {
         this.#logLevel = options.logLevel ?? 'info';
         this.#hostname = options.host ?? 'localhost';
         this.#port = options.port ?? 4723;
+        this.#keepSession = options.keepSession ?? false;
+        this.#startFromStep = options.startFromStep ?? -1;
+        this.#stopAtStep = options.stopAtStep ?? -1;
     }
 
     get runType() {
@@ -53,6 +59,30 @@ class RunConfiguration {
 
     get logLevel() {
         return this.#logLevel;
+    }
+
+    get keepSession() {
+        return this.#keepSession;
+    }
+
+    set keepSession(value) {
+        this.#keepSession = value;
+    }
+
+    get startFromStep() {
+        return this.#startFromStep;
+    }
+
+    get stopAtStep() {
+        return this.#stopAtStep;
+    }
+
+    set startFromStep(value) {
+        this.#startFromStep = value;
+    }
+
+    set stopAtStep(value) {
+        this.#stopAtStep = value;
     }
 
     get conf() {

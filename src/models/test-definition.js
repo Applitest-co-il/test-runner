@@ -81,7 +81,14 @@ class TestDefinition {
             throw new TestDefinitionError(`Test "${this.#name}" has no steps`);
         }
 
-        for (let i = 0; i < steps.length; i++) {
+        const startFromSteps =
+            this.#conf.startFromStep > 0 && this.#conf.startFromStep < steps.length ? this.#conf.startFromStep : 0;
+        const stopAtStep =
+            this.#conf.stopAtStep > startFromSteps && this.#conf.stopAtStep < steps.length
+                ? this.#conf.stopAtStep
+                : steps.length;
+
+        for (let i = startFromSteps; i < stopAtStep; i++) {
             const step = steps[i];
             const success = await step.run(driver, this.variables);
             if (!success) {
