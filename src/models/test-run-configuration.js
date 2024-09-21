@@ -1,5 +1,6 @@
 const { remote } = require('webdriverio');
 const { TestRunnerConfigurationError } = require('../helpers/test-errors');
+const { checkAppIsInstalled } = require('../helpers/mobile-utils');
 
 class RunConfiguration {
     #runType = '';
@@ -166,6 +167,10 @@ class RunConfigurationMobile extends RunConfiguration {
             wdio.capabilities[this.capabilityPropertyName('autoGrantPermissions')] = this.#autoGrantPermissions;
         }
         return wdio;
+    }
+
+    get platformName() {
+        return this.#platformName;
     }
 
     capabilityPropertyName(name) {

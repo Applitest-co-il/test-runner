@@ -3,12 +3,10 @@
     "version": "0.9.21",
     "description": "Applitest Manager Test Runner",
     "scripts": {
-        "cli": "node ./src/cli/index.js -- ",
-        "cli:start:debug": "node --inspect  ./src/cli/index.js -- ",
+        "start": "node ./src/cli/index.js",
+        "cli:debug": "node --inspect  ./src/cli/index.js -c ./samples/json/mobile-dazn.json",
         "api": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./cmd/start-api.ps1",
-        "api:start": "node ./src/api/app.js",
-        "api:start:debug": "node --inspect ./src/api/app.js",
-        "api:start:dev:debug": "nodemon --inspect ./src/api/app.js",
+        "api:debug": "nodemon --inspect ./src/api/app.js",
         "build:windows": "@powershell -NoProfile -Command ./cmd/build.ps1",
         "build:linux": "sh ./cmd/build.sh"
     },

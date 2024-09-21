@@ -1,5 +1,6 @@
 const { TestDefinitionError, TestItemNotFoundError, TestRunnerError } = require('../helpers/test-errors');
 const { replaceVariables, prepareLocalScript } = require('../helpers/utils');
+const { checkAppIsInstalled } = require('../helpers/mobile-utils');
 const TestCondition = require('./test-condition');
 const vmRun = require('@danielyaghil/vm-helper');
 
@@ -30,6 +31,8 @@ class TestStep {
         //settings
         'toggle-location-services',
         'toggle-airplane-mode',
+        //'set-google-account',
+        'set-geolocation',
 
         //variables
         'set-variable',
@@ -55,7 +58,8 @@ class TestStep {
         'assert-text',
         'assert-number',
         'assert-css-property',
-        'assert-attribute'
+        'assert-attribute',
+        'assert-app-installed'
     ];
     static #commandsRequireItem = [
         'click',
@@ -75,12 +79,17 @@ class TestStep {
         'press-key',
         'assert-text',
         'assert-number',
+        'assert-css-property',
+        'assert-attribute',
+        'assert-app-installed',
         'scroll-up',
         'scroll-down',
         'scroll-up-to-element',
         'scroll-down-to-element',
         'generate-random-integer',
         'toggle-location-services',
+        //'set-google-account',
+        'set-geolocation',
         'execute-script',
         'set-variable',
         'set-variable-from-script',
@@ -256,6 +265,20 @@ class TestStep {
                     await this.#navigate(driver);
                     break;
 
+                //settings
+                case 'toggle-location-services':
+                    await this.#toggleLocationServices(driver);
+                    break;
+                case 'toggle-airplane-mode':
+                    await this.#toggleAirplaneMode(driver);
+                    break;
+                // case 'set-google-account':
+                //     await this.#setGoogleAccount(driver);
+                //     break;
+                case 'set-geolocation':
+                    await this.#setGeoLocation(driver);
+                    break;
+
                 //variables
                 case 'generate-random-integer':
                     await this.#generateRandomInteger();
@@ -321,11 +344,8 @@ class TestStep {
                 case 'assert-attribute':
                     await this.#assertAttribute(item);
                     break;
-                case 'toggle-location-services':
-                    await this.#toggleLocationServices(driver);
-                    break;
-                case 'toggle-airplane-mode':
-                    await this.#toggleAirplaneMode(driver);
+                case 'assert-app-installed':
+                    await this.#assertAppInstalled(driver);
                     break;
 
                 //default
@@ -671,6 +691,56 @@ class TestStep {
         }
     }
 
+    async #setGeoLocation(driver) {
+        try {
+            const value = replaceVariables(this.#value, this.#variables);
+            const locationParts = value.split('|||');
+            if (locationParts.length < 2) {
+                throw new TestRunnerError(
+                    `SetGeoLocation::Latitude and longitude are required to set geo location - ${this.#value}`
+                );
+            }
+            const latitude = locationParts[0];
+            const longitude = locationParts[1];
+            const altitude = locationParts.length == 3 ? locationParts[2] : 0;
+
+            if (isNaN(latitude) || isNaN(longitude) || (altitude && isNaN(altitude))) {
+                throw new TestRunnerError(
+                    `SetGeoLocation::Latitude, longitude and altitude should be numbers - ${this.#value}`
+                );
+            }
+
+            if (this.#conf.platformName.toLowerCase() === 'android') {
+                const isIoAppiumSettingAppInstalled = await checkAppIsInstalled(driver, 'io.appium.settings');
+                if (!isIoAppiumSettingAppInstalled) {
+                    console.log(
+                        `SetGeoLocation::App "io.appium.settings" is not installed on the device - installing it now`
+                    );
+                    await driver.execute('mobile: install', './apps/settings_apk-debug.apk');
+                    console.log(`SetGeoLocation::Installed app "io.appium.settings"`);
+                }
+
+                console.log(`SetGeoLocation::Allowing mock location for app "io.appium.settings"`);
+                let command = 'appops set io.appium.settings android:mock_location allow';
+                await driver.execute('mobile: shell', { command: command });
+
+                console.log(
+                    `SetGeoLocation::Starting location service for app "io.appium.settings" with latitude: ${latitude}, longitude: ${longitude}m altitude: ${altitude}`
+                );
+                command = `am start-foreground-service --user 0 -n io.appium.settings/.LocationService --es longitude ${longitude} --es latitude ${latitude} ${altitude != 0 ? '--es altitude ' + altitude : ''}`;
+                await driver.execute('mobile: shell', { command: command });
+
+                console.log(
+                    `SetGeoLocation::Set geo location to latitude: ${latitude}, longitude: ${longitude}, altitude: ${altitude}`
+                );
+            } else {
+                throw new TestRunnerError('SetGeoLocation::Setting geo location is not supported on iOS yet');
+            }
+        } catch (error) {
+            throw new TestRunnerError(`SetGeoLocation::Failed to set geo location. Error: ${error.message}`);
+        }
+    }
+
     async #assertIsDisplayed(item) {
         // Implement assert is displayed logic
         let isDisplayed = await item.isDisplayed();
@@ -839,6 +909,20 @@ class TestStep {
         if (!result) {
             throw new TestRunnerError(
                 `Assertion failed: Attribute '${attribute}' is '${actualFormattedValue}', expected '${expectedValue}'`
+            );
+        }
+    }
+
+    async #assertAppInstalled(driver) {
+        const app = replaceVariables(this.#value, this.#variables);
+        try {
+            const isInstalled = await checkAppIsInstalled(driver, app);
+            if (!isInstalled) {
+                throw new TestRunnerError(`AssertAppInstalled::App "${app}" is not installed`);
+            }
+        } catch (error) {
+            throw new TestRunnerError(
+                `AssertAppInstalled::Failed to check if app "${app}" is installed. Error: ${error.message}`
             );
         }
     }
