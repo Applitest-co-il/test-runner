@@ -19,17 +19,8 @@
                 {
                     "steps": [
                         {
-                            "command": "click",
-                            "selectors": [
-                                "android|||//android.widget.TextView[@content-desc=\"Predicted app: DAZN\"]"
-                            ],
-                            "value": 5000
-                        },
-                        {
                             "command": "wait-for-exist",
-                            "selectors": [
-                                "android|||//android.widget.ImageView[@content-desc='logoImage']"
-                            ],
+                            "selectors": ["android|||//android.widget.ImageView[@content-desc='logoImage']"],
                             "value": 15000
                         },
                         {
@@ -40,12 +31,10 @@
                                 "expectedValue": "false"
                             }
                         },
-                        
+
                         {
                             "command": "click",
-                            "selectors": [
-                                "android|||//android.view.View[1]/android.widget.Button"
-                            ],
+                            "selectors": ["android|||//android.view.View[1]/android.widget.Button"],
                             "value": 5000
                         },
                         {
@@ -77,16 +66,12 @@
                         },
                         {
                             "command": "wait-for-exist",
-                            "selectors": [
-                                "android|||//android.widget.ImageView[@content-desc=\"background image\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.ImageView[@content-desc=\"background image\"]"],
                             "value": "30000"
-                        },                                        
+                        },
                         {
                             "command": "click",
-                            "selectors": [
-                                "android|||//android.widget.ImageView[2]"
-                            ]
+                            "selectors": ["android|||//android.widget.ImageView[2]"]
                         },
                         {
                             "command": "wait-for-exist",
