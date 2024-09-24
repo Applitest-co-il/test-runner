@@ -1,7 +1,7 @@
 const { mergeVariables } = require('../helpers/utils');
-const TestDefinition = require('./test-definition');
+const Test = require('./test');
 
-class TestSuite {
+class Suite {
     #conf = null;
     #id = '';
     #name = '';
@@ -27,9 +27,9 @@ class TestSuite {
         }
 
         for (let i = 0; i < tests.length; i++) {
-            const test = tests[i];
-            let testDefinition = new TestDefinition(test, this.#conf);
-            this.#tests.push(testDefinition);
+            const testDefinition = tests[i];
+            let test = new Test(testDefinition, this.#conf);
+            this.#tests.push(test);
         }
     }
 
@@ -50,6 +50,8 @@ class TestSuite {
     }
 
     async run(driver, variables) {
+        let promises = [];
+
         const tests = this.#tests;
 
         mergeVariables(this.#variables, variables);
@@ -60,7 +62,9 @@ class TestSuite {
                 continue;
             }
 
-            await test.run(driver, this.variables);
+            const testPromises = await test.run(driver, this.variables);
+            promises = promises.concat(testPromises);
+
             if (this.#stopOnFailure && test.status === 'failed') {
                 break;
             }
@@ -71,6 +75,8 @@ class TestSuite {
                 await driver.pause(this.#waitBetweenTests);
             }
         }
+
+        return promises;
     }
 
     report() {
@@ -142,4 +148,4 @@ class TestSuite {
     }
 }
 
-module.exports = TestSuite;
+module.exports = Suite;

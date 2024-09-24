@@ -1,8 +1,9 @@
 const { TestDefinitionError } = require('../helpers/test-errors');
 const { mergeVariables } = require('../helpers/utils');
 const TestStep = require('./test-step');
+const VideoRecorder = require('../helpers/video-recorder');
 
-class TestDefinition {
+class Test {
     #conf = null;
     #id = '';
     #name = '';
@@ -13,6 +14,8 @@ class TestDefinition {
 
     #status = 'pending';
     #lastStep = 0;
+
+    #videoRecorder = null;
 
     constructor(test, conf) {
         this.#conf = conf;
@@ -73,6 +76,18 @@ class TestDefinition {
     }
 
     async run(driver, variables) {
+        const promises = [];
+
+        if (this.#conf.enableVideo) {
+            const options = {
+                baseName: this.#name,
+                outputDir: `${process.cwd()}/reports/videos`,
+                screenShotInterval: 250
+            };
+            this.#videoRecorder = new VideoRecorder(driver, options);
+            this.#videoRecorder.start();
+        }
+
         const steps = this.#steps;
 
         mergeVariables(this.#variables, variables);
@@ -89,6 +104,10 @@ class TestDefinition {
                 : steps.length;
 
         for (let i = startFromSteps; i < stopAtStep; i++) {
+            if (this.#videoRecorder) {
+                this.#videoRecorder.currentStep = i + 1;
+            }
+
             const step = steps[i];
             const success = await step.run(driver, this.variables);
             if (!success) {
@@ -97,12 +116,26 @@ class TestDefinition {
                 break;
             }
             mergeVariables(this.#variables, step.variables);
+
+            if (this.#videoRecorder) {
+                await this.#videoRecorder.addFrame();
+            }
         }
         if (this.#status === 'pending') {
             this.#status = 'passed';
             this.#lastStep = steps.length - 1;
         }
+
+        if (this.#videoRecorder) {
+            await this.#videoRecorder.stop();
+            const videoPromise = await this.#videoRecorder.generateVideo();
+            if (videoPromise) {
+                promises.push(videoPromise);
+            }
+        }
+
+        return promises;
     }
 }
 
-module.exports = TestDefinition;
+module.exports = Test;

@@ -1,6 +1,5 @@
 const { remote } = require('webdriverio');
 const { TestRunnerConfigurationError } = require('../helpers/test-errors');
-const { checkAppIsInstalled } = require('../helpers/mobile-utils');
 
 class RunConfiguration {
     #runType = '';
@@ -11,6 +10,7 @@ class RunConfiguration {
     #keepSession = false;
     #startFromStep = -1;
     #stopAtStep = -1;
+    #enableVideo = false;
 
     static factory(options) {
         if (!options) {
@@ -40,6 +40,7 @@ class RunConfiguration {
         this.#keepSession = options.keepSession ?? false;
         this.#startFromStep = options.startFromStep ?? -1;
         this.#stopAtStep = options.stopAtStep ?? -1;
+        this.#enableVideo = options.enableVideo ?? false;
     }
 
     get runType() {
@@ -84,6 +85,10 @@ class RunConfiguration {
 
     set stopAtStep(value) {
         this.#stopAtStep = value;
+    }
+
+    get enableVideo() {
+        return this.#enableVideo;
     }
 
     get conf() {

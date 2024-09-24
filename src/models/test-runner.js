@@ -1,5 +1,5 @@
 const { TestRunnerError, TestDefinitionError } = require('../helpers/test-errors');
-const TestSuite = require('./test-suite');
+const Suite = require('./suite');
 const { RunConfiguration } = require('./test-run-configuration');
 const { mergeVariables } = require('../helpers/utils');
 
@@ -18,7 +18,7 @@ class TestRunner {
 
         if (options.suites) {
             for (let i = 0; i < options.suites.length; i++) {
-                const suite = new TestSuite(options.suites[i], this.#conf);
+                const suite = new Suite(options.suites[i], this.#conf);
                 this.#suites.push(suite);
             }
         }
@@ -75,13 +75,15 @@ class TestRunner {
         try {
             console.log('Starting run...');
 
+            let promises = [];
             let suiteResults = [];
 
             for (let i = 0; i < this.#suites.length; i++) {
                 await this.startSession();
 
                 const suite = this.#suites[i];
-                await suite.run(this.#driver, this.variables);
+                const suitePromises = await suite.run(this.#driver, this.variables);
+                promises = promises.concat(suitePromises);
 
                 mergeVariables(this.#variables, suite.variables);
 
@@ -92,7 +94,7 @@ class TestRunner {
             }
 
             console.log('Test run complete');
-
+            await Promise.all(promises);
             return suiteResults;
         } catch (error) {
             console.error('Error running test:', error);
