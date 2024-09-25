@@ -30,6 +30,11 @@ class TestCondition {
                     throw new TestDefinitionError('Selector is required for exist condition');
                 }
                 break;
+            case 'not-exist':
+                if (!this.#selector) {
+                    throw new TestDefinitionError('Selector is required for not-exist condition');
+                }
+                break;
             case 'script':
                 if (!this.#script) {
                     throw new TestDefinitionError('Script is required for script condition');
@@ -62,6 +67,8 @@ class TestCondition {
         switch (this.#type) {
             case 'exist':
                 return await this.#existCheck(driver, variables);
+            case 'not-exist':
+                return !(await this.#existCheck(driver, variables));
             case 'script':
                 return await this.#scriptCheck(driver, variables);
             case 'value':
