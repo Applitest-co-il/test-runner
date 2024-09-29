@@ -1,6 +1,5 @@
 const { remote } = require('webdriverio');
 const { TestRunnerConfigurationError } = require('../helpers/test-errors');
-const { checkAppIsInstalled } = require('../helpers/mobile-utils');
 
 class RunConfiguration {
     #runType = '';

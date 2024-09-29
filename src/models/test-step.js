@@ -477,35 +477,25 @@ class TestStep {
         const scrollDuration = 500;
 
         const { width, height } = await driver.getWindowSize();
-        const density = (await driver.getDisplayDensity()) / 100;
         const anchor = (width * anchorPercentage) / 100;
         const startPoint = (height * startPercentage) / 100;
         const endPoint = (height * endPercentage) / 100;
-        const direction = down ? -1 : 1;
+        const scroll = endPoint - startPoint;
+        const pointerType = this.#conf.runType == 'mobile' ? 'touch' : 'mouse';
 
         const scrollEvt = count > 1 ? count : 1;
         for (let i = 0; i < scrollEvt; i++) {
-            await driver.performActions([
-                {
-                    type: 'pointer',
-                    id: 'finger1',
-                    parameters: { pointerType: 'touch' },
-                    actions: [
-                        { type: 'pointerMove', duration: 0, x: anchor, y: startPoint },
-                        { type: 'pointerDown', button: 0 },
-                        { type: 'pause', duration: 100 },
-                        {
-                            type: 'pointerMove',
-                            duration: scrollDuration,
-                            origin: 'pointer',
-                            x: 0,
-                            y: direction * endPoint * density
-                        },
-                        { type: 'pointerUp', button: 0 },
-                        { type: 'pause', duration: scrollDuration }
-                    ]
-                }
-            ]);
+            await driver
+                .action('pointer', {
+                    parameters: { pointerType: pointerType }
+                })
+                .move({ x: anchor, y: startPoint })
+                .down()
+                .pause(10)
+                .move({ origin: 'pointer', duration: scrollDuration, y: scroll })
+                .pause(10)
+                .up()
+                .perform();
         }
         return;
     }
@@ -521,23 +511,31 @@ class TestStep {
     async #scrollToElement(driver, down = true) {
         let count = 0;
         let maxCount = this.#value ? parseInt(this.#value) : 1;
-        while (count < maxCount) {
-            let item = await this.#selectItem(driver);
+        this.#value = 1;
+
+        let item = null;
+        while (count <= maxCount) {
+            item = await this.#selectItem(driver);
             if (!item) {
-                this.#verticalScroll(driver, 1, down);
+                await this.#verticalScroll(driver, down);
             } else {
                 break;
             }
             count++;
         }
+        if (!item) {
+            throw new TestRunnerError(
+                `ScrollToElement::Item with selectors [${this.#usedSelectors}] was not found after scrolling ${maxCount} times`
+            );
+        }
     }
 
     async #scrollDownToElement(driver) {
-        await this.#scrollToElement(driver, this.#value);
+        await this.#scrollToElement(driver);
     }
 
     async #scrollUpToElement(driver) {
-        await this.#scrollToElement(driver, this.#value, false);
+        await this.#scrollToElement(driver, false);
     }
 
     async #generateRandomInteger() {

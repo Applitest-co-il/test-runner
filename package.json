@@ -4,7 +4,7 @@
     "description": "Applitest Manager Test Runner",
     "scripts": {
         "start": "node ./src/cli/index.js",
-        "cli:debug": "node --inspect  ./src/cli/index.js -c ./samples/json/mobile-dazn.json",
+        "cli:debug": "node --inspect  ./src/cli/index.js -c ./samples/json/sample.json",
         "api": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./cmd/start-api.ps1",
         "api:debug": "nodemon --inspect ./src/api/app.js",
         "build:windows": "@powershell -NoProfile -Command ./cmd/build.ps1",
