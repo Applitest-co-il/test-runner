@@ -471,8 +471,8 @@ class TestStep {
 
     async #verticalScroll(driver, down = true) {
         const count = this.#value ? parseInt(this.#value) : 1;
-        const startPercentage = down ? 90 : 10;
-        const endPercentage = down ? 10 : 90;
+        const startPercentage = down ? 90 : 20;
+        const endPercentage = down ? 20 : 90;
         const anchorPercentage = 50;
         const scrollDuration = 500;
 
