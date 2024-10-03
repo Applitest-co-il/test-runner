@@ -47,6 +47,12 @@ class TestStep {
         'scroll-down',
         'scroll-up-to-element',
         'scroll-down-to-element',
+        'scroll-up-from-element',
+        'scroll-down-from-element',
+        'scroll-right',
+        'scroll-left',
+        'scroll-right-from-element',
+        'scroll-left-from-element',
         'press-key',
         'execute-script',
 
@@ -65,6 +71,10 @@ class TestStep {
         'click',
         'multiple-clicks',
         'set-value',
+        'scroll-up-from-element',
+        'scroll-down-from-element',
+        'scroll-right-from-element',
+        'scroll-left-from-element',
         'assert-is-displayed',
         'assert-is-not-displayed',
         'assert-text',
@@ -72,7 +82,13 @@ class TestStep {
         'assert-css-property',
         'assert-attribute'
     ];
-    static #commandsRequireSelector = [...TestStep.#commandsRequireItem, 'wait-for-exist', 'wait-for-not-exist'];
+    static #commandsRequireSelector = [
+        ...TestStep.#commandsRequireItem,
+        'wait-for-exist',
+        'wait-for-not-exist',
+        'scroll-up-to-element',
+        'scroll-down-to-element'
+    ];
     static #commandsRequireValue = [
         'multiple-clicks',
         'set-value',
@@ -86,6 +102,12 @@ class TestStep {
         'scroll-down',
         'scroll-up-to-element',
         'scroll-down-to-element',
+        'scroll-up-from-element',
+        'scroll-down-from-element',
+        'scroll-right',
+        'scroll-left',
+        'scroll-right-from-element',
+        'scroll-left-from-element',
         'generate-random-integer',
         'toggle-location-services',
         //'set-google-account',
@@ -315,6 +337,24 @@ class TestStep {
                 case 'scroll-down-to-element':
                     await this.#scrollDownToElement(driver);
                     break;
+                case 'scroll-up-from-element':
+                    await this.#scrollUpFromElement(driver, item);
+                    break;
+                case 'scroll-down-from-element':
+                    await this.#scrollDownFromElement(driver, item);
+                    break;
+                case 'scroll-right':
+                    await this.#scrollRight(driver, null, false);
+                    break;
+                case 'scroll-left':
+                    await this.#scrollLeft(driver, null, true);
+                    break;
+                case 'scroll-right-from-element':
+                    await this.#scrollRightFromElement(driver, item);
+                    break;
+                case 'scroll-left-from-element':
+                    await this.#scrollLeftFromElement(driver, item);
+                    break;
                 case 'execute-script':
                     await this.#executeScript(driver);
                     break;
@@ -469,46 +509,72 @@ class TestStep {
         }
     }
 
-    async #verticalScroll(driver, down = true) {
+    //#region vertical scroll actions
+
+    async #verticalScroll(driver, originItem, down = true) {
         const count = this.#value ? parseInt(this.#value) : 1;
-        const startPercentage = down ? 90 : 20;
-        const endPercentage = down ? 20 : 90;
-        const anchorPercentage = 50;
+
+        const runType = this.#conf.runType;
+
+        const startPercentage = originItem ? 0 : down ? 0.85 : 0.2;
+        const endPercentage = originItem ? 0.3 : down ? 0.2 : 0.85;
+        const anchorPercentage = 0.5;
         const scrollDuration = 500;
 
         const { width, height } = await driver.getWindowSize();
-        const anchor = (width * anchorPercentage) / 100;
-        const startPoint = (height * startPercentage) / 100;
-        const endPoint = (height * endPercentage) / 100;
-        const scroll = endPoint - startPoint;
-        const pointerType = this.#conf.runType == 'mobile' ? 'touch' : 'mouse';
+        const origin = originItem ? originItem : 'viewport';
+        const anchorX = originItem ? 0 : width * anchorPercentage;
+        const startY = originItem ? 0 : height * startPercentage;
+        const endY = height * endPercentage;
+        const fixedScroll = down ? -endY : endY;
+        const scrollY = originItem ? fixedScroll : endY - startY;
 
         const scrollEvt = count > 1 ? count : 1;
         for (let i = 0; i < scrollEvt; i++) {
-            await driver
-                .action('pointer', {
-                    parameters: { pointerType: pointerType }
-                })
-                .move({ x: anchor, y: startPoint })
-                .down()
-                .pause(10)
-                .move({ origin: 'pointer', duration: scrollDuration, y: scroll })
-                .pause(10)
-                .up()
-                .perform();
+            if (this.#conf.runType == 'web') {
+                const actualScrollY = -scrollY;
+
+                await driver
+                    .action('wheel')
+                    .scroll({ origin: origin, deltaX: anchorX, deltaY: actualScrollY })
+                    .pause(10)
+                    .perform();
+            } else {
+                await driver
+                    .action('pointer', {
+                        parameters: { pointerType: 'touch' }
+                    })
+                    .move({ origin: origin, x: anchorX, y: startY })
+                    .down()
+                    .pause(10)
+                    .move({ origin: 'pointer', duration: scrollDuration, x: 0, y: scrollY })
+                    .pause(10)
+                    .up()
+                    .pause(10)
+                    .perform();
+            }
+            console.log(`VerticalScroll::Scrolled: ${down ? 'down' : 'up'} - iteration: ${i} - Y: ${scrollY}px`);
         }
         return;
     }
 
     async #scrollUp(driver) {
-        await this.#verticalScroll(driver, false);
+        await this.#verticalScroll(driver, null, false);
     }
 
     async #scrollDown(driver) {
-        await this.#verticalScroll(driver, true);
+        await this.#verticalScroll(driver, null, true);
     }
 
-    async #scrollToElement(driver, down = true) {
+    async #scrollUpFromElement(driver, item) {
+        await this.#verticalScroll(driver, item, false);
+    }
+
+    async #scrollDownFromElement(driver, item) {
+        await this.#verticalScroll(driver, item);
+    }
+
+    async #scrollUpOrDownToElement(driver, down = true) {
         let count = 0;
         let maxCount = this.#value ? parseInt(this.#value) : 1;
         this.#value = 1;
@@ -517,7 +583,7 @@ class TestStep {
         while (count <= maxCount) {
             item = await this.#selectItem(driver);
             if (!item) {
-                await this.#verticalScroll(driver, down);
+                await this.#verticalScroll(driver, null, down);
             } else {
                 break;
             }
@@ -531,12 +597,69 @@ class TestStep {
     }
 
     async #scrollDownToElement(driver) {
-        await this.#scrollToElement(driver);
+        await this.#scrollUpOrDownToElement(driver);
     }
 
     async #scrollUpToElement(driver) {
-        await this.#scrollToElement(driver, false);
+        await this.#scrollUpOrDownToElement(driver, false);
     }
+
+    //#endregion
+
+    //#region horizontal scroll actions
+
+    async #horizontalScroll(driver, originItem, left = true) {
+        const count = this.#value ? parseInt(this.#value) : 1;
+
+        const startPercentage = originItem ? 0 : left ? 0.1 : 0.9;
+        const endPercentage = originItem ? 0.3 : left ? 0.9 : 0.1;
+        const anchorPercentage = 0.5;
+        const scrollDuration = 500;
+
+        const { width, height } = await driver.getWindowSize();
+        const origin = originItem ? originItem : 'viewport';
+        const anchorY = originItem ? 0 : height * anchorPercentage;
+        const startX = originItem ? 0 : width * startPercentage;
+        const endX = width * endPercentage;
+        const fixedScroll = left ? -endX : endX;
+        const scrollX = originItem ? fixedScroll : endX - startX;
+        const pointerType = this.#conf.runType == 'mobile' ? 'touch' : 'mouse';
+
+        const scrollEvt = count > 1 ? count : 1;
+        for (let i = 0; i < scrollEvt; i++) {
+            await driver
+                .action('pointer', {
+                    parameters: { pointerType: pointerType }
+                })
+                .move({ origin: origin, x: startX, y: anchorY })
+                .down()
+                .pause(10)
+                .move({ origin: 'pointer', duration: scrollDuration, x: scrollX, y: 0 })
+                .pause(10)
+                .up()
+                .pause(10)
+                .perform();
+        }
+        return;
+    }
+
+    async #scrollRight(driver) {
+        await this.#horizontalScroll(driver, null, false);
+    }
+
+    async #scrollLeft(driver) {
+        await this.#horizontalScroll(driver, null, true);
+    }
+
+    async #scrollRightFromElement(driver, item) {
+        await this.#horizontalScroll(driver, item, false);
+    }
+
+    async #scrollLeftFromElement(driver, item) {
+        await this.#horizontalScroll(driver, item, true);
+    }
+
+    //#endregion
 
     async #generateRandomInteger() {
         const randomParts = this.#value.split('|||');
