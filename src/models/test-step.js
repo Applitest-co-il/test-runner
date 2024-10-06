@@ -42,6 +42,7 @@ class TestStep {
         //actions
         'click',
         'multiple-clicks',
+        'click-coordinates',
         'set-value',
         'scroll-up',
         'scroll-down',
@@ -55,6 +56,7 @@ class TestStep {
         'scroll-left-from-element',
         'press-key',
         'execute-script',
+        'perform-action',
 
         //assertions
         'wait-for-exist',
@@ -91,6 +93,7 @@ class TestStep {
     ];
     static #commandsRequireValue = [
         'multiple-clicks',
+        'click-coordinates',
         'set-value',
         'press-key',
         'assert-text',
@@ -113,6 +116,7 @@ class TestStep {
         //'set-google-account',
         'set-geolocation',
         'execute-script',
+        'perform-action',
         'set-variable',
         'set-variable-from-script',
         'navigate'
@@ -319,6 +323,9 @@ class TestStep {
                 case 'multiple-clicks':
                     await this.#multipleClicks(item);
                     break;
+                case 'click-coordinates':
+                    await this.#clickCoordinates(driver);
+                    break;
                 case 'set-value':
                     await this.#setValue(item);
                     break;
@@ -357,6 +364,9 @@ class TestStep {
                     break;
                 case 'execute-script':
                     await this.#executeScript(driver);
+                    break;
+                case 'perform-action':
+                    await this.#performAction(driver);
                     break;
 
                 //assertions
@@ -514,8 +524,6 @@ class TestStep {
     async #verticalScroll(driver, originItem, down = true) {
         const count = this.#value ? parseInt(this.#value) : 1;
 
-        const runType = this.#conf.runType;
-
         const startPercentage = originItem ? 0 : down ? 0.85 : 0.2;
         const endPercentage = originItem ? 0.3 : down ? 0.2 : 0.85;
         const anchorPercentage = 0.5;
@@ -657,6 +665,108 @@ class TestStep {
 
     async #scrollLeftFromElement(driver, item) {
         await this.#horizontalScroll(driver, item, true);
+    }
+
+    //#endregion
+
+    //#region action
+
+    async #clickCoordinates(driver) {
+        const coordinates = this.#value.split('|||');
+        if (coordinates.length !== 2) {
+            throw new TestRunnerError(
+                `ClickCoordinates::Invalid coordinates value format "${this.#value}" - format should be "<x>|||<y>"`
+            );
+        }
+
+        const x = parseInt(coordinates[0]);
+        const y = parseInt(coordinates[1]);
+        const pointerType = this.#conf.runType == 'mobile' ? 'touch' : 'mouse';
+
+        if (isNaN(x) || isNaN(y)) {
+            throw new TestRunnerError(
+                `ClickCoordinates::Coordinates should be numbers in "${this.#value}" - format should be "<x>|||<y>"`
+            );
+        }
+
+        await driver
+            .action('pointer', {
+                parameters: { pointerType: pointerType }
+            })
+            .move({ origin: 'viewport', duration: 100, x: x, y: y })
+            .pause(10)
+            .down()
+            .pause(10)
+            .up()
+            .perform();
+    }
+
+    async #performAction(driver) {
+        try {
+            const json = JSON.parse(this.#value);
+
+            const type = json.type;
+            let typeParams = null;
+            if (type == 'pointer') {
+                typeParams = { pointerType: json.pointerType ?? 'mouse' };
+            }
+
+            const action = typeParams ? await driver.action(type, typeParams) : driver.action(type);
+            const actions = json.actions;
+
+            if (actions && Array.isArray(actions) && actions.length > 0) {
+                switch (type) {
+                    case 'pointer':
+                        await this.#performPointerAction(driver, action, actions);
+                        break;
+                }
+            } else {
+                throw new TestRunnerError(`PerformAction::Actions are required and should be an array of actions`);
+            }
+
+            await action.perform();
+        } catch (error) {
+            throw new TestRunnerError(`PerformAction::Failed to apply action" - ${error.message}`);
+        }
+    }
+
+    async #performPointerAction(driver, actionObj, actions) {
+        try {
+            for (let i = 0; i < actions.length; i++) {
+                const action = actions[i];
+                let origin = 'viewport';
+                switch (action.command) {
+                    case 'move':
+                        if (action.origin) {
+                            if (action.origin == 'pointer' || action.origin == 'viewport') {
+                                origin = action.origin;
+                            } else {
+                                origin = await this.#selectItem(driver);
+                                if (!origin) {
+                                    throw new TestRunnerError(
+                                        `PerformAction::Origin item was not found for action ${i}`
+                                    );
+                                }
+                            }
+                        }
+                        await actionObj.move({ origin: origin, duration: 100, x: action.x, y: action.y });
+                        break;
+                    case 'down':
+                        await actionObj.down(action.button ?? 'left');
+                        break;
+                    case 'up':
+                        await actionObj.up(action.button ?? 'left');
+                        break;
+                    case 'pause':
+                        await actionObj.pause(action.duration ?? 10);
+                        break;
+                }
+            }
+        } catch (error) {
+            throw new TestRunnerError(
+                `PerformAction::Failed to parse action value "${this.#value}" - ${error.message}`
+            );
+        }
     }
 
     //#endregion
@@ -862,6 +972,8 @@ class TestStep {
         }
     }
 
+    //#region assertions
+
     async #assertIsDisplayed(item) {
         // Implement assert is displayed logic
         let isDisplayed = await item.isDisplayed();
@@ -1047,6 +1159,8 @@ class TestStep {
             );
         }
     }
+
+    //#endregion
 
     //#endregion
 }
