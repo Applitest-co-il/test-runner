@@ -679,8 +679,27 @@ class TestStep {
             );
         }
 
-        const x = parseInt(coordinates[0]);
-        const y = parseInt(coordinates[1]);
+        let x = 0;
+        let y = 0;
+
+        if (coordinates[0].includes('%') || coordinates[1].includes('%')) {
+            const { width, height } = await driver.getWindowSize();
+
+            if (coordinates[0].includes('%')) {
+                x = parseInt(coordinates[0].replace('%', '')) * width * 0.01;
+            } else {
+                x = parseInt(coordinates[0]);
+            }
+            if (coordinates[1].includes('%')) {
+                y = parseInt(coordinates[1].replace('%', '')) * height * 0.01;
+            } else {
+                y = parseInt(coordinates[1]);
+            }
+        } else {
+            x = parseInt(coordinates[0]);
+            y = parseInt(coordinates[1]);
+        }
+
         const pointerType = this.#conf.runType == 'mobile' ? 'touch' : 'mouse';
 
         if (isNaN(x) || isNaN(y)) {
