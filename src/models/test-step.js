@@ -3,6 +3,7 @@ const { replaceVariables, prepareLocalScript } = require('../helpers/utils');
 const { checkAppIsInstalled } = require('../helpers/mobile-utils');
 const TestCondition = require('./test-condition');
 const vmRun = require('@danielyaghil/vm-helper');
+var randomstring = require('randomstring');
 
 class TestStep {
     #conf = null;
@@ -38,6 +39,7 @@ class TestStep {
         'set-variable',
         'set-variable-from-script',
         'generate-random-integer',
+        'generate-random-string',
 
         //actions
         'click',
@@ -112,6 +114,7 @@ class TestStep {
         'scroll-right-from-element',
         'scroll-left-from-element',
         'generate-random-integer',
+        'generate-random-string',
         'toggle-location-services',
         //'set-google-account',
         'set-geolocation',
@@ -308,6 +311,9 @@ class TestStep {
                 //variables
                 case 'generate-random-integer':
                     await this.#generateRandomInteger();
+                    break;
+                case 'generate-random-string':
+                    await this.#generateRandomString();
                     break;
                 case 'set-variable':
                     await this.#setVariable(driver);
@@ -672,32 +678,33 @@ class TestStep {
     //#region action
 
     async #clickCoordinates(driver) {
-        const coordinates = this.#value.split('|||');
-        if (coordinates.length !== 2) {
+        const params = this.#value.split('|||');
+        if (params.length < 2 || params.length > 3) {
             throw new TestRunnerError(
-                `ClickCoordinates::Invalid coordinates value format "${this.#value}" - format should be "<x>|||<y>"`
+                `ClickCoordinates::Invalid coordinates value format "${this.#value}" - format should be "<x>|||<y>|||<duration>"`
             );
         }
 
         let x = 0;
         let y = 0;
+        let duration = params.length === 3 ? parseInt(params[2]) : 10;
 
-        if (coordinates[0].includes('%') || coordinates[1].includes('%')) {
+        if (params[0].includes('%') || params[1].includes('%')) {
             const { width, height } = await driver.getWindowSize();
 
-            if (coordinates[0].includes('%')) {
-                x = parseInt(coordinates[0].replace('%', '')) * width * 0.01;
+            if (params[0].includes('%')) {
+                x = parseInt(params[0].replace('%', '')) * width * 0.01;
             } else {
-                x = parseInt(coordinates[0]);
+                x = parseInt(params[0]);
             }
-            if (coordinates[1].includes('%')) {
-                y = parseInt(coordinates[1].replace('%', '')) * height * 0.01;
+            if (params[1].includes('%')) {
+                y = parseInt(params[1].replace('%', '')) * height * 0.01;
             } else {
-                y = parseInt(coordinates[1]);
+                y = parseInt(params[1]);
             }
         } else {
-            x = parseInt(coordinates[0]);
-            y = parseInt(coordinates[1]);
+            x = parseInt(params[0]);
+            y = parseInt(params[1]);
         }
 
         const pointerType = this.#conf.runType == 'mobile' ? 'touch' : 'mouse';
@@ -715,7 +722,7 @@ class TestStep {
             .move({ origin: 'viewport', duration: 100, x: x, y: y })
             .pause(10)
             .down()
-            .pause(10)
+            .pause(duration)
             .up()
             .perform();
     }
@@ -814,6 +821,29 @@ class TestStep {
 
         const randomValue = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
         this.#variables[varName] = randomValue;
+    }
+
+    async #generateRandomString() {
+        const randomParts = this.#value.split('|||');
+        if (randomParts.length !== 3) {
+            throw new TestRunnerError(
+                `GenerateRandomString::Invalid random value format "${this.#value}" - format should be "<var name>|||<prefix>|||<max length>" `
+            );
+        }
+        const varName = randomParts[0];
+        const prefix = randomParts[1] != 'none' ? replaceVariables(randomParts[1], this.#variables) : '';
+        const maxLen = randomParts[2] > 0 ? parseInt(randomParts[2]) : 10;
+
+        if (isNaN(maxLen)) {
+            throw new TestRunnerError(`GenerateRandowString::max words in "${this.#value}" should be a number`);
+        }
+
+        const randomValue = await randomstring.generate(maxLen);
+        if (prefix) {
+            this.#variables[varName] = `${prefix}-${randomValue}`;
+        } else {
+            this.#variables[varName] = randomValue;
+        }
     }
 
     async #setVariable(driver) {

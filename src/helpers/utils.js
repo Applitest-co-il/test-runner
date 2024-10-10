@@ -13,9 +13,12 @@ function replaceVariables(text, variables) {
     if (Object.keys(variables).length === 0) return text;
 
     let newText = text;
-    Object.keys(variables).forEach((key) => {
-        newText = newText.replace(new RegExp(`{{${key}}}`, 'g'), variables[key]);
-    });
+    while (newText.includes('{{') && newText.includes('}}')) {
+        Object.keys(variables).forEach((key) => {
+            newText = newText.replace(new RegExp(`{{${key}}}`, 'g'), variables[key]);
+        });
+    }
+
     return newText;
 }
 
