@@ -1,6 +1,6 @@
 const { TestRunnerError, TestDefinitionError } = require('../helpers/test-errors');
 const TestSuite = require('./test-suite');
-const { RunConfiguration } = require('./test-run-configuration');
+const { runConfigurationFactory } = require('./test-run-configuration');
 const { mergeVariables } = require('../helpers/utils');
 
 class TestRunner {
@@ -13,7 +13,7 @@ class TestRunner {
     #variables = {};
 
     constructor(options) {
-        this.#conf = RunConfiguration.factory(options.runConfiguration);
+        this.#conf = runConfigurationFactory(options.runConfiguration);
         this.#variables = options.variables ?? {};
 
         if (options.suites) {
