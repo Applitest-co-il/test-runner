@@ -14,7 +14,7 @@ class RunConfiguration {
     constructor(options) {
         this.#runType = options.runType ?? 'mobile';
         this.#farm = options.farm ?? process.env.TR_FARM ?? 'local';
-        this.#logLevel = options.logLevel ?? 'info';
+        this.#logLevel = options.logLevel ?? 'error';
         this.#hostname = options.host ?? 'localhost';
         this.#port = options.port ?? 4723;
         this.#keepSession = options.keepSession ?? false;
@@ -82,12 +82,6 @@ class RunConfiguration {
             throw new TestRunnerConfigurationError('Driver could not be set');
         }
         return driver;
-    }
-
-    async closeSession(driver) {
-        if (driver) {
-            await driver.deleteSession();
-        }
     }
 }
 
