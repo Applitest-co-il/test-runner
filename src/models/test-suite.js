@@ -5,15 +5,16 @@ class TestSuite {
     #conf = null;
     #id = '';
     #name = '';
+    #type = '';
     #waitBetweenTests = 0;
     #stopOnFailure = false;
     #variables = {};
     #tests = [];
 
-    constructor(suite, conf) {
-        this.#conf = conf;
+    constructor(suite) {
         this.#id = suite.id ?? '';
         this.#name = suite.name ?? '';
+        this.#type = suite.type ?? '';
         this.#waitBetweenTests = suite.waitBetweenTests ?? 0;
         this.#stopOnFailure = suite.stopOnFailure ?? false;
         this.#variables = suite.variables ?? {};
@@ -28,7 +29,7 @@ class TestSuite {
 
         for (let i = 0; i < tests.length; i++) {
             const test = tests[i];
-            let testDefinition = new TestDefinition(test, this.#conf);
+            let testDefinition = new TestDefinition(test);
             this.#tests.push(testDefinition);
         }
     }
@@ -41,6 +42,10 @@ class TestSuite {
         return this.#name;
     }
 
+    get type() {
+        return this.#type;
+    }
+
     get tests() {
         return this.#tests;
     }
@@ -49,18 +54,19 @@ class TestSuite {
         return this.#variables;
     }
 
-    async run(driver, variables) {
+    async run(driver, variables, conf) {
         const tests = this.#tests;
 
         mergeVariables(this.#variables, variables);
 
         for (let i = 0; i < tests.length; i++) {
+            console.log(`TestSuite::Running test #${i} ${tests[i].name} in suite ${this.#name}`);
             const test = tests[i];
             if (test.skip) {
                 continue;
             }
 
-            await test.run(driver, this.variables);
+            await test.run(driver, this.variables, conf);
             if (this.#stopOnFailure && test.status === 'failed') {
                 break;
             }
@@ -70,6 +76,7 @@ class TestSuite {
             if (this.#waitBetweenTests > 0) {
                 await driver.pause(this.#waitBetweenTests);
             }
+            console.log(`TestSuite::Finished test #${i}`);
         }
     }
 

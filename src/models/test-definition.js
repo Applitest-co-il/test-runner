@@ -3,7 +3,6 @@ const { mergeVariables } = require('../helpers/utils');
 const TestStep = require('./test-step');
 
 class TestDefinition {
-    #conf = null;
     #id = '';
     #name = '';
     #variables = {};
@@ -14,8 +13,7 @@ class TestDefinition {
     #status = 'pending';
     #lastStep = 0;
 
-    constructor(test, conf) {
-        this.#conf = conf;
+    constructor(test) {
         this.#id = test.id ?? '';
         this.#name = test.name ?? '';
         this.#skip = test.skip ?? false;
@@ -31,7 +29,7 @@ class TestDefinition {
 
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
-            let testStep = new TestStep(i + 1, step, this.#conf);
+            let testStep = new TestStep(i + 1, step);
             this.#steps.push(testStep);
         }
     }
@@ -72,7 +70,7 @@ class TestDefinition {
         return this.#variables;
     }
 
-    async run(driver, variables) {
+    async run(driver, variables, conf) {
         const steps = this.#steps;
 
         mergeVariables(this.#variables, variables);
@@ -81,12 +79,9 @@ class TestDefinition {
             throw new TestDefinitionError(`Test "${this.#name}" has no steps`);
         }
 
-        const startFromSteps =
-            this.#conf.startFromStep > 0 && this.#conf.startFromStep < steps.length ? this.#conf.startFromStep : 0;
+        const startFromSteps = conf.startFromStep > 0 && conf.startFromStep < steps.length ? conf.startFromStep : 0;
         const stopAtStep =
-            this.#conf.stopAtStep > startFromSteps && this.#conf.stopAtStep < steps.length
-                ? this.#conf.stopAtStep
-                : steps.length;
+            conf.stopAtStep > startFromSteps && conf.stopAtStep < steps.length ? conf.stopAtStep : steps.length;
 
         for (let i = startFromSteps; i < stopAtStep; i++) {
             const step = steps[i];

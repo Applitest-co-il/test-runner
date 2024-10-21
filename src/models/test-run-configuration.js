@@ -2,16 +2,16 @@ const RunConfigurationWeb = require('./configuration/web-run-configuration');
 const RunConfigurationMobile = require('./configuration/mobile-run-configuration');
 const { TestRunnerConfigurationError } = require('../helpers/test-errors');
 
-function runConfigurationFactory(options) {
+function runConfigurationFactory(options, runType) {
     if (!options) {
         throw new TestRunnerConfigurationError('No options provided');
     }
 
-    if (!options.runType) {
+    if (!runType) {
         throw new TestRunnerConfigurationError('No run type provided');
     }
 
-    switch (options.runType) {
+    switch (runType) {
         case 'mobile':
             return new RunConfigurationMobile(options);
         case 'web':

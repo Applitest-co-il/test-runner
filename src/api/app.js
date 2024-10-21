@@ -18,7 +18,7 @@ app.patch('/test-runner', async (req, res) => {
 
     const options = req.body;
 
-    if (options?.runConfiguration?.runType === 'mobile') {
+    if (['mobile', 'mixed'].includes(options?.runConfiguration?.runType)) {
         console.log('Received mobile run configuration');
         if (options?.runConfiguration?.appium?.app?.startsWith('s3:')) {
             const appName = options.runConfiguration.appium.appName;

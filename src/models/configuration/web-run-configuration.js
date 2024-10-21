@@ -1,4 +1,5 @@
 const RunConfiguration = require('./base-run-configuration');
+const { TestRunnerConfigurationError } = require('../../helpers/test-errors');
 
 class RunConfigurationWeb extends RunConfiguration {
     #browserName = '';
@@ -98,6 +99,8 @@ class RunConfigurationWeb extends RunConfiguration {
         }
 
         await driver.url(this.#startUrl);
+
+        await driver.pause(10000);
 
         return driver;
     }
