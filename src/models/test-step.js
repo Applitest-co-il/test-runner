@@ -80,7 +80,6 @@ class TestStep {
         'scroll-right-from-element',
         'scroll-left-from-element',
         'assert-is-displayed',
-        'assert-is-not-displayed',
         'assert-text',
         'assert-number',
         'assert-css-property',
@@ -90,6 +89,7 @@ class TestStep {
         ...TestStep.#commandsRequireItem,
         'wait-for-exist',
         'wait-for-not-exist',
+        'assert-is-not-displayed',
         'scroll-up-to-element',
         'scroll-down-to-element'
     ];
@@ -125,16 +125,14 @@ class TestStep {
         'navigate'
     ];
 
-    constructor(sequence, step, conf) {
-        this.#conf = conf;
-
+    constructor(sequence, step) {
         this.#sequence = sequence;
         this.#command = step.command;
         this.#selectors = step.selectors;
         this.#position = step.position ?? -1;
         this.#value = step.value;
         this.#operator = step.operator;
-        this.#condition = step.condition ? new TestCondition(step.condition, this.#conf) : null;
+        this.#condition = step.condition ? new TestCondition(step.condition) : null;
 
         this.#build();
         this.#isValid();
@@ -210,12 +208,6 @@ class TestStep {
                         `ExecuteScript::Script for step ${this.#sequence} should contain "return" to indicate to the system the script has completed and with what output`
                     );
                 }
-            } else if (this.#operator === 'async') {
-                if (!this.#value.includes('callback')) {
-                    throw new TestDefinitionError(
-                        `ExecuteAsyncScript::Script for step ${this.#sequence} should contain call to "callback" function with return value has paramter to indicate to the system the script has completed and with what output`
-                    );
-                }
             } else if (this.#operator !== 'local') {
                 throw new TestDefinitionError(
                     `ExecuteScript::Script for step ${this.#sequence} has invalid operator "${this.#operator} (should be only 'sync', 'async' or 'local')`
@@ -267,12 +259,13 @@ class TestStep {
 
     //#region run
 
-    async run(driver, variables) {
+    async run(driver, variables, conf) {
+        this.#conf = conf;
         this.#variables = variables;
 
         try {
             if (this.#condition) {
-                let conditionResult = await this.#condition.evaluate(driver, variables);
+                let conditionResult = await this.#condition.evaluate(driver, variables, conf);
                 if (!conditionResult) {
                     this.#status = 'skipped';
                     console.log(`TestStep::Condition for step ${this.#sequence} was not met - step skipped`);
@@ -386,7 +379,7 @@ class TestStep {
                     await this.#assertIsDisplayed(item);
                     break;
                 case 'assert-is-not-displayed':
-                    await this.#assertIsNotDisplayed(item);
+                    await this.#assertIsNotDisplayed(driver);
                     break;
                 case 'assert-text':
                     await this.#assertText(item);
@@ -898,17 +891,9 @@ class TestStep {
     }
 
     async #executeScript(driver) {
-        const script = replaceVariables(this.#value, this.#variables);
+        const script = `() => { ${replaceVariables(this.#value, this.#variables)} } `;
         try {
-            if (this.#operator === 'async') {
-                const asyncScript = `var callback = arguments[arguments.length - 1]; ${script};`;
-                const result = await driver.executeAsync(asyncScript);
-                if (!result) {
-                    throw new TestRunnerError(`ExecuteAsyncScript::Script: script for step ${this.#sequence} returns`);
-                }
-                console.log(`ExecuteScript::Script: async script for step ${this.#sequence} returns ${result}`);
-                return result;
-            } else if (this.#operator === 'sync') {
+            if (this.#operator === 'sync') {
                 const result = await driver.execute(script);
                 if (!result) {
                     throw new TestRunnerError(`ExecuteScript::Script: script for step ${this.#sequence} returns`);
@@ -1033,12 +1018,18 @@ class TestStep {
         }
     }
 
-    async #assertIsNotDisplayed(item) {
+    async #assertIsNotDisplayed(driver) {
         // Implement assert is displayed logic
+        const item = await this.#selectItem(driver);
+        if (!item) {
+            throw new TestRunnerError(
+                `AssertIsNotDisplayed::Item with selectors [${this.#usedSelectors}] was not found`
+            );
+        }
         let isDisplayed = await item.isDisplayed();
         if (isDisplayed) {
             throw new TestRunnerError(
-                `AssertIsNotDisplayed::Item with selectors [${this.#usedSelectors}] was found or is displayed`
+                `AssertIsNotDisplayed::Item with selectors [${this.#usedSelectors}] is displayed`
             );
         }
     }
