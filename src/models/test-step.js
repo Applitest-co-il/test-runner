@@ -3,6 +3,7 @@ const { replaceVariables, prepareLocalScript } = require('../helpers/utils');
 const { checkAppIsInstalled } = require('../helpers/mobile-utils');
 const TestCondition = require('./test-condition');
 const vmRun = require('@danielyaghil/vm-helper');
+var randomstring = require('randomstring');
 
 class TestStep {
     #conf = null;
@@ -38,17 +39,26 @@ class TestStep {
         'set-variable',
         'set-variable-from-script',
         'generate-random-integer',
+        'generate-random-string',
 
         //actions
         'click',
         'multiple-clicks',
+        'click-coordinates',
         'set-value',
         'scroll-up',
         'scroll-down',
         'scroll-up-to-element',
         'scroll-down-to-element',
+        'scroll-up-from-element',
+        'scroll-down-from-element',
+        'scroll-right',
+        'scroll-left',
+        'scroll-right-from-element',
+        'scroll-left-from-element',
         'press-key',
         'execute-script',
+        'perform-action',
 
         //assertions
         'wait-for-exist',
@@ -65,16 +75,27 @@ class TestStep {
         'click',
         'multiple-clicks',
         'set-value',
+        'scroll-up-from-element',
+        'scroll-down-from-element',
+        'scroll-right-from-element',
+        'scroll-left-from-element',
         'assert-is-displayed',
-        'assert-is-not-displayed',
         'assert-text',
         'assert-number',
         'assert-css-property',
         'assert-attribute'
     ];
-    static #commandsRequireSelector = [...TestStep.#commandsRequireItem, 'wait-for-exist', 'wait-for-not-exist'];
+    static #commandsRequireSelector = [
+        ...TestStep.#commandsRequireItem,
+        'wait-for-exist',
+        'wait-for-not-exist',
+        'assert-is-not-displayed',
+        'scroll-up-to-element',
+        'scroll-down-to-element'
+    ];
     static #commandsRequireValue = [
         'multiple-clicks',
+        'click-coordinates',
         'set-value',
         'press-key',
         'assert-text',
@@ -86,26 +107,32 @@ class TestStep {
         'scroll-down',
         'scroll-up-to-element',
         'scroll-down-to-element',
+        'scroll-up-from-element',
+        'scroll-down-from-element',
+        'scroll-right',
+        'scroll-left',
+        'scroll-right-from-element',
+        'scroll-left-from-element',
         'generate-random-integer',
+        'generate-random-string',
         'toggle-location-services',
         //'set-google-account',
         'set-geolocation',
         'execute-script',
+        'perform-action',
         'set-variable',
         'set-variable-from-script',
         'navigate'
     ];
 
-    constructor(sequence, step, conf) {
-        this.#conf = conf;
-
+    constructor(sequence, step) {
         this.#sequence = sequence;
         this.#command = step.command;
         this.#selectors = step.selectors;
         this.#position = step.position ?? -1;
         this.#value = step.value;
         this.#operator = step.operator;
-        this.#condition = step.condition ? new TestCondition(step.condition, this.#conf) : null;
+        this.#condition = step.condition ? new TestCondition(step.condition) : null;
 
         this.#build();
         this.#isValid();
@@ -181,12 +208,6 @@ class TestStep {
                         `ExecuteScript::Script for step ${this.#sequence} should contain "return" to indicate to the system the script has completed and with what output`
                     );
                 }
-            } else if (this.#operator === 'async') {
-                if (!this.#value.includes('callback')) {
-                    throw new TestDefinitionError(
-                        `ExecuteAsyncScript::Script for step ${this.#sequence} should contain call to "callback" function with return value has paramter to indicate to the system the script has completed and with what output`
-                    );
-                }
             } else if (this.#operator !== 'local') {
                 throw new TestDefinitionError(
                     `ExecuteScript::Script for step ${this.#sequence} has invalid operator "${this.#operator} (should be only 'sync', 'async' or 'local')`
@@ -238,12 +259,13 @@ class TestStep {
 
     //#region run
 
-    async run(driver, variables) {
+    async run(driver, variables, conf) {
+        this.#conf = conf;
         this.#variables = variables;
 
         try {
             if (this.#condition) {
-                let conditionResult = await this.#condition.evaluate(driver, variables);
+                let conditionResult = await this.#condition.evaluate(driver, variables, conf);
                 if (!conditionResult) {
                     this.#status = 'skipped';
                     console.log(`TestStep::Condition for step ${this.#sequence} was not met - step skipped`);
@@ -283,6 +305,9 @@ class TestStep {
                 case 'generate-random-integer':
                     await this.#generateRandomInteger();
                     break;
+                case 'generate-random-string':
+                    await this.#generateRandomString();
+                    break;
                 case 'set-variable':
                     await this.#setVariable(driver);
                     break;
@@ -296,6 +321,9 @@ class TestStep {
                     break;
                 case 'multiple-clicks':
                     await this.#multipleClicks(item);
+                    break;
+                case 'click-coordinates':
+                    await this.#clickCoordinates(driver);
                     break;
                 case 'set-value':
                     await this.#setValue(item);
@@ -315,8 +343,29 @@ class TestStep {
                 case 'scroll-down-to-element':
                     await this.#scrollDownToElement(driver);
                     break;
+                case 'scroll-up-from-element':
+                    await this.#scrollUpFromElement(driver, item);
+                    break;
+                case 'scroll-down-from-element':
+                    await this.#scrollDownFromElement(driver, item);
+                    break;
+                case 'scroll-right':
+                    await this.#scrollRight(driver, null, false);
+                    break;
+                case 'scroll-left':
+                    await this.#scrollLeft(driver, null, true);
+                    break;
+                case 'scroll-right-from-element':
+                    await this.#scrollRightFromElement(driver, item);
+                    break;
+                case 'scroll-left-from-element':
+                    await this.#scrollLeftFromElement(driver, item);
+                    break;
                 case 'execute-script':
                     await this.#executeScript(driver);
+                    break;
+                case 'perform-action':
+                    await this.#performAction(driver);
                     break;
 
                 //assertions
@@ -330,7 +379,7 @@ class TestStep {
                     await this.#assertIsDisplayed(item);
                     break;
                 case 'assert-is-not-displayed':
-                    await this.#assertIsNotDisplayed(item);
+                    await this.#assertIsNotDisplayed(driver);
                     break;
                 case 'assert-text':
                     await this.#assertText(item);
@@ -469,76 +518,277 @@ class TestStep {
         }
     }
 
-    async #verticalScroll(driver, down = true) {
+    //#region vertical scroll actions
+
+    async #verticalScroll(driver, originItem, down = true) {
         const count = this.#value ? parseInt(this.#value) : 1;
-        const startPercentage = down ? 90 : 10;
-        const endPercentage = down ? 10 : 90;
-        const anchorPercentage = 50;
+
+        const startPercentage = originItem ? 0 : down ? 0.85 : 0.2;
+        const endPercentage = originItem ? 0.3 : down ? 0.2 : 0.85;
+        const anchorPercentage = 0.5;
         const scrollDuration = 500;
 
         const { width, height } = await driver.getWindowSize();
-        const density = (await driver.getDisplayDensity()) / 100;
-        const anchor = (width * anchorPercentage) / 100;
-        const startPoint = (height * startPercentage) / 100;
-        const endPoint = (height * endPercentage) / 100;
-        const direction = down ? -1 : 1;
+        const origin = originItem ? originItem : 'viewport';
+        const anchorX = originItem ? 0 : width * anchorPercentage;
+        const startY = originItem ? 0 : height * startPercentage;
+        const endY = height * endPercentage;
+        const fixedScroll = down ? -endY : endY;
+        const scrollY = originItem ? fixedScroll : endY - startY;
 
         const scrollEvt = count > 1 ? count : 1;
         for (let i = 0; i < scrollEvt; i++) {
-            await driver.performActions([
-                {
-                    type: 'pointer',
-                    id: 'finger1',
-                    parameters: { pointerType: 'touch' },
-                    actions: [
-                        { type: 'pointerMove', duration: 0, x: anchor, y: startPoint },
-                        { type: 'pointerDown', button: 0 },
-                        { type: 'pause', duration: 100 },
-                        {
-                            type: 'pointerMove',
-                            duration: scrollDuration,
-                            origin: 'pointer',
-                            x: 0,
-                            y: direction * endPoint * density
-                        },
-                        { type: 'pointerUp', button: 0 },
-                        { type: 'pause', duration: scrollDuration }
-                    ]
-                }
-            ]);
+            if (this.#conf.runType == 'web') {
+                const actualScrollY = -scrollY;
+
+                await driver
+                    .action('wheel')
+                    .scroll({ origin: origin, deltaX: anchorX, deltaY: actualScrollY })
+                    .pause(10)
+                    .perform();
+            } else {
+                await driver
+                    .action('pointer', {
+                        parameters: { pointerType: 'touch' }
+                    })
+                    .move({ origin: origin, x: anchorX, y: startY })
+                    .down()
+                    .pause(10)
+                    .move({ origin: 'pointer', duration: scrollDuration, x: 0, y: scrollY })
+                    .pause(10)
+                    .up()
+                    .pause(10)
+                    .perform();
+            }
+            console.log(`VerticalScroll::Scrolled: ${down ? 'down' : 'up'} - iteration: ${i} - Y: ${scrollY}px`);
         }
         return;
     }
 
     async #scrollUp(driver) {
-        await this.#verticalScroll(driver, false);
+        await this.#verticalScroll(driver, null, false);
     }
 
     async #scrollDown(driver) {
-        await this.#verticalScroll(driver, true);
+        await this.#verticalScroll(driver, null, true);
     }
 
-    async #scrollToElement(driver, down = true) {
+    async #scrollUpFromElement(driver, item) {
+        await this.#verticalScroll(driver, item, false);
+    }
+
+    async #scrollDownFromElement(driver, item) {
+        await this.#verticalScroll(driver, item);
+    }
+
+    async #scrollUpOrDownToElement(driver, down = true) {
         let count = 0;
         let maxCount = this.#value ? parseInt(this.#value) : 1;
-        while (count < maxCount) {
-            let item = await this.#selectItem(driver);
+        this.#value = 1;
+
+        let item = null;
+        while (count <= maxCount) {
+            item = await this.#selectItem(driver);
             if (!item) {
-                this.#verticalScroll(driver, 1, down);
+                await this.#verticalScroll(driver, null, down);
             } else {
                 break;
             }
             count++;
         }
+        if (!item) {
+            throw new TestRunnerError(
+                `ScrollToElement::Item with selectors [${this.#usedSelectors}] was not found after scrolling ${maxCount} times`
+            );
+        }
     }
 
     async #scrollDownToElement(driver) {
-        await this.#scrollToElement(driver, this.#value);
+        await this.#scrollUpOrDownToElement(driver);
     }
 
     async #scrollUpToElement(driver) {
-        await this.#scrollToElement(driver, this.#value, false);
+        await this.#scrollUpOrDownToElement(driver, false);
     }
+
+    //#endregion
+
+    //#region horizontal scroll actions
+
+    async #horizontalScroll(driver, originItem, left = true) {
+        const count = this.#value ? parseInt(this.#value) : 1;
+
+        const startPercentage = originItem ? 0 : left ? 0.1 : 0.9;
+        const endPercentage = originItem ? 0.3 : left ? 0.9 : 0.1;
+        const anchorPercentage = 0.5;
+        const scrollDuration = 500;
+
+        const { width, height } = await driver.getWindowSize();
+        const origin = originItem ? originItem : 'viewport';
+        const anchorY = originItem ? 0 : height * anchorPercentage;
+        const startX = originItem ? 0 : width * startPercentage;
+        const endX = width * endPercentage;
+        const fixedScroll = left ? -endX : endX;
+        const scrollX = originItem ? fixedScroll : endX - startX;
+        const pointerType = this.#conf.runType == 'mobile' ? 'touch' : 'mouse';
+
+        const scrollEvt = count > 1 ? count : 1;
+        for (let i = 0; i < scrollEvt; i++) {
+            await driver
+                .action('pointer', {
+                    parameters: { pointerType: pointerType }
+                })
+                .move({ origin: origin, x: startX, y: anchorY })
+                .down()
+                .pause(10)
+                .move({ origin: 'pointer', duration: scrollDuration, x: scrollX, y: 0 })
+                .pause(10)
+                .up()
+                .pause(10)
+                .perform();
+        }
+        return;
+    }
+
+    async #scrollRight(driver) {
+        await this.#horizontalScroll(driver, null, false);
+    }
+
+    async #scrollLeft(driver) {
+        await this.#horizontalScroll(driver, null, true);
+    }
+
+    async #scrollRightFromElement(driver, item) {
+        await this.#horizontalScroll(driver, item, false);
+    }
+
+    async #scrollLeftFromElement(driver, item) {
+        await this.#horizontalScroll(driver, item, true);
+    }
+
+    //#endregion
+
+    //#region action
+
+    async #clickCoordinates(driver) {
+        const params = this.#value.split('|||');
+        if (params.length < 2 || params.length > 3) {
+            throw new TestRunnerError(
+                `ClickCoordinates::Invalid coordinates value format "${this.#value}" - format should be "<x>|||<y>|||<duration>"`
+            );
+        }
+
+        let x = 0;
+        let y = 0;
+        let duration = params.length === 3 ? parseInt(params[2]) : 10;
+
+        if (params[0].includes('%') || params[1].includes('%')) {
+            const { width, height } = await driver.getWindowSize();
+
+            if (params[0].includes('%')) {
+                x = parseInt(params[0].replace('%', '')) * width * 0.01;
+            } else {
+                x = parseInt(params[0]);
+            }
+            if (params[1].includes('%')) {
+                y = parseInt(params[1].replace('%', '')) * height * 0.01;
+            } else {
+                y = parseInt(params[1]);
+            }
+        } else {
+            x = parseInt(params[0]);
+            y = parseInt(params[1]);
+        }
+
+        const pointerType = this.#conf.runType == 'mobile' ? 'touch' : 'mouse';
+
+        if (isNaN(x) || isNaN(y)) {
+            throw new TestRunnerError(
+                `ClickCoordinates::Coordinates should be numbers in "${this.#value}" - format should be "<x>|||<y>"`
+            );
+        }
+
+        await driver
+            .action('pointer', {
+                parameters: { pointerType: pointerType }
+            })
+            .move({ origin: 'viewport', duration: 100, x: x, y: y })
+            .pause(10)
+            .down()
+            .pause(duration)
+            .up()
+            .perform();
+    }
+
+    async #performAction(driver) {
+        try {
+            const json = JSON.parse(this.#value);
+
+            const type = json.type;
+            let typeParams = null;
+            if (type == 'pointer') {
+                typeParams = { pointerType: json.pointerType ?? 'mouse' };
+            }
+
+            const action = typeParams ? await driver.action(type, typeParams) : driver.action(type);
+            const actions = json.actions;
+
+            if (actions && Array.isArray(actions) && actions.length > 0) {
+                switch (type) {
+                    case 'pointer':
+                        await this.#performPointerAction(driver, action, actions);
+                        break;
+                }
+            } else {
+                throw new TestRunnerError(`PerformAction::Actions are required and should be an array of actions`);
+            }
+
+            await action.perform();
+        } catch (error) {
+            throw new TestRunnerError(`PerformAction::Failed to apply action" - ${error.message}`);
+        }
+    }
+
+    async #performPointerAction(driver, actionObj, actions) {
+        try {
+            for (let i = 0; i < actions.length; i++) {
+                const action = actions[i];
+                let origin = 'viewport';
+                switch (action.command) {
+                    case 'move':
+                        if (action.origin) {
+                            if (action.origin == 'pointer' || action.origin == 'viewport') {
+                                origin = action.origin;
+                            } else {
+                                origin = await this.#selectItem(driver);
+                                if (!origin) {
+                                    throw new TestRunnerError(
+                                        `PerformAction::Origin item was not found for action ${i}`
+                                    );
+                                }
+                            }
+                        }
+                        await actionObj.move({ origin: origin, duration: 100, x: action.x, y: action.y });
+                        break;
+                    case 'down':
+                        await actionObj.down(action.button ?? 'left');
+                        break;
+                    case 'up':
+                        await actionObj.up(action.button ?? 'left');
+                        break;
+                    case 'pause':
+                        await actionObj.pause(action.duration ?? 10);
+                        break;
+                }
+            }
+        } catch (error) {
+            throw new TestRunnerError(
+                `PerformAction::Failed to parse action value "${this.#value}" - ${error.message}`
+            );
+        }
+    }
+
+    //#endregion
 
     async #generateRandomInteger() {
         const randomParts = this.#value.split('|||');
@@ -564,6 +814,29 @@ class TestStep {
 
         const randomValue = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
         this.#variables[varName] = randomValue;
+    }
+
+    async #generateRandomString() {
+        const randomParts = this.#value.split('|||');
+        if (randomParts.length !== 3) {
+            throw new TestRunnerError(
+                `GenerateRandomString::Invalid random value format "${this.#value}" - format should be "<var name>|||<prefix>|||<max length>" `
+            );
+        }
+        const varName = randomParts[0];
+        const prefix = randomParts[1] != 'none' ? replaceVariables(randomParts[1], this.#variables) : '';
+        const maxLen = randomParts[2] > 0 ? parseInt(randomParts[2]) : 10;
+
+        if (isNaN(maxLen)) {
+            throw new TestRunnerError(`GenerateRandowString::max words in "${this.#value}" should be a number`);
+        }
+
+        const randomValue = await randomstring.generate(maxLen);
+        if (prefix) {
+            this.#variables[varName] = `${prefix}-${randomValue}`;
+        } else {
+            this.#variables[varName] = randomValue;
+        }
     }
 
     async #setVariable(driver) {
@@ -618,17 +891,9 @@ class TestStep {
     }
 
     async #executeScript(driver) {
-        const script = replaceVariables(this.#value, this.#variables);
+        const script = `() => { ${replaceVariables(this.#value, this.#variables)} } `;
         try {
-            if (this.#operator === 'async') {
-                const asyncScript = `var callback = arguments[arguments.length - 1]; ${script};`;
-                const result = await driver.executeAsync(asyncScript);
-                if (!result) {
-                    throw new TestRunnerError(`ExecuteAsyncScript::Script: script for step ${this.#sequence} returns`);
-                }
-                console.log(`ExecuteScript::Script: async script for step ${this.#sequence} returns ${result}`);
-                return result;
-            } else if (this.#operator === 'sync') {
+            if (this.#operator === 'sync') {
                 const result = await driver.execute(script);
                 if (!result) {
                     throw new TestRunnerError(`ExecuteScript::Script: script for step ${this.#sequence} returns`);
@@ -741,6 +1006,8 @@ class TestStep {
         }
     }
 
+    //#region assertions
+
     async #assertIsDisplayed(item) {
         // Implement assert is displayed logic
         let isDisplayed = await item.isDisplayed();
@@ -751,12 +1018,18 @@ class TestStep {
         }
     }
 
-    async #assertIsNotDisplayed(item) {
+    async #assertIsNotDisplayed(driver) {
         // Implement assert is displayed logic
+        const item = await this.#selectItem(driver);
+        if (!item) {
+            throw new TestRunnerError(
+                `AssertIsNotDisplayed::Item with selectors [${this.#usedSelectors}] was not found`
+            );
+        }
         let isDisplayed = await item.isDisplayed();
         if (isDisplayed) {
             throw new TestRunnerError(
-                `AssertIsNotDisplayed::Item with selectors [${this.#usedSelectors}] was found or is displayed`
+                `AssertIsNotDisplayed::Item with selectors [${this.#usedSelectors}] is displayed`
             );
         }
     }
@@ -926,6 +1199,8 @@ class TestStep {
             );
         }
     }
+
+    //#endregion
 
     //#endregion
 }

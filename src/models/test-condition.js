@@ -10,9 +10,7 @@ class TestCondition {
     #script = '';
     #value = '';
 
-    constructor(condition, conf) {
-        this.#conf = conf;
-
+    constructor(condition) {
         this.#type = condition.type;
         this.#selector = condition.selector;
         this.#script = condition.script;
@@ -28,6 +26,11 @@ class TestCondition {
             case 'exist':
                 if (!this.#selector) {
                     throw new TestDefinitionError('Selector is required for exist condition');
+                }
+                break;
+            case 'not-exist':
+                if (!this.#selector) {
+                    throw new TestDefinitionError('Selector is required for not-exist condition');
                 }
                 break;
             case 'script':
@@ -58,12 +61,14 @@ class TestCondition {
         return true;
     }
 
-    async evaluate(driver, variables) {
+    async evaluate(driver, variables, conf) {
         switch (this.#type) {
             case 'exist':
                 return await this.#existCheck(driver, variables);
+            case 'not-exist':
+                return !(await this.#existCheck(driver, variables));
             case 'script':
-                return await this.#scriptCheck(driver, variables);
+                return await this.#scriptCheck(driver, variables, conf);
             case 'value':
                 return await this.#valueCheck(driver, variables);
             default:
@@ -77,10 +82,11 @@ class TestCondition {
         return item && !item.error;
     }
 
-    async #scriptCheck(driver, variables) {
+    async #scriptCheck(driver, variables, conf) {
         let script = replaceVariables(this.#script, variables);
         let result = null;
-        if (this.#conf.runType === 'web') {
+        if (conf.runType === 'web') {
+            script = `() => { ${script} }`;
             result = await driver.execute(script);
         } else {
             const localScript = prepareLocalScript(script);

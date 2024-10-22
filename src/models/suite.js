@@ -5,15 +5,16 @@ class Suite {
     #conf = null;
     #id = '';
     #name = '';
+    #type = '';
     #waitBetweenTests = 0;
     #stopOnFailure = false;
     #variables = {};
     #tests = [];
 
-    constructor(suite, conf) {
-        this.#conf = conf;
+    constructor(suite) {
         this.#id = suite.id ?? '';
         this.#name = suite.name ?? '';
+        this.#type = suite.type ?? '';
         this.#waitBetweenTests = suite.waitBetweenTests ?? 0;
         this.#stopOnFailure = suite.stopOnFailure ?? false;
         this.#variables = suite.variables ?? {};
@@ -28,7 +29,7 @@ class Suite {
 
         for (let i = 0; i < tests.length; i++) {
             const testDefinition = tests[i];
-            let test = new Test(testDefinition, this.#conf);
+            let test = new Test(testDefinition);
             this.#tests.push(test);
         }
     }
@@ -41,6 +42,10 @@ class Suite {
         return this.#name;
     }
 
+    get type() {
+        return this.#type;
+    }
+
     get tests() {
         return this.#tests;
     }
@@ -49,7 +54,7 @@ class Suite {
         return this.#variables;
     }
 
-    async run(driver, variables) {
+    async run(driver, variables, conf) {
         let promises = [];
 
         const tests = this.#tests;
@@ -57,12 +62,13 @@ class Suite {
         mergeVariables(this.#variables, variables);
 
         for (let i = 0; i < tests.length; i++) {
+            console.log(`TestSuite::Running test #${i} ${tests[i].name} in suite ${this.#name}`);
             const test = tests[i];
             if (test.skip) {
                 continue;
             }
 
-            const testPromises = await test.run(driver, this.variables);
+            const testPromises = await test.run(driver, this.variables, conf);
             promises = promises.concat(testPromises);
 
             if (this.#stopOnFailure && test.status === 'failed') {
@@ -74,6 +80,7 @@ class Suite {
             if (this.#waitBetweenTests > 0) {
                 await driver.pause(this.#waitBetweenTests);
             }
+            console.log(`TestSuite::Finished test #${i}`);
         }
 
         return promises;

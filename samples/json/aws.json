@@ -1,0 +1,719 @@
+{
+    "runConfiguration": {
+        "runType": "mobile",
+        "appium": {
+            "port": 4723,
+            "host": "localhost",
+            "platformName": "DEVICE_FARM_android",
+            "automationName": "UiAutomator2",
+            "deviceName": "DEVICE_FARM_Google PIXEL 7",
+            "app": "DEVICE_FARM_tms.android.agritask-agritask-release-9.2.0.34927.apk",
+            "appName": "tms.android.agritask-agritask-release-9.2.0.34927.apk",
+            "appPackage": "com.agritask.mobile.android",
+            "appActivity": "com.scantask.tms.droid.tasker.gis.MapActivity2"
+        }
+    },
+    "variables": {
+        "username": "applitest_manager_il",
+        "password": "DevelopersApplitest2023!",
+        "baseURL": "https://il.pescout.com/i/mobile",
+        "usernameAdmin": "applitest_admin_il",
+        "usernameSupport": "applitest_support_il",
+        "usernameUser": "applitest_user_il",
+        "usernameReader": "applitest_reader_il",
+        "usernameManagerEmail": "applitest.manager.il@email.ghostinspector.com",
+        "usernameFullName": "Applitest Manager",
+        "usernameScout": "applitest_scout_il",
+        "usernameManagerDeactivated": "applitest_manager_il_deactivated",
+        "baseURLOther": "https://br.pescout.com/b/mobile",
+        "gmailRecoveryEmail": "avinash@applitest.co.il",
+        "gmailRecoveryPhoneNumber": "09911459252",
+        "gmailAccountEmail": "applitestmanagermoag@gmail.com",
+        "gmailAccountName": "Applitest Manager IL Gmail"
+    },
+    "suites": [
+        {
+            "id": "AS-922e1813-f049-41ed-aad5-02ef9ba5044f",
+            "name": "Temp AWS Test MyLocation",
+            "waitBetweenTests": 0,
+            "stopOnFailure": true,
+            "tests": [
+                {
+                    "id": "T-ea2ef065-9a0f-4d84-bdee-76fefe94006c",
+                    "name": "Shared : Setup Base URL",
+                    "steps": [
+                        {
+                            "note": "Verify Logo is visible on Login screen",
+                            "selectors": [
+                                "android|||//android.widget.ImageView[@resource-id='com.agritask.mobile.android:id/loginBrandLogoImageView']"
+                            ],
+                            "command": "assert-is-displayed",
+                            "operator": ""
+                        },
+                        {
+                            "note": "Tap 3 times on Logo",
+                            "selectors": [
+                                "android|||//android.widget.ImageView[@resource-id='com.agritask.mobile.android:id/loginBrandLogoImageView']"
+                            ],
+                            "value": "3",
+                            "command": "multiple-clicks",
+                            "operator": null
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"android:id/title\" and @text=\"About application\"]"
+                            ],
+                            "note": "Verify About Application page is opened.",
+                            "command": "assert-is-displayed"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"android:id/summary\" and @text=\"The context for relative URLs\"]"
+                            ],
+                            "note": "Wait for Base URL field to appear",
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"android:id/summary\" and @text=\"The context for relative URLs\"]"
+                            ],
+                            "note": "Click on Base URL field",
+                            "command": "click"
+                        },
+                        {
+                            "note": "Wait for the Base URL dialog to open",
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"android:id/edit\"]"
+                            ],
+                            "value": "",
+                            "command": "wait-for-exist",
+                            "operator": null
+                        },
+                        {
+                            "note": "Set value for the Base URL",
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"android:id/edit\"]"
+                            ],
+                            "value": "{{baseURL}}",
+                            "command": "set-value"
+                        },
+                        {
+                            "selectors": [
+                                "android|||id=android:id/button1"
+                            ],
+                            "note": "Click on OK button",
+                            "command": "click"
+                        },
+                        {
+                            "selectors": [
+                                "android|||id=com.agritask.mobile.android:id/manager_frag_button_back"
+                            ],
+                            "note": "Click on X button to close the About screen",
+                            "command": "click"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.ImageView[@resource-id='com.agritask.mobile.android:id/loginBrandLogoImageView']"
+                            ],
+                            "note": "Wait for Login screen to be visible with Logo",
+                            "command": "wait-for-exist"
+                        }
+                    ]
+                },
+                {
+                    "id": "T-d74c1df7-5963-4a78-a83d-78dfec417af3",
+                    "name": "C3017 Regular Login By Username And Password",
+                    "steps": [
+                        {
+                            "note": "Verify Login Button is visible on  Login screen.",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginButton\"]"
+                            ],
+                            "command": "assert-is-displayed",
+                            "operator": null
+                        },
+                        {
+                            "note": "Set value in Username field",
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
+                            ],
+                            "value": "{{username}}",
+                            "command": "set-value"
+                        },
+                        {
+                            "note": "Set value in Password Field",
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editPassword\"]"
+                            ],
+                            "value": "{{password}}",
+                            "command": "set-value"
+                        },
+                        {
+                            "selectors": [
+                                "android|||id=loginButton"
+                            ],
+                            "note": "Click On Login Button",
+                            "command": "click"
+                        },
+                        {
+                            "note": "Verify user is successfully logged in i.e. Settings option is visible.",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@text=\"Settings\"]"
+                            ],
+                            "value": "60000",
+                            "command": "wait-for-exist",
+                            "operator": null
+                        }
+                    ]
+                },
+                {
+                    "id": "T-8a9ad6cf-0968-4362-a06e-dc3da036f326",
+                    "name": "C3040 Find my location",
+                    "steps": [
+                        {
+                            "note": "Set Variable for plotName",
+                            "selectors": [],
+                            "value": "plotName|||Test Cotton",
+                            "command": "set-variable",
+                            "operator": null
+                        },
+                        {
+                            "note": "Set Variable for cropName",
+                            "selectors": [],
+                            "value": "cropName|||Cotton",
+                            "command": "set-variable"
+                        },
+                        {
+                            "note": "Set Variable for cropVariety",
+                            "selectors": [],
+                            "value": "cropVariety|||TMG 82 WS",
+                            "command": "set-variable"
+                        },
+                        {
+                            "note": "Set Variable for growerName",
+                            "selectors": [],
+                            "value": "growerName|||Test 1",
+                            "command": "set-variable"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.ImageView/following-sibling::android.widget.TextView[@text=\"Settings\"]"
+                            ],
+                            "note": "Click on Settings Tab",
+                            "command": "click"
+                        },
+                        {
+                            "note": "Wait and verify Settings screen is open",
+                            "selectors": [
+                                "android|||//android.widget.LinearLayout[@resource-id=\"com.agritask.mobile.android:id/settings_layout_title\"]/android.widget.TextView[@text=\"Settings\"]"
+                            ],
+                            "value": 5000,
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "note": "Set geolocation using coordinates that falls within Polygon of the Plot",
+                            "selectors": [],
+                            "value": "17.743795|||-10.145914|||0",
+                            "command": "set-geolocation",
+                            "operator": ""
+                        },
+                        {
+                            "note": "Pause: Wait for Set Geolocation process to complete at the backend.",
+                            "selectors": [],
+                            "value": "3000",
+                            "command": "pause"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@text=\"Map\"]"
+                            ],
+                            "note": "Click to open the Map tab.",
+                            "command": "click"
+                        },
+                        {
+                            "note": "Wait and verify Map tab is Open.",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@text=\"Map\" and @selected=\"true\"]"
+                            ],
+                            "value": "10000",
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.FrameLayout[@resource-id=\"com.agritask.mobile.android:id/parentLayout\"]/android.widget.ImageView"
+                            ],
+                            "note": "Click on \"My Location\" button on Map",
+                            "command": "click"
+                        },
+                        {
+                            "note": "Pause: Wait for My Location to scroll into view.",
+                            "selectors": [],
+                            "value": "3000",
+                            "command": "pause"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.view.View[@content-desc=\"Google Map\"]"
+                            ],
+                            "note": "Click at the center of the Google Map element",
+                            "command": "click"
+                        },
+                        {
+                            "note": "Pause: Wait for My Location to Zoom In further.",
+                            "selectors": [],
+                            "value": "3000",
+                            "command": "pause"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.view.View[@content-desc=\"Google Map\"]"
+                            ],
+                            "note": "Click again at the center of the Google Map element - to simulate click on the plot beneath My Location point.",
+                            "command": "click"
+                        },
+                        {
+                            "note": "Wait and Verify Plot info Box (for plot beneath My Location coordinates) is open",
+                            "selectors": [
+                                "android|||//android.widget.LinearLayout[@resource-id=\"com.agritask.mobile.android:id/main_info_layout\"]//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/title\" and @text = \"{{plotName}}\"]"
+                            ],
+                            "value": 5000,
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/title\" and @text= \"{{plotName}}\"]"
+                            ],
+                            "note": "Verify Plot Infor Popup displays the correct Plot Name, which indicates My Location pointed at the correct coordinates.",
+                            "command": "assert-is-displayed"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "AS-a01ef56f-0fd0-4f20-ab17-6d63e3869a78",
+            "name": "Temp AWS Test GoogleLogin",
+            "waitBetweenTests": 0,
+            "stopOnFailure": true,
+            "tests": [
+                {
+                    "id": "T-ea2ef065-9a0f-4d84-bdee-76fefe94006c",
+                    "name": "Shared : Setup Base URL",
+                    "steps": [
+                        {
+                            "note": "Verify Logo is visible on Login screen",
+                            "selectors": [
+                                "android|||//android.widget.ImageView[@resource-id='com.agritask.mobile.android:id/loginBrandLogoImageView']"
+                            ],
+                            "command": "assert-is-displayed",
+                            "operator": ""
+                        },
+                        {
+                            "note": "Tap 3 times on Logo",
+                            "selectors": [
+                                "android|||//android.widget.ImageView[@resource-id='com.agritask.mobile.android:id/loginBrandLogoImageView']"
+                            ],
+                            "value": "3",
+                            "command": "multiple-clicks",
+                            "operator": null
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"android:id/title\" and @text=\"About application\"]"
+                            ],
+                            "note": "Verify About Application page is opened.",
+                            "command": "assert-is-displayed"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"android:id/summary\" and @text=\"The context for relative URLs\"]"
+                            ],
+                            "note": "Wait for Base URL field to appear",
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"android:id/summary\" and @text=\"The context for relative URLs\"]"
+                            ],
+                            "note": "Click on Base URL field",
+                            "command": "click"
+                        },
+                        {
+                            "note": "Wait for the Base URL dialog to open",
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"android:id/edit\"]"
+                            ],
+                            "value": "",
+                            "command": "wait-for-exist",
+                            "operator": null
+                        },
+                        {
+                            "note": "Set value for the Base URL",
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"android:id/edit\"]"
+                            ],
+                            "value": "{{baseURL}}",
+                            "command": "set-value"
+                        },
+                        {
+                            "selectors": [
+                                "android|||id=android:id/button1"
+                            ],
+                            "note": "Click on OK button",
+                            "command": "click"
+                        },
+                        {
+                            "selectors": [
+                                "android|||id=com.agritask.mobile.android:id/manager_frag_button_back"
+                            ],
+                            "note": "Click on X button to close the About screen",
+                            "command": "click"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.ImageView[@resource-id='com.agritask.mobile.android:id/loginBrandLogoImageView']"
+                            ],
+                            "note": "Wait for Login screen to be visible with Logo",
+                            "command": "wait-for-exist"
+                        }
+                    ]
+                },
+                {
+                    "id": "T-c85b91b4-da3c-4ade-845d-1a0102077de3",
+                    "name": "Shared : Google Login via PlayStore",
+                    "steps": [
+                        {
+                            "note": "Simulate HOME key press to go to Home Screen",
+                            "selectors": [],
+                            "value": "3",
+                            "command": "press-key",
+                            "operator": null
+                        },
+                        {
+                            "note": "Wait and verify Home screen is open and Play Store app is visible.",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@text=\"Play Store\"]"
+                            ],
+                            "value": "10000",
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@text=\"Play Store\"]"
+                            ],
+                            "note": "Click to open Play Store app",
+                            "command": "click"
+                        },
+                        {
+                            "note": "Wait and verify Sign in button for Google Play is present",
+                            "selectors": [
+                                "android|||//android.widget.Button[@resource-id=\"com.android.vending:id/0_resource_name_obfuscated\" and @text=\"Sign in\"]"
+                            ],
+                            "value": "30000",
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.Button[@resource-id=\"com.android.vending:id/0_resource_name_obfuscated\" and @text=\"Sign in\"]"
+                            ],
+                            "note": "Click on Sign In button",
+                            "command": "click"
+                        },
+                        {
+                            "note": "Wait and Verify Google Login Screen is open",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"headingText\" and @text=\"Sign in\"]"
+                            ],
+                            "value": "50000",
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "note": "Assign GMail ID in Username field",
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"identifierId\"]"
+                            ],
+                            "value": "{{gmailAccountEmail}}",
+                            "command": "set-value"
+                        },
+                        {
+                            "selectors": [],
+                            "value": "10000",
+                            "command": "pause"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.Button[@text=\"Next\"]"
+                            ],
+                            "note": "Click on Next Button",
+                            "command": "click"
+                        },
+                        {
+                            "note": "Wait and Verify Welcome screen to assign Password is open",
+                            "selectors": [
+                                "android|||//android.view.View[@resource-id=\"password\"]"
+                            ],
+                            "value": "20000",
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "note": "Assign value in Password field",
+                            "selectors": [
+                                "android|||//android.view.View[@resource-id=\"password\"]//android.widget.EditText"
+                            ],
+                            "value": "{{password}}",
+                            "command": "set-value"
+                        },
+                        {
+                            "selectors": [],
+                            "value": "3000",
+                            "command": "pause"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.Button[@text=\"Next\"]"
+                            ],
+                            "note": "Click on Next Button",
+                            "command": "click"
+                        },
+                        {
+                            "note": "Pause - Wait for next screen to open",
+                            "selectors": [],
+                            "value": "10000",
+                            "command": "pause"
+                        },
+                        {
+                            "note": "Click on Confirm your Recovery phone number option",
+                            "condition": {
+                                "selector": "//android.widget.TextView[@resource-id=\"headingText\" and @text=\"Verify it’s you\"]",
+                                "type": "exist",
+                                "value": "",
+                                "script": ""
+                            },
+                            "selectors": [
+                                "android|||//android.widget.TextView[@text=\"Confirm your recovery phone number\"]"
+                            ],
+                            "command": "click"
+                        },
+                        {
+                            "note": "Pause : Wait for Next Screen to open",
+                            "selectors": [],
+                            "value": "10000",
+                            "command": "pause"
+                        },
+                        {
+                            "note": "Assign value in Recovery Phone Number field.",
+                            "condition": {
+                                "selector": "//android.widget.TextView[contains(@text, \"Confirm the phone number you provided in your security settings\")]",
+                                "type": "exist",
+                                "value": "",
+                                "script": ""
+                            },
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"phoneNumberId\"]"
+                            ],
+                            "value": "{{gmailRecoveryPhoneNumber}}",
+                            "command": "set-value"
+                        },
+                        {
+                            "condition": {
+                                "selector": "//android.widget.TextView[contains(@text, \"Confirm the phone number you provided in your security settings\")]",
+                                "type": "exist",
+                                "value": "",
+                                "script": ""
+                            },
+                            "selectors": [],
+                            "value": "3000",
+                            "command": "pause"
+                        },
+                        {
+                            "note": "Click on Next button.",
+                            "condition": {
+                                "selector": "//android.widget.TextView[contains(@text, \"Confirm the phone number you provided in your security settings\")]",
+                                "type": "exist",
+                                "value": "",
+                                "script": ""
+                            },
+                            "selectors": [
+                                "android|||//android.widget.Button[@text=\"Next\"]"
+                            ],
+                            "command": "click"
+                        },
+                        {
+                            "note": "Pause : Wait for Next Screen to Open",
+                            "condition": {
+                                "selector": "//android.widget.TextView[contains(@text, \"Confirm the phone number you provided in your security settings\")]",
+                                "type": "exist",
+                                "value": "",
+                                "script": ""
+                            },
+                            "selectors": [],
+                            "value": "10000",
+                            "command": "pause"
+                        },
+                        {
+                            "note": "Wait and verify Google Terms & Condition acceptance screen is open.",
+                            "selectors": [
+                                "android|||//android.widget.Button[@text=\"Google Terms of Service\"]"
+                            ],
+                            "value": "10000",
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.Button[@text=\"I agree\"]"
+                            ],
+                            "note": "Click on I Agree button.",
+                            "command": "click"
+                        },
+                        {
+                            "note": "Wait for Login Process to complete",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@text=\"Search\"]"
+                            ],
+                            "value": "30000",
+                            "command": "pause"
+                        },
+                        {
+                            "note": "Click on Accept button if Google Services page is open",
+                            "condition": {
+                                "selector": "//android.widget.TextView[@resource-id=\"com.google.android.gms:id/suc_layout_title\" and @text=\"Google services\"]",
+                                "type": "exist",
+                                "value": "",
+                                "script": ""
+                            },
+                            "selectors": [
+                                "android|||//android.widget.Button[@text=\"ACCEPT\"]"
+                            ],
+                            "command": "click"
+                        },
+                        {
+                            "note": "Wait for Login Process to complete",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@text=\"Search\"]"
+                            ],
+                            "value": "30000",
+                            "command": "pause"
+                        },
+                        {
+                            "note": "Simulate HOME key press to go to Home Screen",
+                            "selectors": [],
+                            "value": "3",
+                            "command": "press-key",
+                            "operator": null
+                        },
+                        {
+                            "note": "Wait and verify Home screen is open and Play Store app is visible.",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@text=\"Play Store\"]"
+                            ],
+                            "value": "10000",
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "note": "Scroll down once to show All Apps Screen",
+                            "selectors": [],
+                            "value": "1",
+                            "command": "scroll-down"
+                        },
+                        {
+                            "note": "Wait and Verify list of Apps screen is open and Agritask App is visible.",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@content-desc=\"AgriTask\"]"
+                            ],
+                            "value": 5000,
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@content-desc=\"AgriTask\"]"
+                            ],
+                            "note": "Click to open Agritask App.",
+                            "command": "click"
+                        },
+                        {
+                            "note": "Wait and Verify Login Screen is open on Agritask",
+                            "selectors": [
+                                "android|||//android.widget.ImageView[@resource-id='com.agritask.mobile.android:id/loginBrandLogoImageView']"
+                            ],
+                            "value": "10000",
+                            "command": "wait-for-exist"
+                        }
+                    ]
+                },
+                {
+                    "id": "T-969a7aaa-9a08-42c0-a638-cf8f3e493a50",
+                    "name": "C3962 Successful Login with Gmail (role:manager)",
+                    "steps": [
+                        {
+                            "note": "Verify Login page is visible i.e. Sign In With Google button is visible",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@text=\"Sign in with Google\"]"
+                            ],
+                            "command": "assert-is-displayed",
+                            "operator": ""
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@text=\"Sign in with Google\"]"
+                            ],
+                            "note": "Click on \"Sign in with Google\" link",
+                            "command": "click"
+                        },
+                        {
+                            "note": "Wait and verify Pop up for Google Accounts is open",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.google.android.gms:id/main_title\" and @text=\"Choose an account\"]"
+                            ],
+                            "value": "30000",
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.google.android.gms:id/account_name\" and @text=\"{{gmailAccountEmail}}\"]"
+                            ],
+                            "note": "Verify existing logged in Google Account is visible in Accounts Pop up.",
+                            "command": "assert-is-displayed"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.google.android.gms:id/account_name\" and @text=\"{{gmailAccountEmail}}\"]"
+                            ],
+                            "note": "Click on Google Account for Manager",
+                            "command": "click"
+                        },
+                        {
+                            "note": "Wait and verify user is logged in i.e. Maps tab is highlighted in Dashboard",
+                            "selectors": [
+                                "android|||//android.widget.TextView[@text=\"Map\" and @selected=\"true\"]"
+                            ],
+                            "value": "50000",
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@text=\"Settings\"]"
+                            ],
+                            "note": "Click on Settings tab under Dashboard.",
+                            "command": "click"
+                        },
+                        {
+                            "note": "Wait and Verify Settings screen is open",
+                            "selectors": [
+                                "android|||//android.widget.LinearLayout[@resource-id=\"com.agritask.mobile.android:id/settings_layout_title\"]//android.widget.TextView[@text=\"Settings\"]"
+                            ],
+                            "value": 5000,
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@text=\"{{gmailAccountName}}\"]"
+                            ],
+                            "note": "Verify Correct username is displayed.",
+                            "command": "assert-is-displayed"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

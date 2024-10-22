@@ -4,7 +4,6 @@ const TestStep = require('./test-step');
 const VideoRecorder = require('../helpers/video-recorder');
 
 class Test {
-    #conf = null;
     #id = '';
     #name = '';
     #variables = {};
@@ -17,8 +16,7 @@ class Test {
 
     #videoRecorder = null;
 
-    constructor(test, conf) {
-        this.#conf = conf;
+    constructor(test) {
         this.#id = test.id ?? '';
         this.#name = test.name ?? '';
         this.#skip = test.skip ?? false;
@@ -34,7 +32,7 @@ class Test {
 
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
-            let testStep = new TestStep(i + 1, step, this.#conf);
+            let testStep = new TestStep(i + 1, step);
             this.#steps.push(testStep);
         }
     }
@@ -75,10 +73,10 @@ class Test {
         return this.#variables;
     }
 
-    async run(driver, variables) {
+    async run(driver, variables, conf) {
         const promises = [];
 
-        if (this.#conf.enableVideo) {
+        if (conf.enableVideo) {
             const options = {
                 baseName: this.#name,
                 outputDir: `${process.cwd()}/reports/videos`,
@@ -96,12 +94,9 @@ class Test {
             throw new TestDefinitionError(`Test "${this.#name}" has no steps`);
         }
 
-        const startFromSteps =
-            this.#conf.startFromStep > 0 && this.#conf.startFromStep < steps.length ? this.#conf.startFromStep : 0;
+        const startFromSteps = conf.startFromStep > 0 && conf.startFromStep < steps.length ? conf.startFromStep : 0;
         const stopAtStep =
-            this.#conf.stopAtStep > startFromSteps && this.#conf.stopAtStep < steps.length
-                ? this.#conf.stopAtStep
-                : steps.length;
+            conf.stopAtStep > startFromSteps && conf.stopAtStep < steps.length ? conf.stopAtStep : steps.length;
 
         for (let i = startFromSteps; i < stopAtStep; i++) {
             if (this.#videoRecorder) {

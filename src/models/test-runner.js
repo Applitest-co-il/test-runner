@@ -6,19 +6,19 @@ const { mergeVariables } = require('../helpers/utils');
 class TestRunner {
     static #savedDriver = null;
 
-    #conf = null;
+    #runConfiguration = null;
     #driver = null;
 
     #suites = [];
     #variables = {};
 
     constructor(options) {
-        this.#conf = RunConfiguration.factory(options.runConfiguration);
+        this.#runConfiguration = options.runConfiguration;
         this.#variables = options.variables ?? {};
 
         if (options.suites) {
             for (let i = 0; i < options.suites.length; i++) {
-                const suite = new Suite(options.suites[i], this.#conf);
+                const suite = new Suite(options.suites[i]);
                 this.#suites.push(suite);
             }
         }
@@ -30,12 +30,14 @@ class TestRunner {
 
         if (
             this.#suites.length > 1 &&
-            (this.#conf.startFromStep > 0 || this.#conf.stopAtStep > 0 || this.#conf.keepSession)
+            (this.#runConfiguration.startFromStep > 0 ||
+                this.#runConfiguration.stopAtStep > 0 ||
+                this.#runConfiguration.keepSession)
         ) {
             console.log('Multiple suites found - startFromStep, stopAtStep and keepSession will be ignored');
-            this.#conf.startFromStep = -1;
-            this.#conf.stopAtStep = -1;
-            this.#conf.keepSession = false;
+            this.#runConfiguration.startFromStep = -1;
+            this.#runConfiguration.stopAtStep = -1;
+            this.#runConfiguration.keepSession = false;
         }
     }
 
@@ -43,29 +45,39 @@ class TestRunner {
         return this.#variables;
     }
 
-    async startSession() {
+    async startSession(runType) {
         console.log('Starting session...');
-        if (TestRunner.#savedDriver) {
+
+        if (runType == 'web' && TestRunner.#savedDriver) {
             console.log('Using saved driver');
             this.#driver = TestRunner.#savedDriver;
             return;
+        } else if (TestRunner.#savedDriver) {
+            console.log('Closing session...');
+            await TestRunner.#savedDriver.deleteSession();
+            TestRunner.#savedDriver = null;
+        } else {
+            console.log('No saved driver found');
         }
 
-        this.#driver = await this.#conf.startSession();
+        const runConf = runConfigurationFactory(this.#runConfiguration, runType);
+        this.#driver = await runConf.startSession();
         if (!this.#driver) {
             console.error('Driver could not be set');
             throw new TestRunnerError('Driver could not be set');
         }
+
+        return runConf;
     }
 
     async closeSession() {
         if (this.#driver) {
-            if (this.#conf.keepSession) {
+            if (this.#runConfiguration.keepSession) {
                 console.log('Saving driver...');
                 TestRunner.#savedDriver = this.#driver;
             } else {
                 console.log('Closing session...');
-                await this.#conf.closeSession(this.#driver);
+                await this.#driver.deleteSession();
                 TestRunner.#savedDriver = null;
             }
         }
@@ -79,10 +91,12 @@ class TestRunner {
             let suiteResults = [];
 
             for (let i = 0; i < this.#suites.length; i++) {
-                await this.startSession();
-
+                console.log(`TestRunner::Running suite #${i} out of ${this.#suites.length}`);
                 const suite = this.#suites[i];
-                const suitePromises = await suite.run(this.#driver, this.variables);
+
+                const runConf = await this.startSession(suite.type);
+
+                const suitePromises = await suite.run(this.#driver, this.variables, runConf);
                 promises = promises.concat(suitePromises);
 
                 mergeVariables(this.#variables, suite.variables);
@@ -91,6 +105,7 @@ class TestRunner {
                 suiteResults.push(suiteResult);
 
                 await this.closeSession();
+                console.log(`TestRunner::Suite ${i} run complete`);
             }
 
             console.log('Test run complete');
