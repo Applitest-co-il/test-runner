@@ -171,6 +171,19 @@ class VideoRecorder {
             txtImage.print({ font: font, x: 10, y: 10, text: sText });
 
             const image = await Jimp.Jimp.read(filePath);
+            let imageWidth = image.bitmap.width;
+            let imageHeight = image.bitmap.height;
+
+            if (imageWidth % 2 !== 0 || imageHeight % 2 !== 0) {
+                if (imageWidth % 2 !== 0) {
+                    imageWidth++;
+                }
+                if (imageHeight % 2 !== 0) {
+                    imageHeight++;
+                }
+                await image.resize({ w: imageWidth, h: imageHeight });
+            }
+
             await image.blit(txtImage, 10, 10);
             await image.write(filePath);
         } catch (error) {

@@ -5,6 +5,7 @@ class Suite {
     #conf = null;
     #id = '';
     #name = '';
+    #index = -1;
     #type = '';
     #waitBetweenTests = 0;
     #stopOnFailure = false;
@@ -14,6 +15,7 @@ class Suite {
     constructor(suite) {
         this.#id = suite.id ?? '';
         this.#name = suite.name ?? '';
+        this.#index = suite.index ?? -1;
         this.#type = suite.type ?? '';
         this.#waitBetweenTests = suite.waitBetweenTests ?? 0;
         this.#stopOnFailure = suite.stopOnFailure ?? false;
@@ -29,6 +31,8 @@ class Suite {
 
         for (let i = 0; i < tests.length; i++) {
             const testDefinition = tests[i];
+            testDefinition.suiteIndex = this.#index;
+            testDefinition.index = i;
             let test = new Test(testDefinition);
             this.#tests.push(test);
         }

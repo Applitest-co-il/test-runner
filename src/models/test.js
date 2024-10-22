@@ -6,6 +6,8 @@ const VideoRecorder = require('../helpers/video-recorder');
 class Test {
     #id = '';
     #name = '';
+    #suiteIndex = -1;
+    #index = -1;
     #variables = {};
     #skip = false;
 
@@ -19,6 +21,8 @@ class Test {
     constructor(test) {
         this.#id = test.id ?? '';
         this.#name = test.name ?? '';
+        this.#suiteIndex = test.suiteIndex ?? -1;
+        this.#index = test.index ?? -1;
         this.#skip = test.skip ?? false;
         this.#variables = test.variables ?? {};
         this.#buildSteps(test.steps);
@@ -78,9 +82,9 @@ class Test {
 
         if (conf.enableVideo) {
             const options = {
-                baseName: this.#name,
+                baseName: `${this.#suiteIndex}_${this.#index}`,
                 outputDir: `${process.cwd()}/reports/videos`,
-                screenShotInterval: 250
+                screenShotInterval: 600
             };
             this.#videoRecorder = new VideoRecorder(driver, options);
             this.#videoRecorder.start();

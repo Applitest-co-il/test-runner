@@ -1,6 +1,6 @@
 const { TestRunnerError, TestDefinitionError } = require('../helpers/test-errors');
 const Suite = require('./suite');
-const { RunConfiguration } = require('./test-run-configuration');
+const { runConfigurationFactory } = require('./test-run-configuration');
 const { mergeVariables } = require('../helpers/utils');
 
 class TestRunner {
@@ -18,6 +18,7 @@ class TestRunner {
 
         if (options.suites) {
             for (let i = 0; i < options.suites.length; i++) {
+                options.suites[i].index = i;
                 const suite = new Suite(options.suites[i]);
                 this.#suites.push(suite);
             }

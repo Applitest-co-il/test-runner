@@ -68,6 +68,10 @@ class RunConfiguration {
         this.#stopAtStep = value;
     }
 
+    get enableVideo() {
+        return this.#enableVideo;
+    }
+
     get conf() {
         return null;
     }
