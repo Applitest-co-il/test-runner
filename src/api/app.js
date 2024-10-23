@@ -6,7 +6,7 @@ const { runTests } = require('../helpers/runner.js');
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '500KB' }));
 
 app.patch('/test-runner', async (req, res) => {
     console.log('Test runner started');
