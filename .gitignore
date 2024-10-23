@@ -1,6 +1,7 @@
 #project specific files
 downloads/tms*
 reports/r*
+reports/videos/*
 
 
 # Logs
