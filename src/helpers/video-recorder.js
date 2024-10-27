@@ -125,7 +125,6 @@ class VideoRecorder {
         const step = this.#currentStep;
 
         const filePath = path.resolve(this.#recordingPath, frame.toString().padStart(6, '0') + '.png');
-        const notAvailablePng = this.#notAvailablePng;
 
         try {
             if (!this.#driver) {
@@ -150,7 +149,6 @@ class VideoRecorder {
                     })
             );
         } catch (error) {
-            fs.writeFileSync(filePath, notAvailablePng, 'base64');
             console.log(`Screenshot not available (frame: ${frame}). Error: ${error}..`);
         }
     }
