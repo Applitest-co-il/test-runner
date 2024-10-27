@@ -20,7 +20,6 @@ class VideoRecorder {
     #recordingPath = '';
     #intervalScreenshot = null;
     #screenShotPromises = [];
-    #notAvailablePng = null;
 
     constructor(driver, options) {
         if (!driver) {
@@ -52,9 +51,6 @@ class VideoRecorder {
                 fs.rmSync(this.#recordingPath, { recursive: true });
             }
             fs.mkdirSync(this.#recordingPath, { recursive: true });
-
-            const notAvailablePngPath = path.resolve(__dirname, '../assets/not-available.png');
-            this.#notAvailablePng = fs.readFileSync(notAvailablePngPath, 'base64');
         } catch (err) {
             console.error(`Video Recorder: Error creating recording directory for ${this.#recordingPath}: ${err}`);
             this.#recordingPath = '';
@@ -89,12 +85,11 @@ class VideoRecorder {
             const command = `${ffmpeg.path}`;
             const args = [
                 '-y',
-                '-r 10',
-                `-i "${this.#recordingPath}/%06d.png"`,
-                `-vcodec ${vcodec}`,
-                '-crf 32',
+                '-framerate 1',
+                `-i "${this.#recordingPath}/%6d.png"`,
+                `-c:v ${vcodec}`,
                 '-pix_fmt yuv420p',
-                '-vf "setpts=3.0*PTS"',
+                '-r 25',
                 `"${videoPath}"`
             ];
             console.log(`Video generation ffmpeg command: ${command} ${args.join(' ')}`);
@@ -151,7 +146,6 @@ class VideoRecorder {
                         await this.addStepToFrame(filePath, step, frame);
                     })
                     .catch((error) => {
-                        fs.writeFileSync(filePath, notAvailablePng, 'base64');
                         console.log(`Screenshot not available (frame: ${frame}). Error: ${error}..`);
                     })
             );
