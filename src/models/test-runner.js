@@ -46,7 +46,7 @@ class TestRunner {
         return this.#variables;
     }
 
-    async startSession(runType) {
+    async startSession(runType, suiteIndex) {
         console.log('Starting session...');
 
         if (runType == 'web' && TestRunner.#savedDriver) {
@@ -59,6 +59,11 @@ class TestRunner {
             TestRunner.#savedDriver = null;
         } else {
             console.log('No saved driver found');
+        }
+
+        if (suiteIndex > 0 && this.#runConfiguration.appium.noFollowReset) {
+            console.log('No follow reset flag set - skipping reset');
+            this.#runConfiguration.appium.reset = false;
         }
 
         const runConf = runConfigurationFactory(this.#runConfiguration, runType);
@@ -95,7 +100,7 @@ class TestRunner {
                 console.log(`TestRunner::Running suite #${i} out of ${this.#suites.length}`);
                 const suite = this.#suites[i];
 
-                const runConf = await this.startSession(suite.type);
+                const runConf = await this.startSession(suite.type, i);
 
                 const suitePromises = await suite.run(this.#driver, this.variables, runConf);
                 promises = promises.concat(suitePromises);
