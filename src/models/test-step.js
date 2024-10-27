@@ -17,6 +17,7 @@ class TestStep {
 
     #selectorsPerPlatform = {};
     #variables = null;
+    #videoRecorder = null;
 
     #status = 'pending';
     #usedSelectors = '';
@@ -259,9 +260,16 @@ class TestStep {
 
     //#region run
 
-    async run(driver, variables, conf) {
+    async #addFrameToVideo() {
+        if (this.#videoRecorder) {
+            await this.#videoRecorder.addFrame();
+        }
+    }
+
+    async run(driver, variables, conf, videoRecorder) {
         this.#conf = conf;
         this.#variables = variables;
+        this.#videoRecorder = videoRecorder;
 
         try {
             if (this.#condition) {
@@ -442,7 +450,6 @@ class TestStep {
     }
 
     async #pause(driver) {
-        // Implement pause logic
         await driver.pause(this.#value);
     }
 
@@ -489,7 +496,12 @@ class TestStep {
             await driver.waitUntil(
                 async () => {
                     let item = await that.#selectItem(driver);
-                    return !item ? false : true;
+                    if (!item) {
+                        await this.#addFrameToVideo();
+                        return false;
+                    } else {
+                        return true;
+                    }
                 },
                 { timeout: timeout, interval: 1000 }
             );
@@ -507,7 +519,12 @@ class TestStep {
             await driver.waitUntil(
                 async () => {
                     let item = await that.#selectItem(driver);
-                    return !item;
+                    if (item) {
+                        await this.#addFrameToVideo();
+                        return false;
+                    } else {
+                        return true;
+                    }
                 },
                 { timeout: timeout, interval: 1000 }
             );
@@ -560,6 +577,7 @@ class TestStep {
                     .pause(10)
                     .perform();
             }
+            await this.#addFrameToVideo();
             console.log(`VerticalScroll::Scrolled: ${down ? 'down' : 'up'} - iteration: ${i} - Y: ${scrollY}px`);
         }
         return;
@@ -646,6 +664,7 @@ class TestStep {
                 .up()
                 .pause(10)
                 .perform();
+            await this.#addFrameToVideo();
         }
         return;
     }

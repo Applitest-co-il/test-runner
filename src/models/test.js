@@ -84,7 +84,7 @@ class Test {
             const options = {
                 baseName: `${this.#suiteIndex}_${this.#index}`,
                 outputDir: `${process.cwd()}/reports/videos`,
-                screenShotInterval: 600
+                screenShotInterval: conf.runType == 'web' ? 750 : 0
             };
             this.#videoRecorder = new VideoRecorder(driver, options);
             this.#videoRecorder.start();
@@ -108,7 +108,7 @@ class Test {
             }
 
             const step = steps[i];
-            const success = await step.run(driver, this.variables);
+            const success = await step.run(driver, this.variables, conf, this.#videoRecorder);
             if (!success) {
                 this.#status = 'failed';
                 this.#lastStep = i;
