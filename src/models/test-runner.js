@@ -1,5 +1,5 @@
 const { TestRunnerError, TestDefinitionError } = require('../helpers/test-errors');
-const TestSuite = require('./test-suite');
+const Suite = require('./suite');
 const { runConfigurationFactory } = require('./test-run-configuration');
 const { mergeVariables } = require('../helpers/utils');
 
@@ -18,7 +18,8 @@ class TestRunner {
 
         if (options.suites) {
             for (let i = 0; i < options.suites.length; i++) {
-                const suite = new TestSuite(options.suites[i]);
+                options.suites[i].index = i;
+                const suite = new Suite(options.suites[i]);
                 this.#suites.push(suite);
             }
         }
@@ -45,7 +46,7 @@ class TestRunner {
         return this.#variables;
     }
 
-    async startSession(runType) {
+    async startSession(runType, suiteIndex) {
         console.log('Starting session...');
 
         if (runType == 'web' && TestRunner.#savedDriver) {
@@ -58,6 +59,11 @@ class TestRunner {
             TestRunner.#savedDriver = null;
         } else {
             console.log('No saved driver found');
+        }
+
+        if (suiteIndex > 0 && this.#runConfiguration.appium.noFollowReset) {
+            console.log('No follow reset flag set - skipping reset');
+            this.#runConfiguration.appium.reset = false;
         }
 
         const runConf = runConfigurationFactory(this.#runConfiguration, runType);
@@ -87,15 +93,17 @@ class TestRunner {
         try {
             console.log('Starting run...');
 
+            let promises = [];
             let suiteResults = [];
 
             for (let i = 0; i < this.#suites.length; i++) {
                 console.log(`TestRunner::Running suite #${i} out of ${this.#suites.length}`);
                 const suite = this.#suites[i];
 
-                const runConf = await this.startSession(suite.type);
+                const runConf = await this.startSession(suite.type, i);
 
-                await suite.run(this.#driver, this.variables, runConf);
+                const suitePromises = await suite.run(this.#driver, this.variables, runConf);
+                promises = promises.concat(suitePromises);
 
                 mergeVariables(this.#variables, suite.variables);
 
@@ -107,7 +115,7 @@ class TestRunner {
             }
 
             console.log('Test run complete');
-
+            await Promise.all(promises);
             return suiteResults;
         } catch (error) {
             console.error('Error running test:', error);

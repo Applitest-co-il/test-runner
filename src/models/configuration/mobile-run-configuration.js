@@ -10,6 +10,7 @@ class RunConfigurationMobile extends RunConfiguration {
     #autoGrantPermissions = true;
     #forceAppInstall = false;
     #reset = true;
+    #noFollowReset = false;
 
     constructor(options) {
         super(options);
@@ -22,11 +23,16 @@ class RunConfigurationMobile extends RunConfiguration {
         this.#appActivity = options.appium.appActivity ?? '';
         this.#autoGrantPermissions = options.appium.autoGrantPermissions ?? true;
         this.#reset = options.appium.reset ?? true;
+        this.#noFollowReset = options.appium.noFollowReset ?? false;
         this.#forceAppInstall = options.appium.forceAppInstall ?? false;
     }
 
     get reset() {
         return this.#reset;
+    }
+
+    get noFollowReset() {
+        return this.#noFollowReset;
     }
 
     get forceAppInstall() {
@@ -61,8 +67,10 @@ class RunConfigurationMobile extends RunConfiguration {
             wdio.capabilities[this.capabilityPropertyName('app')] = process.env.DEVICEFARM_APP_PATH;
             wdio.capabilities[this.capabilityPropertyName('appPackage')] = this.#appPackage;
             wdio.capabilities[this.capabilityPropertyName('appActivity')] = this.#appActivity;
-            wdio.capabilities[this.capabilityPropertyName('noReset')] = false;
             wdio.capabilities[this.capabilityPropertyName('autoGrantPermissions')] = this.#autoGrantPermissions;
+            if (!this.#reset) {
+                wdio.capabilities[this.capabilityPropertyName('noReset')] = true;
+            }
         }
         return wdio;
     }

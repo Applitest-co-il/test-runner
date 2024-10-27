@@ -1,10 +1,11 @@
 const { mergeVariables } = require('../helpers/utils');
-const TestDefinition = require('./test-definition');
+const Test = require('./test');
 
-class TestSuite {
+class Suite {
     #conf = null;
     #id = '';
     #name = '';
+    #index = -1;
     #type = '';
     #waitBetweenTests = 0;
     #stopOnFailure = false;
@@ -14,6 +15,7 @@ class TestSuite {
     constructor(suite) {
         this.#id = suite.id ?? '';
         this.#name = suite.name ?? '';
+        this.#index = suite.index ?? -1;
         this.#type = suite.type ?? '';
         this.#waitBetweenTests = suite.waitBetweenTests ?? 0;
         this.#stopOnFailure = suite.stopOnFailure ?? false;
@@ -28,9 +30,11 @@ class TestSuite {
         }
 
         for (let i = 0; i < tests.length; i++) {
-            const test = tests[i];
-            let testDefinition = new TestDefinition(test);
-            this.#tests.push(testDefinition);
+            const testDefinition = tests[i];
+            testDefinition.suiteIndex = this.#index;
+            testDefinition.index = i;
+            let test = new Test(testDefinition);
+            this.#tests.push(test);
         }
     }
 
@@ -55,6 +59,8 @@ class TestSuite {
     }
 
     async run(driver, variables, conf) {
+        let promises = [];
+
         const tests = this.#tests;
 
         mergeVariables(this.#variables, variables);
@@ -66,7 +72,9 @@ class TestSuite {
                 continue;
             }
 
-            await test.run(driver, this.variables, conf);
+            const testPromises = await test.run(driver, this.variables, conf);
+            promises = promises.concat(testPromises);
+
             if (this.#stopOnFailure && test.status === 'failed') {
                 break;
             }
@@ -78,6 +86,8 @@ class TestSuite {
             }
             console.log(`TestSuite::Finished test #${i}`);
         }
+
+        return promises;
     }
 
     report() {
@@ -149,4 +159,4 @@ class TestSuite {
     }
 }
 
-module.exports = TestSuite;
+module.exports = Suite;
