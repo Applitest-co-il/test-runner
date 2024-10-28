@@ -46,7 +46,7 @@ class TestRunner {
         return this.#variables;
     }
 
-    async startSession(runType, suiteIndex) {
+    async startSession(runType, runTypeIndex) {
         console.log('Starting session...');
 
         if (runType == 'web' && TestRunner.#savedDriver) {
@@ -61,9 +61,10 @@ class TestRunner {
             console.log('No saved driver found');
         }
 
-        if (suiteIndex > 0 && this.#runConfiguration.appium.noFollowReset) {
+        if (runTypeIndex > 0 && this.#runConfiguration.appium && this.#runConfiguration.appium.noFollowReset) {
             console.log('No follow reset flag set - skipping reset');
             this.#runConfiguration.appium.reset = false;
+            this.#runConfiguration.appium.forceAppInstall = false;
         }
 
         const runConf = runConfigurationFactory(this.#runConfiguration, runType);
@@ -95,12 +96,20 @@ class TestRunner {
 
             let promises = [];
             let suiteResults = [];
+            let currentRunType = this.#suites.length ? this.#suites[0].type : '';
+            let currentRunTypeIndex = 0;
 
             for (let i = 0; i < this.#suites.length; i++) {
                 console.log(`TestRunner::Running suite #${i} out of ${this.#suites.length}`);
                 const suite = this.#suites[i];
 
-                const runConf = await this.startSession(suite.type, i);
+                if (currentRunType !== suite.type) {
+                    currentRunType = suite.type;
+                    currentRunTypeIndex = 0;
+                }
+
+                const runConf = await this.startSession(suite.type, currentRunTypeIndex);
+                currentRunTypeIndex++;
 
                 const suitePromises = await suite.run(this.#driver, this.variables, runConf);
                 promises = promises.concat(suitePromises);
