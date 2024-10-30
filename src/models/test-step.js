@@ -4,6 +4,7 @@ const { checkAppIsInstalled } = require('../helpers/mobile-utils');
 const TestCondition = require('./test-condition');
 const vmRun = require('@danielyaghil/vm-helper');
 var randomstring = require('randomstring');
+const { Key } = require('webdriverio');
 
 class TestStep {
     #conf = null;
@@ -59,7 +60,7 @@ class TestStep {
         'scroll-left-from-element',
         'press-key',
         'execute-script',
-        'perform-action',
+        'perform-actions',
 
         //assertions
         'wait-for-exist',
@@ -120,7 +121,7 @@ class TestStep {
         //'set-google-account',
         'set-geolocation',
         'execute-script',
-        'perform-action',
+        'perform-actions',
         'set-variable',
         'set-variable-from-script',
         'navigate'
@@ -372,8 +373,8 @@ class TestStep {
                 case 'execute-script':
                     await this.#executeScript(driver);
                     break;
-                case 'perform-action':
-                    await this.#performAction(driver);
+                case 'perform-actions':
+                    await this.#performActions(driver);
                     break;
 
                 //assertions
@@ -739,7 +740,7 @@ class TestStep {
             .perform();
     }
 
-    async #performAction(driver) {
+    async #performActions(driver) {
         try {
             const json = JSON.parse(this.#value);
 
@@ -757,22 +758,89 @@ class TestStep {
                     case 'pointer':
                         await this.#performPointerAction(driver, action, actions);
                         break;
+                    case 'key':
+                        await this.#performKeyAction(action, actions);
+                        break;
+                    case 'wheel':
+                        await this.#performWheelAction(action, actions);
+                        break;
+                    default:
+                        break;
                 }
             } else {
                 throw new TestRunnerError(`PerformAction::Actions are required and should be an array of actions`);
             }
-
-            await action.perform();
         } catch (error) {
-            throw new TestRunnerError(`PerformAction::Failed to apply action" - ${error.message}`);
+            if (error instanceof TestRunnerError) {
+                throw error;
+            } else {
+                throw new TestRunnerError(`PerformAction::Failed to apply action" - ${error.message}`);
+            }
+        }
+    }
+
+    async #performWheelAction(actionObj, actions) {
+        try {
+            for (let i = 0; i < actions.length; i++) {
+                const action = actions[i];
+                switch (action.command) {
+                    case 'scroll':
+                        await actionObj.scroll({
+                            deltaX: action.deltaX ?? 0,
+                            deltaY: action.deltaY ?? 0,
+                            duration: action.duration ?? 100
+                        });
+                        break;
+                    case 'pause':
+                        await actionObj.pause(action.duration ?? 10);
+                        break;
+                    default:
+                        console.error(`PerformWheelAction::Invalid wheel action command "${action.command}"`);
+                        break;
+                }
+            }
+            await actionObj.perform();
+        } catch (error) {
+            throw new TestRunnerError(
+                `PerformAction::Failed to perform wheel action  "${this.#value}" - ${error.message}`
+            );
+        }
+    }
+
+    async #performKeyAction(actionObj, actions) {
+        try {
+            for (let i = 0; i < actions.length; i++) {
+                const action = actions[i];
+                let key = Key[action.key] ? Key[action.key] : action.key;
+                switch (action.command) {
+                    case 'down':
+                        await actionObj.down(key);
+                        break;
+                    case 'up':
+                        await actionObj.up(key);
+                        break;
+                    case 'pause':
+                        await actionObj.pause(action.duration ?? 10);
+                        break;
+                    default:
+                        console.error(`PerformKeyAction::Invalid key action command "${action.command}"`);
+                }
+            }
+            await actionObj.perform();
+        } catch (error) {
+            throw new TestRunnerError(
+                `PerformAction::Failed to perform key action  "${this.#value}" - ${error.message}`
+            );
         }
     }
 
     async #performPointerAction(driver, actionObj, actions) {
         try {
+            let commandsCount = 0;
             for (let i = 0; i < actions.length; i++) {
                 const action = actions[i];
                 let origin = 'viewport';
+                commandsCount++;
                 switch (action.command) {
                     case 'move':
                         if (action.origin) {
@@ -787,7 +855,12 @@ class TestStep {
                                 }
                             }
                         }
-                        await actionObj.move({ origin: origin, duration: 100, x: action.x, y: action.y });
+                        await actionObj.move({
+                            origin: origin,
+                            duration: action.duration ?? 100,
+                            x: action.x ?? 0,
+                            y: action.y ?? 0
+                        });
                         break;
                     case 'down':
                         await actionObj.down(action.button ?? 'left');
@@ -798,11 +871,25 @@ class TestStep {
                     case 'pause':
                         await actionObj.pause(action.duration ?? 10);
                         break;
+                    default:
+                        console.error(`PerformPointerAction::Invalid pointer action command "${action.command}"`);
+                        break;
                 }
+
+                if (action.command == 'up') {
+                    await driver.pause(300);
+                    await actionObj.perform();
+                    actionObj.sequence = [];
+                    commandsCount = 0;
+                }
+            }
+
+            if (commandsCount > 0) {
+                await actionObj.perform();
             }
         } catch (error) {
             throw new TestRunnerError(
-                `PerformAction::Failed to parse action value "${this.#value}" - ${error.message}`
+                `PerformAction::Failed to perform pointer action  "${this.#value}" - ${error.message}`
             );
         }
     }
@@ -885,9 +972,6 @@ class TestStep {
             varValue = await item.getText();
         }
         this.#variables[varName] = varValue;
-        console.log(
-            `Variables::Variables are ${JSON.stringify(this.#variables)} following addition of "${varName}" with value "${varValue}"`
-        );
     }
 
     async #setVariableFromScript(driver) {
@@ -904,9 +988,6 @@ class TestStep {
         this.#value = script;
         const varValue = await this.#executeScript(driver);
         this.#variables[varName] = varValue;
-        console.log(
-            `Variables::Variables are ${JSON.stringify(this.#variables)} following addition of "${varName}" with value "${varValue}"`
-        );
     }
 
     async #executeScript(driver) {
