@@ -1,5 +1,5 @@
-const { TestDefinitionError, TestRunnerError } = require('../helpers/test-errors');
-const { replaceVariables, prepareLocalScript } = require('../helpers/utils');
+const { TestDefinitionError, TestRunnerError } = require('../../helpers/test-errors');
+const { replaceVariables, prepareLocalScript } = require('../../helpers/utils');
 const vmRun = require('@danielyaghil/vm-helper');
 
 class TestCondition {

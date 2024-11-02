@@ -1,6 +1,6 @@
 const { TestDefinitionError } = require('../helpers/test-errors');
 const { mergeVariables } = require('../helpers/utils');
-const TestStep = require('./test-step');
+const { stepFactory } = require('./test-step');
 const VideoRecorder = require('../helpers/video-recorder');
 
 class Test {
@@ -36,7 +36,7 @@ class Test {
 
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
-            let testStep = new TestStep(i + 1, step);
+            let testStep = stepFactory(i, step);
             this.#steps.push(testStep);
         }
     }
@@ -84,7 +84,7 @@ class Test {
             const options = {
                 baseName: `${this.#suiteIndex}_${this.#index}`,
                 outputDir: `${process.cwd()}/reports/videos`,
-                screenShotInterval: conf.runType == 'web' ? 750 : 0
+                screenShotInterval: 0
             };
             this.#videoRecorder = new VideoRecorder(driver, options);
             this.#videoRecorder.start();
@@ -115,10 +115,6 @@ class Test {
                 break;
             }
             mergeVariables(this.#variables, step.variables);
-
-            if (this.#videoRecorder) {
-                await this.#videoRecorder.addFrame();
-            }
         }
         if (this.#status === 'pending') {
             this.#status = 'passed';
@@ -127,7 +123,7 @@ class Test {
 
         if (this.#videoRecorder) {
             await this.#videoRecorder.stop();
-            const videoPromise = await this.#videoRecorder.generateVideo();
+            const videoPromise = this.#videoRecorder.generateVideo();
             if (videoPromise) {
                 promises.push(videoPromise);
             }
