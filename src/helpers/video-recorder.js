@@ -10,7 +10,6 @@ const ffmpeg = require('@ffmpeg-installer/ffmpeg');
 class VideoRecorder {
     #outputDir = os.tmpdir();
     #baseName = 'video';
-    #screenShotIntervalinMilliseconds = 0;
 
     #driver = null;
 
@@ -18,8 +17,6 @@ class VideoRecorder {
     #currentStep = 0;
 
     #recordingPath = '';
-    #intervalScreenshot = null;
-    #screenShotPromises = [];
 
     constructor(driver, options) {
         if (!driver) {
@@ -32,9 +29,6 @@ class VideoRecorder {
         }
         if (options.baseName) {
             this.#baseName = options.baseName.trim().replace(/\s/g, '_');
-        }
-        if (options.screenShotInterval) {
-            this.#screenShotIntervalinMilliseconds = options.screenShotInterval;
         }
     }
 
@@ -58,23 +52,15 @@ class VideoRecorder {
         }
 
         this.#frameCount = 0;
-        if (this.#screenShotIntervalinMilliseconds) {
-            const instance = this;
-            this.#intervalScreenshot = setInterval(() => instance.addFrame(), this.#screenShotIntervalinMilliseconds);
-        }
+
+        await this.addFrame();
     }
 
     async stop() {
         console.log('Stopping video recording...');
-
-        if (this.#intervalScreenshot) {
-            clearInterval(this.#intervalScreenshot);
-        }
-
-        await Promise.all(this.#screenShotPromises);
     }
 
-    async generateVideo() {
+    generateVideo() {
         console.log(`Generating video: ${ffmpeg.path}  ${ffmpeg.version}`);
 
         try {
@@ -137,17 +123,9 @@ class VideoRecorder {
                 return;
             }
 
-            this.#screenShotPromises.push(
-                this.#driver
-                    .saveScreenshot(filePath)
-                    .then(async () => {
-                        console.log(`Screenshot (frame: ${frame}) to ${filePath}`);
-                        await this.addStepToFrame(filePath, step, frame);
-                    })
-                    .catch((error) => {
-                        console.log(`Screenshot not available (frame: ${frame}). Error: ${error}..`);
-                    })
-            );
+            console.log(`Screenshot (frame: ${frame}) to ${filePath}`);
+            await this.#driver.saveScreenshot(filePath);
+            await this.addStepToFrame(filePath, step, frame);
         } catch (error) {
             console.log(`Screenshot not available (frame: ${frame}). Error: ${error}..`);
         }
