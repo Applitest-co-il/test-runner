@@ -40,6 +40,9 @@ class VideoRecorder {
         console.log('Starting video recording...');
 
         try {
+            if (!fs.existsSync(this.#outputDir)) {
+                fs.mkdirSync(this.#outputDir, { recursive: true });
+            }
             this.#recordingPath = `${this.#outputDir}/${this.#baseName}`;
             if (fs.existsSync(this.#recordingPath)) {
                 fs.rmSync(this.#recordingPath, { recursive: true });
