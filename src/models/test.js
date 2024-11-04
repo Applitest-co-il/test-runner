@@ -49,6 +49,10 @@ class Test {
         return this.#name;
     }
 
+    get index() {
+        return this.#index;
+    }
+
     get skip() {
         return this.#skip;
     }

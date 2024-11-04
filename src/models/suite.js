@@ -106,6 +106,7 @@ class Suite {
             let testDetail = {
                 id: test.id,
                 suiteId: this.#id,
+                index: test.index,
                 name: test.name,
                 status: test.status,
                 failedStep: {},
@@ -145,6 +146,7 @@ class Suite {
         const output = {
             id: this.#id,
             name: this.#name,
+            index: this.#index,
             success: failed === 0 && pending === 0,
             summary: {
                 total: this.#tests.length,
