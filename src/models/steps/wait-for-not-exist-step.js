@@ -14,7 +14,7 @@ class WaitForNotExistStep extends BaseStep {
                 async () => {
                     let item = await that.selectItem(driver);
                     if (item) {
-                        await this.addFrameToVideo();
+                        await that.addFrameToVideo();
                         return false;
                     } else {
                         return true;

@@ -14,10 +14,10 @@ class WaitForExistStep extends BaseStep {
                 async () => {
                     let item = await that.selectItem(driver);
                     if (!item) {
-                        await this.addFrameToVideo();
+                        await that.addFrameToVideo();
                         return false;
                     } else {
-                        await this.highlightElement(driver, item);
+                        await that.highlightElement(driver, item);
                         return true;
                     }
                 },
