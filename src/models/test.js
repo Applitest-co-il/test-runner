@@ -114,13 +114,20 @@ class Test {
             }
 
             const step = steps[i];
-            const success = await step.run(driver, this.variables, conf, this.#videoRecorder);
-            if (!success) {
+            try {
+                const success = await step.run(driver, this.variables, conf, this.#videoRecorder);
+                if (!success) {
+                    this.#status = 'failed';
+                    this.#lastStep = i;
+                    break;
+                }
+                mergeVariables(this.#variables, step.variables);
+            } catch (err) {
                 this.#status = 'failed';
                 this.#lastStep = i;
+                steps[i].errorDetails = err.message;
                 break;
             }
-            mergeVariables(this.#variables, step.variables);
         }
         if (this.#status === 'pending') {
             this.#status = 'passed';
