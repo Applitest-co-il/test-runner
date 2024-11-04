@@ -333,7 +333,7 @@ class BaseStep {
 
             await this.highlightElement(driver, item);
 
-            this.execute(driver, item);
+            await this.execute(driver, item);
 
             await this.addFrameToVideo();
 
@@ -342,9 +342,7 @@ class BaseStep {
             this.#status = 'failed';
             this.#errorDetails = `${error.message}`;
 
-            if (this.#videoRecorder) {
-                await this.#videoRecorder.addFrame();
-            }
+            await this.addFrameToVideo();
 
             return false;
         }
