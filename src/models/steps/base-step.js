@@ -153,6 +153,10 @@ class BaseStep {
         return this.#value;
     }
 
+    set value(value) {
+        this.#value = value;
+    }
+
     get status() {
         return this.#status;
     }
