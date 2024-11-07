@@ -1,3 +1,4 @@
+const AddValueStep = require('./steps/add-value-step.js');
 const AssertAppInstalledStep = require('./steps/assert-app-installed-step.js');
 const AssertAttributeStep = require('./steps/assert-attribute-step.js');
 const AssertCssStep = require('./steps/assert-css-step.js');
@@ -5,6 +6,7 @@ const AssertIsDisplayedStep = require('./steps/assert-is-displayed-step.js');
 const AssertIsNotDisplayedStep = require('./steps/assert-is-not-displayed-step.js');
 const AssertNumberStep = require('./steps/assert-number-step.js');
 const AssertTextStep = require('./steps/assert-text-step.js');
+const ClearValueStep = require('./steps/clear-value-step.js');
 const ClickCoordinatesStep = require('./steps/click-coordinates-step.js');
 const ClickMultipleStep = require('./steps/click-multiple-step.js');
 const ClickStep = require('./steps/click-step.js');
@@ -72,6 +74,10 @@ function stepFactory(sequence, step) {
             return new ClickCoordinatesStep(sequence, step);
         case 'set-value':
             return new SetValueStep(sequence, step);
+        case 'add-value':
+            return new AddValueStep(sequence, step);
+        case 'clear-value':
+            return new ClearValueStep(sequence, step);
         case 'press-key':
             return new PressKeyStep(sequence, step);
         case 'scroll-up':
