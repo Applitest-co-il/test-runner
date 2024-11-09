@@ -16,7 +16,7 @@ RUN mkdir -p /app/reports/videos
 # Assumes your function is named "app.js", and there is a package.json file in the app directory 
 COPY ./package.json ./package-lock.json  ./app/ 
 COPY ./src/api/*.js  ./app/api/ 
-COPY ./src/assets/*.js ./app/assets/
+COPY ./src/assets/* ./app/assets/
 COPY ./src/cli/*.js ./app/cli/
 COPY ./src/helpers/*.js ./app/helpers/
 COPY ./src/models/*.js ./app/models/
