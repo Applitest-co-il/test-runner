@@ -22,7 +22,6 @@ COPY ./src/helpers/*.js ./app/helpers/
 COPY ./src/models/*.js ./app/models/
 COPY ./src/models/configuration/*.js ./app/models/configuration/
 COPY ./src/models/steps/*.js ./app/models/steps/
-COPY ./src/pocos/*.js ./app/pocos/
 
 #set working directory
 WORKDIR /app
