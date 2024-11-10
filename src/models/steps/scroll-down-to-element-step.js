@@ -6,7 +6,7 @@ class ScrollDownToElementStep extends BaseScrollUpDownToElementStep {
     }
 
     async execute(driver, _) {
-        await this.scrollUpOrDownToElement(driver, false);
+        await this.scrollUpOrDownToElement(driver, true);
     }
 }
 
