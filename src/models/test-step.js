@@ -61,6 +61,7 @@ function stepFactory(sequence, step) {
         case 'generate-random-string':
             return new VariableRandomStringStep(sequence, step);
         case 'set-variable':
+        case 'set-variable-from-element':
             return new VariableSetStep(sequence, step);
         case 'set-variable-from-script':
             return new VariableSetFromJavascriptStep(sequence, step);
