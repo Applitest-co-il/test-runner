@@ -34,8 +34,9 @@ function mergeVariables(baseVariables, newVariables) {
     return baseVariables;
 }
 
-function prepareLocalScript(script) {
-    const localScript = script.replace(/return (.*);/, function (match, p1) {
+function prepareLocalScript(script, variables) {
+    let localScript = replaceVariables(script, variables);
+    localScript = localScript.replace(/return (.*);/, function (match, p1) {
         return `console.output(${p1});`;
     });
     return localScript;
