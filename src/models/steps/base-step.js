@@ -38,6 +38,7 @@ class BaseStep {
 
         //variables
         'set-variable',
+        'set-variable-from-element',
         'set-variable-from-script',
         'generate-random-integer',
         'generate-random-string',
@@ -84,6 +85,7 @@ class BaseStep {
         'scroll-down-from-element',
         'scroll-right-from-element',
         'scroll-left-from-element',
+        'set-variable-from-element',
         'assert-is-displayed',
         'assert-text',
         'assert-number',
@@ -287,16 +289,20 @@ class BaseStep {
             return;
         }
 
-        this.#originalBorderCSS = await item.getCSSProperty('border');
-        await driver.execute((el) => {
-            let elt = el;
-            console.log(`'elt = ${elt}' - parent = ${elt.parentNode} - children = ${elt.parentNode.children}`);
-            while (elt.parentNode && elt.parentNode.children.length == 1) {
-                elt = elt.parentNode;
-            }
-            elt.style.border = '3px solid orangered';
-        }, item);
-        console.log('highlighted');
+        try {
+            this.#originalBorderCSS = await item.getCSSProperty('border');
+            await driver.execute((el) => {
+                let elt = el;
+                console.log(`'elt = ${elt}' - parent = ${elt.parentNode} - children = ${elt.parentNode.children}`);
+                while (elt.parentNode && elt.parentNode.children.length == 1) {
+                    elt = elt.parentNode;
+                }
+                elt.style.border = '3px solid orangered';
+            }, item);
+            console.log('highlighted');
+        } catch (error) {
+            console.log('Could not be highlighted');
+        }
     }
 
     async revertElement(driver, item) {
@@ -304,19 +310,25 @@ class BaseStep {
             return;
         }
 
-        await driver.execute(
-            (el, css) => {
-                let elt = el;
-                while (elt.parentNode && elt.parentNode.children.length == 1) {
-                    elt = elt.parentNode;
-                }
+        try {
+            await driver.execute(
+                (el, css) => {
+                    let elt = el;
+                    while (elt.parentNode && elt.parentNode.children.length == 1) {
+                        elt = elt.parentNode;
+                    }
 
-                elt.style.border = css;
-            },
-            item,
-            this.#originalBorderCSS.value
-        );
-        console.log('highlight reverted');
+                    elt.style.border = css;
+                },
+                item,
+                this.#originalBorderCSS.value
+            );
+            console.log('highlight reverted');
+        } catch (error) {
+            console.log(`Error reverting border: ${error}`);
+        } finally {
+            this.#originalBorderCSS = '';
+        }
     }
 
     async run(driver, variables, conf, videoRecorder) {
@@ -391,10 +403,10 @@ class BaseStep {
     async executeScript(driver) {
         try {
             if (this.#operator === 'sync') {
-                const script = `() => { ${replaceVariables(this.#value, this.#variables)} } `;
+                const script = replaceVariables(this.#value, this.#variables);
                 const result = await driver.execute(script);
                 if (!result) {
-                    throw new TestRunnerError(`ExecuteScript::Script: script for step ${this.#sequence} returns`);
+                    throw new TestRunnerError(`ExecuteScript::Script: script for step ${this.#sequence} failed`);
                 }
                 console.log(`ExecuteScript::Script: script for step ${this.#sequence} returns ${result}`);
                 return result;

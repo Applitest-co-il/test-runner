@@ -86,7 +86,6 @@ class TestCondition {
         let script = replaceVariables(this.#script, variables);
         let result = null;
         if (conf.runType === 'web') {
-            script = `() => { ${script} }`;
             result = await driver.execute(script);
         } else {
             const localScript = prepareLocalScript(script);
