@@ -9,9 +9,7 @@ class AssertIsNotDisplayedStep extends BaseStep {
     async execute(driver) {
         const item = await this.selectItem(driver);
         if (!item) {
-            throw new TestRunnerError(
-                `AssertIsNotDisplayed::Item with selectors [${this.usedSelectors}] was not found`
-            );
+            return;
         }
         let isDisplayed = await item.isDisplayed();
         if (isDisplayed) {

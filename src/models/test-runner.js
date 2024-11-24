@@ -84,7 +84,11 @@ class TestRunner {
                 TestRunner.#savedDriver = this.#driver;
             } else {
                 console.log('Closing session...');
-                await this.#driver.deleteSession();
+                try {
+                    await this.#driver.deleteSession();
+                } catch (error) {
+                    console.error('Error closing session (could be already lost):', error);
+                }
                 TestRunner.#savedDriver = null;
             }
         }

@@ -20,7 +20,7 @@ function replaceVariables(text, variables) {
     });
 
     if (newText.includes('{{') && newText.includes('}}')) {
-        throw new Error(`Some variables were not replaced: ${newText}`);
+        console.log(`Some variables were not replaced: ${newText}`);
     }
 
     return newText;

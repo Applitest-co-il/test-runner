@@ -171,7 +171,7 @@ class BaseStep {
         return this.#operator;
     }
 
-    get usedSelector() {
+    get usedSelectors() {
         return this.#usedSelectors;
     }
 

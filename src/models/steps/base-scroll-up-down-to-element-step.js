@@ -27,7 +27,7 @@ class BaseScrollUpDownToElementStep extends BaseVerticalScrollStep {
         }
         if (!item) {
             throw new TestRunnerError(
-                `ScrollToElement::Item with selectors [${this.usedSelector}] was not found after scrolling ${maxCount} times`
+                `ScrollToElement::Item with selectors [${this.usedSelectors}] was not found after scrolling ${maxCount} times`
             );
         }
     }
