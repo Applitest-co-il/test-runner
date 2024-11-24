@@ -15,7 +15,7 @@ class AssertIsNotDisplayedStep extends BaseStep {
         if (isDisplayed) {
             await this.highlightElement(driver, item);
             await this.addFrameToVideo();
-            await this.revertElementHighlight(driver, item);
+            await this.revertElement(driver, item);
             throw new TestRunnerError(`AssertIsNotDisplayed::Item with selectors [${this.usedSelectors}] is displayed`);
         }
     }

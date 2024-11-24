@@ -33,7 +33,7 @@ class VariableSetStep extends BaseStep {
             await this.highlightElement(driver, item);
             await this.addFrameToVideo();
             varValue = await item.getText();
-            await this.revertElementHighlight(driver, item);
+            await this.revertElement(driver, item);
         }
         this.variables[varName] = varValue;
     }
