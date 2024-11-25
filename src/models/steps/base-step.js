@@ -235,7 +235,13 @@ class BaseStep {
         }
 
         if (this.#condition) {
-            this.#condition.isValid();
+            try {
+                this.#condition.isValid();
+            } catch (error) {
+                throw new TestDefinitionError(
+                    `Condition for step ${this.#sequence} is not valid due to condition ${error.message}`
+                );
+            }
         }
 
         return true;

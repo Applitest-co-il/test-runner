@@ -55,7 +55,7 @@ class TestCondition {
                 }
                 break;
             default:
-                throw new TestDefinitionError(`Condition type ${this.#type} is not a valid one`);
+                throw new TestDefinitionError(`Condition type ${this.#type} is not unknown`);
         }
 
         return true;
