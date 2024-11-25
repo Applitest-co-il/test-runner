@@ -18,7 +18,7 @@ phases:
         commands:
             # The Appium server is written using Node.js. In order to run your desired version of Appium,
             # you first need to set up a Node.js environment that is compatible with your version of Appium.
-            - devicefarm-cli use node 18
+            - devicefarm-cli use node 20
             - node --version
 
             # Use the devicefarm-cli to select a preinstalled major version of Appium.
