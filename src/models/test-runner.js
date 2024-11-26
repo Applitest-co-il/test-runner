@@ -46,13 +46,17 @@ class TestRunner {
         return this.#variables;
     }
 
-    async startSession(runType, runTypeIndex) {
+    async startSession(runType) {
         console.log('Starting session...');
 
-        if (runType == 'web' && TestRunner.#savedDriver) {
+        const runConf = runConfigurationFactory(this.#runConfiguration, runType);
+
+        if (this.#driver) {
+            return runConf;
+        } else if (runType == 'web' && TestRunner.#savedDriver) {
             console.log('Using saved driver');
             this.#driver = TestRunner.#savedDriver;
-            return;
+            return runConf;
         } else if (TestRunner.#savedDriver) {
             console.log('Closing session...');
             await TestRunner.#savedDriver.deleteSession();
@@ -61,13 +65,6 @@ class TestRunner {
             console.log('No saved driver found');
         }
 
-        if (runTypeIndex > 0 && this.#runConfiguration.appium && this.#runConfiguration.appium.noFollowReset) {
-            console.log('No follow reset flag set - skipping reset');
-            this.#runConfiguration.appium.reset = false;
-            this.#runConfiguration.appium.forceAppInstall = false;
-        }
-
-        const runConf = runConfigurationFactory(this.#runConfiguration, runType);
         this.#driver = await runConf.startSession();
         if (!this.#driver) {
             console.error('Driver could not be set');
@@ -77,15 +74,22 @@ class TestRunner {
         return runConf;
     }
 
-    async closeSession() {
+    async closeSession(forceEndSession = false) {
         if (this.#driver) {
             if (this.#runConfiguration.keepSession) {
                 console.log('Saving driver...');
                 TestRunner.#savedDriver = this.#driver;
+            } else if (
+                !forceEndSession &&
+                this.#runConfiguration.appium &&
+                this.#runConfiguration.appium.noFollowReset
+            ) {
+                console.log('Mobile No follow reset flag set - skipping closing or resetting session');
             } else {
                 console.log('Closing session...');
                 try {
                     await this.#driver.deleteSession();
+                    this.#driver = null;
                 } catch (error) {
                     console.error('Error closing session (could be already lost):', error);
                 }
@@ -123,7 +127,8 @@ class TestRunner {
                 let suiteResult = await suite.report();
                 suiteResults.push(suiteResult);
 
-                await this.closeSession();
+                const forceEndSession = i == this.#suites.length - 1 || this.#suites[i + 1].type != currentRunType;
+                await this.closeSession(forceEndSession);
                 console.log(`TestRunner::Suite ${i} run complete`);
             }
 

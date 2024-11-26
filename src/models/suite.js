@@ -121,7 +121,7 @@ class Suite {
                     testDetail.failedStep = {
                         sequence: test.lastStep,
                         command: test.steps[test.lastStep].command,
-                        target: test.steps[test.lastStep].usedSelector,
+                        target: test.steps[test.lastStep].usedSelectors,
                         error: test.steps[test.lastStep].errorDetails,
                         url: ''
                     };
