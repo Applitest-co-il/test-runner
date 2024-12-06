@@ -2,6 +2,7 @@ const { TestDefinitionError } = require('../helpers/test-errors');
 const { mergeVariables } = require('../helpers/utils');
 const { stepFactory } = require('./test-step');
 const VideoRecorder = require('../helpers/video-recorder');
+const AppActivateStep = require('./steps/app-activate-step');
 
 class Test {
     #id = '';
@@ -95,6 +96,9 @@ class Test {
             this.#videoRecorder = new VideoRecorder(driver, options);
             this.#videoRecorder.start();
         }
+
+        const activateAppStep = new AppActivateStep(0, { command: 'app-activate', value: 'current-app' });
+        await activateAppStep.run(driver, this.variables, conf, null);
 
         const steps = this.#steps;
 

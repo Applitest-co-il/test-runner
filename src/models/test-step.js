@@ -1,4 +1,6 @@
 const AddValueStep = require('./steps/add-value-step.js');
+const AppActivateStep = require('./steps/app-activate-step.js');
+const AppBackgroundStep = require('./steps/app-background-step.js');
 const AssertAppInstalledStep = require('./steps/assert-app-installed-step.js');
 const AssertAttributeStep = require('./steps/assert-attribute-step.js');
 const AssertCssStep = require('./steps/assert-css-step.js');
@@ -43,9 +45,12 @@ function stepFactory(sequence, step) {
         //generic
         case 'pause':
             return new PauseStep(sequence, step);
-
         case 'navigate':
             return new NavigateStep(sequence, step);
+        case 'app-activate':
+            return new AppActivateStep(sequence, step);
+        case 'app-background':
+            return new AppBackgroundStep(sequence, step);
 
         //settings
         case 'toggle-location-services':

@@ -5,10 +5,20 @@ class ClickMultipleStep extends BaseStep {
         super(sequence, step);
     }
 
-    async execute(_, item) {
+    async execute(driver, item) {
+        // for (let i = 0; i < this.value; i++) {
+        //     await item.click();
+        // }
+
+        const action = await driver.action('pointer', { pointerType: 'mouse' });
+
+        await action.move({ origin: item }).pause(1);
+
         for (let i = 0; i < this.value; i++) {
-            await item.click();
+            await action.down().pause(1).up().pause(1);
         }
+
+        await action.perform();
     }
 }
 

@@ -29,6 +29,8 @@ class BaseStep {
         //generic
         'pause',
         'navigate',
+        'app-activate',
+        'app-background',
 
         //settings
         'toggle-location-services',
@@ -101,6 +103,7 @@ class BaseStep {
         'scroll-down-to-element'
     ];
     static #commandsRequireValue = [
+        'app-activate',
         'multiple-clicks',
         'click-coordinates',
         'set-value',
