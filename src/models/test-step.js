@@ -12,6 +12,8 @@ const ClearValueStep = require('./steps/clear-value-step.js');
 const ClickCoordinatesStep = require('./steps/click-coordinates-step.js');
 const ClickMultipleStep = require('./steps/click-multiple-step.js');
 const ClickStep = require('./steps/click-step.js');
+const RightClickStep = require('./steps/right-click-step.js');
+const MiddleClickStep = require('./steps/middle-click-step.js');
 const ExecuteScriptStep = require('./steps/execute-script-step.js');
 const NavigateStep = require('./steps/navigate-step.js');
 const PauseStep = require('./steps/pause-step.js');
@@ -78,6 +80,10 @@ function stepFactory(sequence, step) {
             return new ClickMultipleStep(sequence, step);
         case 'click-coordinates':
             return new ClickCoordinatesStep(sequence, step);
+        case 'right-click':
+            return new RightClickStep(sequence, step);
+        case 'middle-click':
+            return new MiddleClickStep(sequence, step);
         case 'set-value':
             return new SetValueStep(sequence, step);
         case 'add-value':

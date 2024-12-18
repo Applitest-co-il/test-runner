@@ -49,6 +49,8 @@ class BaseStep {
         'click',
         'multiple-clicks',
         'click-coordinates',
+        'right-click',
+        'middle-click',
         'set-value',
         'clear-value',
         'add-value',
@@ -80,6 +82,8 @@ class BaseStep {
     static #commandsRequireItem = [
         'click',
         'multiple-clicks',
+        'right-click',
+        'middle-click',
         'set-value',
         'clear-value',
         'add-value',
