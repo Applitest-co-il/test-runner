@@ -1,0 +1,9 @@
+local:
+    NODE_ENV: local
+    TR_FARM: saucelabs
+    TEST_RUNNER_CONF_SECRET: applitest/TestRunner
+
+prod:
+    NODE_ENV: prod
+    TR_FARM: saucelabs
+    TEST_RUNNER_CONF_SECRET: applitest/TestRunner
