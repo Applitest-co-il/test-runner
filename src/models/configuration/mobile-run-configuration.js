@@ -1,4 +1,6 @@
+const { pauseApp } = require('../../helpers/utils');
 const RunConfiguration = require('./base-run-configuration');
+const { SecretsClient } = require('@danielyaghil/aws-helpers');
 
 class RunConfigurationMobile extends RunConfiguration {
     #platformName = '';
@@ -10,7 +12,6 @@ class RunConfigurationMobile extends RunConfiguration {
     #autoGrantPermissions = true;
     #forceAppInstall = false;
     #reset = true;
-    #noFollowReset = false;
 
     constructor(options) {
         super(options);
@@ -23,7 +24,6 @@ class RunConfigurationMobile extends RunConfiguration {
         this.#appActivity = options.appium.appActivity ?? '';
         this.#autoGrantPermissions = options.appium.autoGrantPermissions ?? true;
         this.#reset = options.appium.reset ?? true;
-        this.#noFollowReset = options.appium.noFollowReset ?? false;
         this.#forceAppInstall = options.appium.forceAppInstall ?? false;
     }
 
@@ -31,16 +31,21 @@ class RunConfigurationMobile extends RunConfiguration {
         return this.#reset;
     }
 
-    get noFollowReset() {
-        return this.#noFollowReset;
-    }
-
     get forceAppInstall() {
         return this.#forceAppInstall;
     }
 
-    get conf() {
+    get platformName() {
+        return this.#platformName;
+    }
+
+    get appPackage() {
+        return this.#appPackage;
+    }
+
+    async conf() {
         let wdio = {
+            connectionRetryTimeout: 900000,
             hostname: this.hostname,
             port: this.port,
             logLevel: this.logLevel,
@@ -58,6 +63,30 @@ class RunConfigurationMobile extends RunConfiguration {
             if (!this.#reset) {
                 wdio.capabilities[this.capabilityPropertyName('noReset')] = true;
             }
+        } else if (this.farm === 'saucelabs') {
+            const testRunnerConf = await SecretsClient.instance().get(process.env.TEST_RUNNER_CONF_SECRET);
+            if (!testRunnerConf) {
+                throw new Error('Could not retrieve SauceLabs credentials');
+            }
+
+            wdio.user = testRunnerConf.sauce_user;
+            wdio.key = testRunnerConf.sauce_key;
+            wdio.hostname = testRunnerConf.sauce_hostname;
+            wdio.port = 443;
+            wdio.baseUrl = 'wd/hub';
+            wdio.capabilities['platformName'] = this.#platformName;
+            wdio.capabilities[this.capabilityPropertyName('app')] = `storage:filename=${this.#app}`;
+            wdio.capabilities[this.capabilityPropertyName('appPackage')] = this.#appPackage;
+            wdio.capabilities[this.capabilityPropertyName('appActivity')] = this.#appActivity;
+            wdio.capabilities[this.capabilityPropertyName('autoGrantPermissions')] = this.#autoGrantPermissions;
+            wdio.capabilities[this.capabilityPropertyName('deviceName')] = this.#deviceName;
+            wdio.capabilities[this.capabilityPropertyName('automationName')] =
+                this.#platformName == 'android' ? 'UiAutomator2' : '';
+            wdio.capabilities['sauce:options'] = {
+                name: this.runName,
+                appiumVersion: 'latest',
+                deviceOrientation: 'PORTRAIT'
+            };
         } else if (this.farm === 'aws') {
             // Implement AWS capabilities
             wdio['path'] = process.env.APPIUM_BASE_PATH;
@@ -75,10 +104,6 @@ class RunConfigurationMobile extends RunConfiguration {
         return wdio;
     }
 
-    get platformName() {
-        return this.#platformName;
-    }
-
     async startSession() {
         if (this.forceAppInstall) {
             console.log('Resetting device...');
@@ -86,6 +111,8 @@ class RunConfigurationMobile extends RunConfiguration {
             await resetDriver.execute('mobile: terminateApp', { appId: this.#appPackage });
             await resetDriver.removeApp(this.#appPackage);
             await resetDriver.deleteSession();
+            console.log('Waiting for session to be closed properly');
+            await pauseApp(20000);
         }
 
         const driver = await super.startSession();

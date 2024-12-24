@@ -7,6 +7,7 @@
         "cli:debug": "node --inspect  ./src/cli/index.js -c ./samples/json/sample.json",
         "api": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./cmd/start-api.ps1",
         "api:debug": "nodemon --inspect ./src/api/app.js",
+        "handler:debug": "node --inspect ./src/handlers/local-handler.js",
         "build:windows": "@powershell -NoProfile -Command ./cmd/build.ps1",
         "build:linux": "sh ./cmd/build.sh"
     },
@@ -26,6 +27,7 @@
     },
     "homepage": "https://github.com/Applitest-co-il/test-runner#readme",
     "dependencies": {
+        "@danielyaghil/aws-helpers": "^0.9.72",
         "@danielyaghil/vm-helper": "^0.9.12",
         "@ffmpeg-installer/ffmpeg": "^1.1.0",
         "axios": "^1.7.7",
@@ -38,8 +40,9 @@
         "webdriverio": "^9.2.1"
     },
     "devDependencies": {
-        "eslint": "^8.57.1",
+        "eslint": "^9.15.0",
         "eslint-config-prettier": "^9.1.0",
-        "prettier": "^3.3.3"
+        "prettier": "^3.3.3",
+        "serverless": "^3.38.0"
     }
 }

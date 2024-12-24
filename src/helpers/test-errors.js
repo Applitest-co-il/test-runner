@@ -5,6 +5,12 @@ class TestError extends Error {
     }
 }
 
+class TestAbuseError extends TestError {
+    constructor(message) {
+        super(message);
+    }
+}
+
 class TestRunnerConfigurationError extends TestError {
     constructor(message) {
         super(message);
@@ -33,5 +39,6 @@ module.exports = {
     TestRunnerConfigurationError,
     TestRunnerError,
     TestDefinitionError,
-    TestItemNotFoundError
+    TestItemNotFoundError,
+    TestAbuseError
 };

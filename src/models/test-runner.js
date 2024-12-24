@@ -1,4 +1,4 @@
-const { TestRunnerError, TestDefinitionError } = require('../helpers/test-errors');
+const { TestRunnerError, TestDefinitionError, TestAbuseError } = require('../helpers/test-errors');
 const Suite = require('./suite');
 const { runConfigurationFactory } = require('./test-run-configuration');
 const { mergeVariables } = require('../helpers/utils');
@@ -79,11 +79,7 @@ class TestRunner {
             if (this.#runConfiguration.keepSession) {
                 console.log('Saving driver...');
                 TestRunner.#savedDriver = this.#driver;
-            } else if (
-                !forceEndSession &&
-                this.#runConfiguration.appium &&
-                this.#runConfiguration.appium.noFollowReset
-            ) {
+            } else if (!forceEndSession && this.#runConfiguration.noFollowReset) {
                 console.log('Mobile No follow reset flag set - skipping closing or resetting session');
             } else {
                 console.log('Closing session...');
@@ -105,40 +101,53 @@ class TestRunner {
             let promises = [];
             let suiteResults = [];
             let currentRunType = this.#suites.length ? this.#suites[0].type : '';
-            let currentRunTypeIndex = 0;
 
             for (let i = 0; i < this.#suites.length; i++) {
-                console.log(`TestRunner::Running suite #${i} out of ${this.#suites.length}`);
+                console.log(
+                    `TestRunner::Running suite #${i} of type ${this.#suites[i].type} out of ${this.#suites.length}`
+                );
                 const suite = this.#suites[i];
 
                 if (currentRunType !== suite.type) {
                     currentRunType = suite.type;
-                    currentRunTypeIndex = 0;
                 }
 
-                const runConf = await this.startSession(suite.type, currentRunTypeIndex);
-                currentRunTypeIndex++;
+                try {
+                    const runConf = await this.startSession(suite.type);
 
-                const suitePromises = await suite.run(this.#driver, this.variables, runConf);
-                promises = promises.concat(suitePromises);
+                    const suitePromises = await suite.run(this.#driver, this.variables, runConf);
+                    promises = promises.concat(suitePromises);
 
-                mergeVariables(this.#variables, suite.variables);
+                    mergeVariables(this.#variables, suite.variables);
 
-                let suiteResult = await suite.report();
-                suiteResults.push(suiteResult);
+                    let suiteResult = await suite.report();
+                    suiteResults.push(suiteResult);
 
-                const forceEndSession = i == this.#suites.length - 1 || this.#suites[i + 1].type != currentRunType;
-                await this.closeSession(forceEndSession);
-                console.log(`TestRunner::Suite ${i} run complete`);
+                    const forceEndSession = i == this.#suites.length - 1 || this.#suites[i + 1].type != currentRunType;
+                    await this.closeSession(forceEndSession);
+                    console.log(`TestRunner::Suite ${i} run complete`);
+                } catch (error) {
+                    if (error instanceof TestAbuseError) {
+                        throw error;
+                    } else {
+                        console.error('Error running suite:', error);
+                        throw new Error(`error running suite: ${error.message}`);
+                    }
+                    await this.closeSession(true);
+                }
             }
 
             console.log('Test run complete');
             await Promise.all(promises);
             return suiteResults;
         } catch (error) {
-            console.error('Error running test:', error);
+            if (error instanceof TestAbuseError) {
+                throw error;
+            } else {
+                console.error('Error running test:', error);
+            }
         }
-        return false;
+        return null;
     }
 }
 

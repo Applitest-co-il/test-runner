@@ -1,7 +1,8 @@
 const { remote } = require('webdriverio');
-const { TestRunnerConfigurationError } = require('../../helpers/test-errors');
+const { TestRunnerConfigurationError, TestAbuseError } = require('../../helpers/test-errors');
 
 class RunConfiguration {
+    #runName = '';
     #runType = '';
     #farm = 'local';
     #hostname = 'localhost';
@@ -11,8 +12,10 @@ class RunConfiguration {
     #startFromStep = -1;
     #stopAtStep = -1;
     #enableVideo = false;
+    #noFollowReset = false;
 
     constructor(options) {
+        this.#runName = options.runName ?? `RUN ${new Date().toISOString()}`;
         this.#runType = options.runType ?? 'mobile';
         this.#farm = options.farm ?? process.env.TR_FARM ?? 'local';
         this.#logLevel = options.logLevel ?? 'error';
@@ -22,6 +25,11 @@ class RunConfiguration {
         this.#startFromStep = options.startFromStep ?? -1;
         this.#stopAtStep = options.stopAtStep ?? -1;
         this.#enableVideo = options.enableVideo ?? false;
+        this.#noFollowReset = options.noFollowReset ?? false;
+    }
+
+    get runName() {
+        return this.#runName;
     }
 
     get runType() {
@@ -52,6 +60,10 @@ class RunConfiguration {
         this.#keepSession = value;
     }
 
+    get noFollowReset() {
+        return this.#noFollowReset;
+    }
+
     get startFromStep() {
         return this.#startFromStep;
     }
@@ -72,7 +84,7 @@ class RunConfiguration {
         return this.#enableVideo;
     }
 
-    get conf() {
+    async conf() {
         return null;
     }
 
@@ -82,12 +94,27 @@ class RunConfiguration {
 
     async startSession() {
         console.log('Starting session...');
-        let driver = await remote(this.conf);
-        if (!driver) {
-            console.error('Driver could not be set');
-            throw new TestRunnerConfigurationError('Driver could not be set');
+
+        let conf = null;
+        try {
+            conf = await this.conf();
+            let driver = await remote(conf);
+            if (!driver) {
+                console.error('Driver could not be set');
+                throw new TestRunnerConfigurationError('Driver could not be set');
+            }
+            return driver;
+        } catch (err) {
+            if (err.message.indexOf('CCYAbuse - too many jobs when running') > -1) {
+                const errMsg = conf
+                    ? `Error: Too many jobs running on ${conf.hostname}`
+                    : 'Error: Too many jobs running';
+                console.error(errMsg);
+                throw new TestAbuseError(errMsg);
+            }
+            console.error(`Error starting session: ${err}`);
+            throw new TestRunnerConfigurationError(`Driver could not be set: ${err}`);
         }
-        return driver;
     }
 }
 

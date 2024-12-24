@@ -2,6 +2,7 @@
 downloads/tms*
 reports/r*
 reports/videos/*
+.env
 
 
 # Logs

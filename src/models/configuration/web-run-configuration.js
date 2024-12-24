@@ -1,9 +1,11 @@
 const RunConfiguration = require('./base-run-configuration');
 const { TestRunnerConfigurationError } = require('../../helpers/test-errors');
+const { SecretsClient } = require('@danielyaghil/aws-helpers');
 
 class RunConfigurationWeb extends RunConfiguration {
     #browserName = '';
     #browserVersion = '';
+    #platformName = '';
     #startUrl = '';
     #incognito = false;
     #startMaximized = false;
@@ -16,7 +18,8 @@ class RunConfigurationWeb extends RunConfiguration {
         super(options);
 
         this.#browserName = options.browser.name ?? 'chrome';
-        this.#browserVersion = options.browser.version ?? '';
+        this.#browserVersion = options.browser.version ?? 'latest';
+        this.#platformName = options.browser.platform ?? 'Windows 10';
         this.#resolution = options.browser.resolution ?? '1920x1080';
         this.#startUrl = options.browser.startUrl ?? '';
         this.#incognito = options.browser.incognito ?? false;
@@ -28,9 +31,9 @@ class RunConfigurationWeb extends RunConfiguration {
         }
     }
 
-    get conf() {
+    async conf() {
         let wdio = {
-            connectionRetryTimeout: 180000,
+            connectionRetryTimeout: 900000,
             logLevel: this.logLevel,
             capabilities: {
                 browserName: this.#browserName
@@ -59,9 +62,26 @@ class RunConfigurationWeb extends RunConfiguration {
 
         if (this.farm === 'local') {
             wdio.capabilities['browserName'] = this.#browserName;
-        }
+        } else if (this.farm === 'saucelabs') {
+            const testRunnerConf = await SecretsClient.instance().get(process.env.TEST_RUNNER_CONF_SECRET);
+            if (!testRunnerConf) {
+                throw new Error('Could not retrieve SauceLabs credentials');
+            }
 
-        if (this.farm === 'remote') {
+            wdio.user = testRunnerConf.sauce_user;
+            wdio.key = testRunnerConf.sauce_key;
+            wdio.hostname = testRunnerConf.sauce_hostname;
+            wdio.port = 443;
+            wdio.path = '/wd/hub';
+
+            wdio.capabilities['browserName'] = this.#browserName;
+            wdio.capabilities['browserVersion'] = this.#browserVersion;
+            wdio.capabilities['platformName'] = this.#platformName;
+
+            wdio.capabilities['sauce:options'] = {
+                name: this.runName
+            };
+        } else if (this.farm === 'aws') {
             // Implement AWS capabilities
             let url = new URL(process.env.TR_FARM_SESSION_URL);
             wdio.protocol = url.protocol.replace(':', '');
@@ -73,6 +93,8 @@ class RunConfigurationWeb extends RunConfiguration {
             wdio.hostname = url.hostname;
             wdio.path = url.pathname;
         }
+
+        console.log(`Web configuration FINAL: ${JSON.stringify(wdio)}`);
 
         return wdio;
     }

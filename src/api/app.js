@@ -1,3 +1,4 @@
+require('dotenv').config({ path: './.env', debug: true });
 const express = require('express');
 const cors = require('cors');
 
@@ -43,6 +44,6 @@ app.patch('/test-runner', async (req, res) => {
     res.status(200).json(output);
 });
 
-app.listen(8282, () => {
-    console.log('Server started on port 8282');
+app.listen(process.env.TR_PORT, () => {
+    console.log(`Server started on port ${process.env.TR_PORT}`);
 });
