@@ -33,6 +33,7 @@ async function runTests(options) {
         }
 
         output = {
+            runCompleted: true,
             success: success,
             summary: summary,
             suiteResults: suiteResults,

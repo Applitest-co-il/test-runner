@@ -88,9 +88,7 @@ class Test {
         if (conf.enableVideo) {
             const options = {
                 baseName: `${this.#suiteIndex}_${this.#index}`,
-                outputDir: process.env.DEVICEFARM_LOG_DIR
-                    ? `${process.env.DEVICEFARM_LOG_DIR}/videos`
-                    : `${process.cwd()}/reports/videos`,
+                outputDir: process.env.NODE_ENV == 'prod' ? `/tmp/videos` : `${process.cwd()}/reports/videos`,
                 screenShotInterval: 0
             };
             this.#videoRecorder = new VideoRecorder(driver, options);
@@ -142,6 +140,7 @@ class Test {
             await this.#videoRecorder.stop();
             const videoPromise = this.#videoRecorder.generateVideo();
             if (videoPromise) {
+                console.log(`Video promise OK for test "${this.#suiteIndex}_${this.#index}"`);
                 promises.push(videoPromise);
             }
         }

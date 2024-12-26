@@ -1,14 +1,11 @@
-const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const spawn = require('child_process').spawn;
 const Jimp = require('jimp');
 const JimpFonts = require('jimp/fonts');
 
-const ffmpeg = require('@ffmpeg-installer/ffmpeg');
-
 class VideoRecorder {
-    #outputDir = os.tmpdir();
+    #outputDir = '';
     #baseName = 'video';
 
     #driver = null;
@@ -64,14 +61,21 @@ class VideoRecorder {
     }
 
     generateVideo() {
-        console.log(`Generating video: ${ffmpeg.path}  ${ffmpeg.version}`);
+        console.log(`Generating video for ${this.#baseName}...`);
 
         try {
             const fileExtension = 'mp4';
             const vcodec = 'libx264';
             const videoPath = path.resolve(this.#outputDir, `${this.#baseName}.${fileExtension}`);
 
-            const command = `${ffmpeg.path}`;
+            let command = `${process.cwd()}/bin/ffmpeg`;
+            if (process.env.NODE_ENV !== 'prod') {
+                const ffmpeg = require('@ffmpeg-installer/ffmpeg');
+                command = ffmpeg.path;
+            }
+
+            console.log(`FFmpeg Command: ${command}`);
+
             const args = [
                 '-y',
                 '-framerate 1',
@@ -95,7 +99,7 @@ class VideoRecorder {
                     windowsHide: true
                 });
                 cp.on('close', () => {
-                    console.log(`Generated video: "${videoPath}" (${Date.now() - start}ms)`);
+                    console.log(`Generated video complete: "${videoPath}" (${Date.now() - start}ms)`);
                     if (fs.existsSync(this.#recordingPath)) {
                         fs.rmSync(this.#recordingPath, { recursive: true });
                     }

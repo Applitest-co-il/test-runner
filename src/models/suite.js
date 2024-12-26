@@ -73,6 +73,8 @@ class Suite {
             }
 
             const testPromises = await test.run(driver, this.variables, conf);
+
+            console.log(`Adding video promise "${this.#index}_${i}" to suite promises`);
             promises = promises.concat(testPromises);
 
             if (this.#stopOnFailure && test.status === 'failed') {

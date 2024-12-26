@@ -2,7 +2,8 @@ const axios = require('axios');
 const fs = require('fs');
 
 async function downloadFile(url, fileName, override = false) {
-    const fileLocalPath = `${process.cwd()}/downloads/${fileName}`;
+    const fileLocalPath =
+        process.env.NODE_ENV == 'prod' ? `/tmp/${fileName}` : `${process.cwd()}/downloads/${fileName}`;
 
     if (!override) {
         const existLocalApp = fs.existsSync(fileLocalPath);

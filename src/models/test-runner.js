@@ -116,6 +116,8 @@ class TestRunner {
                     const runConf = await this.startSession(suite.type);
 
                     const suitePromises = await suite.run(this.#driver, this.variables, runConf);
+
+                    console.log(`Adding videos promises for suite ${i} to main promises`);
                     promises = promises.concat(suitePromises);
 
                     mergeVariables(this.#variables, suite.variables);
@@ -127,18 +129,20 @@ class TestRunner {
                     await this.closeSession(forceEndSession);
                     console.log(`TestRunner::Suite ${i} run complete`);
                 } catch (error) {
+                    await this.closeSession(true);
                     if (error instanceof TestAbuseError) {
                         throw error;
                     } else {
                         console.error('Error running suite:', error);
                         throw new Error(`error running suite: ${error.message}`);
                     }
-                    await this.closeSession(true);
                 }
             }
 
-            console.log('Test run complete');
+            console.log('Test run complete waiting for all video promises to complete');
             await Promise.all(promises);
+            console.log('All video promises completed');
+
             return suiteResults;
         } catch (error) {
             if (error instanceof TestAbuseError) {

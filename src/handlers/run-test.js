@@ -10,7 +10,11 @@ async function run(event, context) {
 
     try {
         for (const message of event.Records) {
-            await processMessage(message.body);
+            let messageBody = message.body;
+            if (typeof messageBody === 'string') {
+                messageBody = JSON.parse(messageBody);
+            }
+            await processMessage(messageBody);
         }
     } catch (err) {
         console.error(`TestRunner::Error:: ${err}`);
@@ -26,6 +30,7 @@ async function run(event, context) {
 
 async function reportFailure(reportBucket, reportKey, errorMessage) {
     const output = {
+        runCompleted: true,
         success: false,
         runningError: errorMessage
     };
@@ -41,9 +46,12 @@ async function reportOutput(reportBucket, reportKey, output) {
 
 //#region main methods
 
-async function getConf(testRunDetail, reportBucket, reportKey) {
+async function getConf(confUrl, reportBucket, reportKey) {
     try {
-        const confUrl = testRunDetail.confUrl;
+        console.log(
+            `TestRunner::Getting Configuration With aregs "${confUrl}", "${reportBucket}", "${reportKey}", "$ `
+        );
+
         const localConf = await downloadFile(confUrl, 'options.json', true);
         if (!localConf) {
             const errMsg = `TestRunner::Error::Configuration  ${confUrl} could not be retrieved`;
@@ -78,7 +86,7 @@ async function processMessage(testRunDetail) {
     const reportFolder = testRunDetail.reportFolder;
     const reportKey = `${reportFolder}/reports.json`;
 
-    let runConf = await getConf(testRunDetail, reportBucket, reportKey);
+    let runConf = await getConf(testRunDetail.confUrl, reportBucket, reportKey);
     if (!runConf) {
         return;
     }
@@ -95,7 +103,7 @@ async function processMessage(testRunDetail) {
     }
 
     try {
-        const localVideosFolder = `${process.cwd()}/reports/videos`;
+        const localVideosFolder = process.env.NODE_ENV == 'prod' ? `/tmp/videos` : `${process.cwd()}/reports/videos`;
         const s3Instance = await S3Client.instance();
         const videos = await fs.promises.readdir(localVideosFolder);
         for (const video of videos) {
