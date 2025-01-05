@@ -6,6 +6,7 @@
         "start": "node ./src/cli/index.js",
         "cli:debug": "node --inspect  ./src/cli/index.js -c ./samples/json/sample.json",
         "api": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./cmd/start-api.ps1",
+        "api:only": "node ./src/api/app.js",
         "api:debug": "nodemon --inspect ./src/api/app.js",
         "handler:debug": "node --inspect ./src/handlers/local-handler.js",
         "build:windows": "@powershell -NoProfile -Command ./cmd/build.ps1",
