@@ -4,6 +4,7 @@
 /.prettierrc.json
 /.gitignore
 /.npmignore
+/.prettierignore
 /eslint.config.mjs
 /src/api
 /scr/cli
