@@ -68,8 +68,8 @@ class VideoRecorder {
             const vcodec = 'libx264';
             const videoPath = path.resolve(this.#outputDir, `${this.#baseName}.${fileExtension}`);
 
-            let command = `${process.cwd()}/bin/ffmpeg`;
-            if (process.env.NODE_ENV !== 'prod') {
+            let command = process.env.FFMPEG_PATH;
+            if (!command) {
                 const ffmpeg = require('@ffmpeg-installer/ffmpeg');
                 command = ffmpeg.path;
             }
