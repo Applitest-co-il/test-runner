@@ -8,8 +8,8 @@ on:
             - 'main'
         paths:
             - 'src/**.js'
-            - src/package.json
-            - src/package-lock.json
+            - package.json
+            - package-lock.json
             - README.rnd
 defaults:
     run:
