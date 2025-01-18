@@ -9,6 +9,6 @@ It get as a configuration file and depending on the configuration, it can:
 - run tests on mobile app
 
 Depending on configuration, tests are either runs locally or on remote grid (supported grids: Saucelabs).
-Details of the configuration can be found at see [configuration details](https://githib.com/applitest/test-runner/docs/README-CONF.md)
+Details of the configuration can be found at see [configuration details](https://github.com/applitest/test-runner/docs/README-CONF.md)
 
-For local run stetup, please see [setup locally](https://githib.com/applitest/test-runner/docs/README-LOCAL.md).
+For local run stetup, please see [setup locally](https://github.com/applitest/test-runner/docs/README-LOCAL.md).
