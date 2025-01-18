@@ -2,7 +2,6 @@ const { mergeVariables } = require('../helpers/utils');
 const Test = require('./test');
 
 class Suite {
-    #conf = null;
     #id = '';
     #name = '';
     #index = -1;

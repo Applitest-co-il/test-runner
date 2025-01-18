@@ -23,7 +23,7 @@ class WaitForExistStep extends BaseStep {
                 },
                 { timeout: timeout, interval: 1000 }
             );
-        } catch (e) {
+        } catch {
             throw new TestRunnerError(
                 `Element with selector [${this.usedSelectors}] did not appear on screen up to ${timeout}ms`
             );

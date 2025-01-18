@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 
 const { downloadFile } = require('../helpers/download-file.js');
-const { runTests } = require('../helpers/runner.js');
+const { runTests } = require('../lib/index.js');
 
 const app = express();
 app.use(cors());

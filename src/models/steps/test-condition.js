@@ -3,8 +3,6 @@ const { replaceVariables, prepareLocalScript } = require('../../helpers/utils');
 const vmRun = require('@danielyaghil/vm-helper');
 
 class TestCondition {
-    #conf = null;
-
     #type = '';
     #selector = '';
     #script = '';

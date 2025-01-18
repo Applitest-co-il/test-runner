@@ -1,16 +1,21 @@
 {
-    "name": "test-runner",
-    "version": "0.9.21",
-    "description": "Applitest Manager Test Runner",
+    "name": "@applitest/test-runner",
+    "version": "0.5.0",
+    "description": "Applitest Manager Test Runner. It receives a json based configuration file and runs automation tests accordingly on web or mobile (via webdriverio, webdriver and appium).",
+    "main": "/src/lib/index.js",
     "scripts": {
-        "start": "node ./src/cli/index.js",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "cli": "node ./src/cli/index.js",
         "cli:debug": "node --inspect  ./src/cli/index.js -c ./samples/json/sample.json",
         "api": "@powershell -NoProfile -ExecutionPolicy Unrestricted -Command ./cmd/start-api.ps1",
         "api:only": "node ./src/api/app.js",
-        "api:debug": "nodemon --inspect ./src/api/app.js",
-        "handler:debug": "node --inspect ./src/handlers/local-handler.js",
+        "api:only:debug": "nodemon --inspect ./src/api/app.js",
         "build:windows": "@powershell -NoProfile -Command ./cmd/build.ps1",
-        "build:linux": "sh ./cmd/build.sh"
+        "build:linux": "sh ./cmd/build.sh",
+        "format:check": "prettier --check .",
+        "format:write": "prettier --write .",
+        "lint:check": "eslint .",
+        "lint:fix": "eslint --fix ."
     },
     "repository": {
         "type": "git",

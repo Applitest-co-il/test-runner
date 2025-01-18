@@ -313,7 +313,7 @@ class BaseStep {
                 elt.style.border = '3px solid orangered';
             }, item);
             console.log('highlighted');
-        } catch (error) {
+        } catch {
             console.log('Could not be highlighted');
         }
     }

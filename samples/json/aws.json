@@ -82,32 +82,24 @@
                         },
                         {
                             "note": "Wait for the Base URL dialog to open",
-                            "selectors": [
-                                "android|||//android.widget.EditText[@resource-id=\"android:id/edit\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.EditText[@resource-id=\"android:id/edit\"]"],
                             "value": "",
                             "command": "wait-for-exist",
                             "operator": null
                         },
                         {
                             "note": "Set value for the Base URL",
-                            "selectors": [
-                                "android|||//android.widget.EditText[@resource-id=\"android:id/edit\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.EditText[@resource-id=\"android:id/edit\"]"],
                             "value": "{{baseURL}}",
                             "command": "set-value"
                         },
                         {
-                            "selectors": [
-                                "android|||id=android:id/button1"
-                            ],
+                            "selectors": ["android|||id=android:id/button1"],
                             "note": "Click on OK button",
                             "command": "click"
                         },
                         {
-                            "selectors": [
-                                "android|||id=com.agritask.mobile.android:id/manager_frag_button_back"
-                            ],
+                            "selectors": ["android|||id=com.agritask.mobile.android:id/manager_frag_button_back"],
                             "note": "Click on X button to close the About screen",
                             "command": "click"
                         },
@@ -149,17 +141,13 @@
                             "command": "set-value"
                         },
                         {
-                            "selectors": [
-                                "android|||id=loginButton"
-                            ],
+                            "selectors": ["android|||id=loginButton"],
                             "note": "Click On Login Button",
                             "command": "click"
                         },
                         {
                             "note": "Verify user is successfully logged in i.e. Settings option is visible.",
-                            "selectors": [
-                                "android|||//android.widget.TextView[@text=\"Settings\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Settings\"]"],
                             "value": "60000",
                             "command": "wait-for-exist",
                             "operator": null
@@ -224,17 +212,13 @@
                             "command": "pause"
                         },
                         {
-                            "selectors": [
-                                "android|||//android.widget.TextView[@text=\"Map\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Map\"]"],
                             "note": "Click to open the Map tab.",
                             "command": "click"
                         },
                         {
                             "note": "Wait and verify Map tab is Open.",
-                            "selectors": [
-                                "android|||//android.widget.TextView[@text=\"Map\" and @selected=\"true\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Map\" and @selected=\"true\"]"],
                             "value": "10000",
                             "command": "wait-for-exist"
                         },
@@ -252,9 +236,7 @@
                             "command": "pause"
                         },
                         {
-                            "selectors": [
-                                "android|||//android.view.View[@content-desc=\"Google Map\"]"
-                            ],
+                            "selectors": ["android|||//android.view.View[@content-desc=\"Google Map\"]"],
                             "note": "Click at the center of the Google Map element",
                             "command": "click"
                         },
@@ -265,9 +247,7 @@
                             "command": "pause"
                         },
                         {
-                            "selectors": [
-                                "android|||//android.view.View[@content-desc=\"Google Map\"]"
-                            ],
+                            "selectors": ["android|||//android.view.View[@content-desc=\"Google Map\"]"],
                             "note": "Click again at the center of the Google Map element - to simulate click on the plot beneath My Location point.",
                             "command": "click"
                         },
@@ -340,32 +320,24 @@
                         },
                         {
                             "note": "Wait for the Base URL dialog to open",
-                            "selectors": [
-                                "android|||//android.widget.EditText[@resource-id=\"android:id/edit\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.EditText[@resource-id=\"android:id/edit\"]"],
                             "value": "",
                             "command": "wait-for-exist",
                             "operator": null
                         },
                         {
                             "note": "Set value for the Base URL",
-                            "selectors": [
-                                "android|||//android.widget.EditText[@resource-id=\"android:id/edit\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.EditText[@resource-id=\"android:id/edit\"]"],
                             "value": "{{baseURL}}",
                             "command": "set-value"
                         },
                         {
-                            "selectors": [
-                                "android|||id=android:id/button1"
-                            ],
+                            "selectors": ["android|||id=android:id/button1"],
                             "note": "Click on OK button",
                             "command": "click"
                         },
                         {
-                            "selectors": [
-                                "android|||id=com.agritask.mobile.android:id/manager_frag_button_back"
-                            ],
+                            "selectors": ["android|||id=com.agritask.mobile.android:id/manager_frag_button_back"],
                             "note": "Click on X button to close the About screen",
                             "command": "click"
                         },
@@ -391,16 +363,12 @@
                         },
                         {
                             "note": "Wait and verify Home screen is open and Play Store app is visible.",
-                            "selectors": [
-                                "android|||//android.widget.TextView[@text=\"Play Store\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Play Store\"]"],
                             "value": "10000",
                             "command": "wait-for-exist"
                         },
                         {
-                            "selectors": [
-                                "android|||//android.widget.TextView[@text=\"Play Store\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Play Store\"]"],
                             "note": "Click to open Play Store app",
                             "command": "click"
                         },
@@ -429,9 +397,7 @@
                         },
                         {
                             "note": "Assign GMail ID in Username field",
-                            "selectors": [
-                                "android|||//android.widget.EditText[@resource-id=\"identifierId\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.EditText[@resource-id=\"identifierId\"]"],
                             "value": "{{gmailAccountEmail}}",
                             "command": "set-value"
                         },
@@ -441,17 +407,13 @@
                             "command": "pause"
                         },
                         {
-                            "selectors": [
-                                "android|||//android.widget.Button[@text=\"Next\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.Button[@text=\"Next\"]"],
                             "note": "Click on Next Button",
                             "command": "click"
                         },
                         {
                             "note": "Wait and Verify Welcome screen to assign Password is open",
-                            "selectors": [
-                                "android|||//android.view.View[@resource-id=\"password\"]"
-                            ],
+                            "selectors": ["android|||//android.view.View[@resource-id=\"password\"]"],
                             "value": "20000",
                             "command": "wait-for-exist"
                         },
@@ -469,9 +431,7 @@
                             "command": "pause"
                         },
                         {
-                            "selectors": [
-                                "android|||//android.widget.Button[@text=\"Next\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.Button[@text=\"Next\"]"],
                             "note": "Click on Next Button",
                             "command": "click"
                         },
@@ -508,9 +468,7 @@
                                 "value": "",
                                 "script": ""
                             },
-                            "selectors": [
-                                "android|||//android.widget.EditText[@resource-id=\"phoneNumberId\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.EditText[@resource-id=\"phoneNumberId\"]"],
                             "value": "{{gmailRecoveryPhoneNumber}}",
                             "command": "set-value"
                         },
@@ -533,9 +491,7 @@
                                 "value": "",
                                 "script": ""
                             },
-                            "selectors": [
-                                "android|||//android.widget.Button[@text=\"Next\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.Button[@text=\"Next\"]"],
                             "command": "click"
                         },
                         {
@@ -552,24 +508,18 @@
                         },
                         {
                             "note": "Wait and verify Google Terms & Condition acceptance screen is open.",
-                            "selectors": [
-                                "android|||//android.widget.Button[@text=\"Google Terms of Service\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.Button[@text=\"Google Terms of Service\"]"],
                             "value": "10000",
                             "command": "wait-for-exist"
                         },
                         {
-                            "selectors": [
-                                "android|||//android.widget.Button[@text=\"I agree\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.Button[@text=\"I agree\"]"],
                             "note": "Click on I Agree button.",
                             "command": "click"
                         },
                         {
                             "note": "Wait for Login Process to complete",
-                            "selectors": [
-                                "android|||//android.widget.TextView[@text=\"Search\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Search\"]"],
                             "value": "30000",
                             "command": "pause"
                         },
@@ -581,16 +531,12 @@
                                 "value": "",
                                 "script": ""
                             },
-                            "selectors": [
-                                "android|||//android.widget.Button[@text=\"ACCEPT\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.Button[@text=\"ACCEPT\"]"],
                             "command": "click"
                         },
                         {
                             "note": "Wait for Login Process to complete",
-                            "selectors": [
-                                "android|||//android.widget.TextView[@text=\"Search\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Search\"]"],
                             "value": "30000",
                             "command": "pause"
                         },
@@ -603,9 +549,7 @@
                         },
                         {
                             "note": "Wait and verify Home screen is open and Play Store app is visible.",
-                            "selectors": [
-                                "android|||//android.widget.TextView[@text=\"Play Store\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Play Store\"]"],
                             "value": "10000",
                             "command": "wait-for-exist"
                         },
@@ -617,16 +561,12 @@
                         },
                         {
                             "note": "Wait and Verify list of Apps screen is open and Agritask App is visible.",
-                            "selectors": [
-                                "android|||//android.widget.TextView[@content-desc=\"AgriTask\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.TextView[@content-desc=\"AgriTask\"]"],
                             "value": 5000,
                             "command": "wait-for-exist"
                         },
                         {
-                            "selectors": [
-                                "android|||//android.widget.TextView[@content-desc=\"AgriTask\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.TextView[@content-desc=\"AgriTask\"]"],
                             "note": "Click to open Agritask App.",
                             "command": "click"
                         },
@@ -646,16 +586,12 @@
                     "steps": [
                         {
                             "note": "Verify Login page is visible i.e. Sign In With Google button is visible",
-                            "selectors": [
-                                "android|||//android.widget.TextView[@text=\"Sign in with Google\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Sign in with Google\"]"],
                             "command": "assert-is-displayed",
                             "operator": ""
                         },
                         {
-                            "selectors": [
-                                "android|||//android.widget.TextView[@text=\"Sign in with Google\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Sign in with Google\"]"],
                             "note": "Click on \"Sign in with Google\" link",
                             "command": "click"
                         },
@@ -683,16 +619,12 @@
                         },
                         {
                             "note": "Wait and verify user is logged in i.e. Maps tab is highlighted in Dashboard",
-                            "selectors": [
-                                "android|||//android.widget.TextView[@text=\"Map\" and @selected=\"true\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Map\" and @selected=\"true\"]"],
                             "value": "50000",
                             "command": "wait-for-exist"
                         },
                         {
-                            "selectors": [
-                                "android|||//android.widget.TextView[@text=\"Settings\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.TextView[@text=\"Settings\"]"],
                             "note": "Click on Settings tab under Dashboard.",
                             "command": "click"
                         },
@@ -705,9 +637,7 @@
                             "command": "wait-for-exist"
                         },
                         {
-                            "selectors": [
-                                "android|||//android.widget.TextView[@text=\"{{gmailAccountName}}\"]"
-                            ],
+                            "selectors": ["android|||//android.widget.TextView[@text=\"{{gmailAccountName}}\"]"],
                             "note": "Verify Correct username is displayed.",
                             "command": "assert-is-displayed"
                         }

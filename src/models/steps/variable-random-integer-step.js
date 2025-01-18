@@ -1,4 +1,5 @@
 const BaseStep = require('./base-step');
+const { TestRunnerError } = require('../../helpers/test-errors');
 
 class VariableRandomIntegerStep extends BaseStep {
     constructor(sequence, step) {

@@ -47,7 +47,7 @@ class TestRunner {
     }
 
     async startSession(runType) {
-        console.log('Starting session...');
+        console.log('Requesting session...');
 
         const runConf = runConfigurationFactory(this.#runConfiguration, runType);
 

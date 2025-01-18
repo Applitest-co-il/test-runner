@@ -99,6 +99,10 @@ class RunConfigurationWeb extends RunConfiguration {
         return wdio;
     }
 
+    get restoreEmulateFunc() {
+        return this.#restoreEmulateFunc;
+    }
+
     async startSession() {
         let driver = await super.startSession();
 

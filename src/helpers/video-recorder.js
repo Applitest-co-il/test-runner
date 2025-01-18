@@ -34,7 +34,7 @@ class VideoRecorder {
     }
 
     async start() {
-        console.log('Starting video recording...');
+        console.log(`Starting video recording ${this.#baseName}...`);
 
         try {
             if (!fs.existsSync(this.#outputDir)) {
@@ -74,8 +74,6 @@ class VideoRecorder {
                 command = ffmpeg.path;
             }
 
-            console.log(`FFmpeg Command: ${command}`);
-
             const args = [
                 '-y',
                 '-framerate 1',
@@ -85,30 +83,43 @@ class VideoRecorder {
                 '-r 25',
                 `"${videoPath}"`
             ];
-            console.log(`Video generation ffmpeg command: ${command} ${args.join(' ')}`);
+            console.log(`Video generation for ${this.#baseName} ffmpeg command: ${command} ${args.join(' ')}`);
 
             const start = Date.now();
+            const that = this;
             const videoPromise = new Promise((resolve) => {
-                if (fs.existsSync(videoPath)) {
-                    fs.rmSync(videoPath);
-                }
-
-                const cp = spawn(command, args, {
-                    stdio: 'ignore',
-                    shell: true,
-                    windowsHide: true
-                });
-                cp.on('close', () => {
-                    console.log(`Generated video complete: "${videoPath}" (${Date.now() - start}ms)`);
-                    if (fs.existsSync(this.#recordingPath)) {
-                        fs.rmSync(this.#recordingPath, { recursive: true });
+                try {
+                    if (fs.existsSync(videoPath)) {
+                        fs.rmSync(videoPath);
                     }
+
+                    const cp = spawn(command, args, {
+                        stdio: 'ignore',
+                        shell: true,
+                        windowsHide: true
+                    });
+                    cp.on('close', () => {
+                        try {
+                            console.log(
+                                `Generated video for ${that.#baseName} complete: "${videoPath}" (${Date.now() - start}ms)`
+                            );
+                            if (fs.existsSync(that.#recordingPath)) {
+                                fs.rmSync(that.#recordingPath, { recursive: true });
+                            }
+                            return resolve();
+                        } catch (error) {
+                            console.error(`Error closing generating video for ${that.#baseName}: ${error}`);
+                            return resolve();
+                        }
+                    });
+                } catch (error) {
+                    console.error(`Error generating video for ${that.#baseName}: ${error}`);
                     return resolve();
-                });
+                }
             });
             return videoPromise;
         } catch (error) {
-            console.error(`Error generating video: ${error}`);
+            console.error(`Error generating video for ${this.#baseName}: ${error}`);
             return null;
         }
     }
@@ -130,9 +141,10 @@ class VideoRecorder {
                 return;
             }
 
-            console.log(`Screenshot (frame: ${frame}) to ${filePath}`);
+            console.log(`Screenshot (frame: ${frame}) to ${filePath} started`);
             await this.#driver.saveScreenshot(filePath);
             await this.addStepToFrame(filePath, step, frame);
+            console.log(`Screenshot (frame: ${frame}) to ${filePath} complete`);
         } catch (error) {
             console.log(`Screenshot not available (frame: ${frame}). Error: ${error}..`);
         }
