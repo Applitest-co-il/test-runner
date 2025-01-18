@@ -68,5 +68,5 @@ jobs:
               with:
                   token: ${{ secrets.NPM_TOKEN }}
                   access: public
-                  package: src/package.json
+                  package: package.json
                   strategy: all
