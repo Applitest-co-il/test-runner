@@ -1,8 +1,8 @@
 {
     "name": "@applitest/test-runner",
-    "version": "0.5.2",
+    "version": "0.5.3",
     "description": "Applitest Manager Test Runner. It receives a json based configuration file and runs automation tests accordingly on web or mobile (via webdriverio, webdriver and appium).",
-    "main": "/src/lib/index.js",
+    "main": "src/lib/index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\"",
         "cli": "node ./src/cli/index.js",
