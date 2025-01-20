@@ -1,4 +1,11 @@
 const TestRunner = require('../models/test-runner.js');
+const {
+    TestRunnerConfigurationError,
+    TestRunnerError,
+    TestDefinitionError,
+    TestItemNotFoundError,
+    TestAbuseError
+} = require('../helpers/test-errors');
 
 async function runTests(options) {
     const startDate = new Date();
@@ -60,3 +67,8 @@ async function runTests(options) {
 }
 
 module.exports.runTests = runTests;
+module.exports.TestRunnerConfigurationError = TestRunnerConfigurationError;
+module.exports.TestRunnerError = TestRunnerError;
+module.exports.TestDefinitionError = TestDefinitionError;
+module.exports.TestItemNotFoundError = TestItemNotFoundError;
+module.exports.TestAbuseError = TestAbuseError;
