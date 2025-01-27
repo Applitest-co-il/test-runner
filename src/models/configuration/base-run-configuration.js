@@ -12,6 +12,7 @@ class RunConfiguration {
     #startFromStep = -1;
     #stopAtStep = -1;
     #enableVideo = false;
+    #videosPath = './reports/videos';
     #noFollowReset = false;
 
     constructor(options) {
@@ -25,6 +26,7 @@ class RunConfiguration {
         this.#startFromStep = options.startFromStep ?? -1;
         this.#stopAtStep = options.stopAtStep ?? -1;
         this.#enableVideo = options.enableVideo ?? false;
+        this.#videosPath = options.videosPath ?? './reports/videos';
         this.#noFollowReset = options.noFollowReset ?? false;
     }
 
@@ -82,6 +84,10 @@ class RunConfiguration {
 
     get enableVideo() {
         return this.#enableVideo;
+    }
+
+    get videosPath() {
+        return this.#videosPath;
     }
 
     async conf() {

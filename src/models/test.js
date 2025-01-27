@@ -88,7 +88,7 @@ class Test {
         if (conf.enableVideo) {
             const options = {
                 baseName: `${this.#suiteIndex}_${this.#index}`,
-                outputDir: process.env.NODE_ENV == 'prod' ? `/tmp/videos` : `${process.cwd()}/reports/videos`,
+                outputDir: conf.videosPath,
                 screenShotInterval: 0
             };
             this.#videoRecorder = new VideoRecorder(driver, options);

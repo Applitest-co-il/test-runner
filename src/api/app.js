@@ -39,6 +39,8 @@ app.patch('/test-runner', async (req, res) => {
         return;
     }
 
+    options.runConfiguration.videosPath = process.env.VIDEOS_PATH;
+
     const output = await runTests(options);
 
     res.status(200).json(output);
