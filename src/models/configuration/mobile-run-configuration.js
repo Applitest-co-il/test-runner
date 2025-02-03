@@ -1,6 +1,5 @@
 const { pauseApp } = require('../../helpers/utils');
 const RunConfiguration = require('./base-run-configuration');
-const { SecretsClient } = require('@danielyaghil/aws-helpers');
 
 class RunConfigurationMobile extends RunConfiguration {
     #platformName = '';

@@ -1,6 +1,5 @@
 const RunConfiguration = require('./base-run-configuration');
 const { TestRunnerConfigurationError } = require('../../helpers/test-errors');
-const { SecretsClient } = require('@danielyaghil/aws-helpers');
 
 class RunConfigurationWeb extends RunConfiguration {
     #browserName = '';
