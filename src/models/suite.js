@@ -107,6 +107,8 @@ class Suite {
             let testDetail = {
                 id: test.id,
                 suiteId: this.#id,
+                suiteIdx: this.#index,
+                suiteName: this.#name,
                 index: test.index,
                 name: test.name,
                 status: test.status,

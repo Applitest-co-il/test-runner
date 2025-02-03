@@ -21,8 +21,8 @@ async function runTests(options) {
     if (suiteResults) {
         let success = true;
         let summary = {
-            suites: suiteResults.length,
-            suitesPassed: 0,
+            totalSuites: suiteResults.length,
+            passedSuites: 0,
             total: 0,
             passed: 0,
             failed: 0,
