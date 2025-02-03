@@ -63,15 +63,10 @@ class RunConfigurationWeb extends RunConfiguration {
         if (this.farm === 'local') {
             wdio.capabilities['browserName'] = this.#browserName;
         } else if (this.farm === 'saucelabs') {
-            const testRunnerConf = await SecretsClient.instance().get(process.env.TEST_RUNNER_CONF_SECRET);
-            if (!testRunnerConf) {
-                throw new Error('Could not retrieve SauceLabs credentials');
-            }
-
-            wdio.user = testRunnerConf.sauce_user;
-            wdio.key = testRunnerConf.sauce_key;
-            wdio.hostname = testRunnerConf.sauce_hostname;
-            wdio.port = 443;
+            wdio.user = this.user;
+            wdio.key = this.user_key;
+            wdio.hostname = this.hostname;
+            wdio.port = this.port;
             wdio.path = '/wd/hub';
 
             wdio.capabilities['browserName'] = this.#browserName;

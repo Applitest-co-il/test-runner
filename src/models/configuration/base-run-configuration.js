@@ -7,6 +7,8 @@ class RunConfiguration {
     #farm = 'local';
     #hostname = 'localhost';
     #port = 4723;
+    #user = '';
+    #user_key = '';
     #logLevel = 'info';
     #keepSession = false;
     #startFromStep = -1;
@@ -22,6 +24,8 @@ class RunConfiguration {
         this.#logLevel = options.logLevel ?? 'error';
         this.#hostname = options.host ?? 'localhost';
         this.#port = options.port ?? 4723;
+        this.#user = options.user ?? '';
+        this.#user_key = options.user_key ?? '';
         this.#keepSession = options.keepSession ?? false;
         this.#startFromStep = options.startFromStep ?? -1;
         this.#stopAtStep = options.stopAtStep ?? -1;
@@ -48,6 +52,14 @@ class RunConfiguration {
 
     get port() {
         return this.#port;
+    }
+
+    get user() {
+        return this.#user;
+    }
+
+    get user_key() {
+        return this.#user_key;
     }
 
     get logLevel() {

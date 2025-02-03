@@ -64,15 +64,10 @@ class RunConfigurationMobile extends RunConfiguration {
                 wdio.capabilities[this.capabilityPropertyName('noReset')] = true;
             }
         } else if (this.farm === 'saucelabs') {
-            const testRunnerConf = await SecretsClient.instance().get(process.env.TEST_RUNNER_CONF_SECRET);
-            if (!testRunnerConf) {
-                throw new Error('Could not retrieve SauceLabs credentials');
-            }
-
-            wdio.user = testRunnerConf.sauce_user;
-            wdio.key = testRunnerConf.sauce_key;
-            wdio.hostname = testRunnerConf.sauce_hostname;
-            wdio.port = 443;
+            wdio.user = this.user;
+            wdio.key = this.user_key;
+            wdio.hostname = this.hostname;
+            wdio.port = this.port;
             wdio.baseUrl = 'wd/hub';
             wdio.capabilities['platformName'] = this.#platformName;
             wdio.capabilities[this.capabilityPropertyName('app')] = `storage:filename=${this.#app}`;
