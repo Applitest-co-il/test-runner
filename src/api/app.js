@@ -41,7 +41,28 @@ app.patch('/test-runner', async (req, res) => {
 
     options.runConfiguration.videosPath = process.env.VIDEOS_PATH;
 
-    const output = await runTests(options);
+    let output = {};
+    try {
+        output = await runTests(options);
+    } catch (error) {
+        console.log(`Error running test: ${error}`);
+
+        output = {
+            success: false,
+            error: error.message,
+            summary: {
+                suites: 0,
+                suitesPassed: 0,
+                total: 0,
+                passed: 0,
+                failed: 0,
+                skipped: 0,
+                pending: 0
+            },
+            suiteResults: [],
+            executionTime: 0
+        };
+    }
 
     res.status(200).json(output);
 });

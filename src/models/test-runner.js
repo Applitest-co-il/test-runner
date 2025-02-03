@@ -95,63 +95,54 @@ class TestRunner {
     }
 
     async run() {
-        try {
-            console.log('Starting run...');
+        console.log('Starting run...');
 
-            let promises = [];
-            let suiteResults = [];
-            let currentRunType = this.#suites.length ? this.#suites[0].type : '';
+        let promises = [];
+        let suiteResults = [];
+        let currentRunType = this.#suites.length ? this.#suites[0].type : '';
 
-            for (let i = 0; i < this.#suites.length; i++) {
-                console.log(
-                    `TestRunner::Running suite #${i} of type ${this.#suites[i].type} out of ${this.#suites.length}`
-                );
-                const suite = this.#suites[i];
+        for (let i = 0; i < this.#suites.length; i++) {
+            console.log(
+                `TestRunner::Running suite #${i} of type ${this.#suites[i].type} out of ${this.#suites.length}`
+            );
+            const suite = this.#suites[i];
 
-                if (currentRunType !== suite.type) {
-                    currentRunType = suite.type;
-                }
-
-                try {
-                    const runConf = await this.startSession(suite.type);
-
-                    const suitePromises = await suite.run(this.#driver, this.variables, runConf);
-
-                    console.log(`Adding videos promises for suite ${i} to main promises`);
-                    promises = promises.concat(suitePromises);
-
-                    mergeVariables(this.#variables, suite.variables);
-
-                    let suiteResult = await suite.report();
-                    suiteResults.push(suiteResult);
-
-                    const forceEndSession = i == this.#suites.length - 1 || this.#suites[i + 1].type != currentRunType;
-                    await this.closeSession(forceEndSession);
-                    console.log(`TestRunner::Suite ${i} run complete`);
-                } catch (error) {
-                    await this.closeSession(true);
-                    if (error instanceof TestAbuseError) {
-                        throw error;
-                    } else {
-                        console.error('Error running suite:', error);
-                        throw new Error(`error running suite: ${error.message}`);
-                    }
-                }
+            if (currentRunType !== suite.type) {
+                currentRunType = suite.type;
             }
 
-            console.log('Test run complete waiting for all video promises to complete');
-            await Promise.all(promises);
-            console.log('All video promises completed');
+            try {
+                const runConf = await this.startSession(suite.type);
 
-            return suiteResults;
-        } catch (error) {
-            if (error instanceof TestAbuseError) {
-                throw error;
-            } else {
-                console.error('Error running test:', error);
+                const suitePromises = await suite.run(this.#driver, this.variables, runConf);
+
+                console.log(`Adding videos promises for suite ${i} to main promises`);
+                promises = promises.concat(suitePromises);
+
+                mergeVariables(this.#variables, suite.variables);
+
+                let suiteResult = await suite.report();
+                suiteResults.push(suiteResult);
+
+                const forceEndSession = i == this.#suites.length - 1 || this.#suites[i + 1].type != currentRunType;
+                await this.closeSession(forceEndSession);
+                console.log(`TestRunner::Suite ${i} run complete`);
+            } catch (error) {
+                await this.closeSession(true);
+                if (error instanceof TestAbuseError) {
+                    throw error;
+                } else {
+                    console.error('Error running suite:', error);
+                    throw new Error(`error running suite: ${error.message}`);
+                }
             }
         }
-        return null;
+
+        console.log('Test run complete waiting for all video promises to complete');
+        await Promise.all(promises);
+        console.log('All video promises completed');
+
+        return suiteResults;
     }
 }
 
