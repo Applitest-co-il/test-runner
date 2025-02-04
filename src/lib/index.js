@@ -21,7 +21,7 @@ async function runTests(options) {
     if (suiteResults) {
         let success = true;
         let summary = {
-            totalSuites: suiteResults.length,
+            suites: suiteResults.length,
             passedSuites: 0,
             total: 0,
             passed: 0,
@@ -31,7 +31,7 @@ async function runTests(options) {
         };
         for (let i = 0; i < suiteResults.length; i++) {
             success = success && suiteResults[i].success;
-            summary.suitesPassed += suiteResults[i].success ? 1 : 0;
+            summary.passedSuites += suiteResults[i].success ? 1 : 0;
             summary.total += suiteResults[i].summary.total;
             summary.passed += suiteResults[i].summary.passed;
             summary.failed += suiteResults[i].summary.failed;
@@ -51,7 +51,7 @@ async function runTests(options) {
             success: false,
             summary: {
                 suites: 0,
-                suitesPassed: 0,
+                passedSuites: 0,
                 total: 0,
                 passed: 0,
                 failed: 0,

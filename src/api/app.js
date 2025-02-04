@@ -52,7 +52,7 @@ app.patch('/test-runner', async (req, res) => {
             error: error.message,
             summary: {
                 suites: 0,
-                suitesPassed: 0,
+                passedSuites: 0,
                 total: 0,
                 passed: 0,
                 failed: 0,
