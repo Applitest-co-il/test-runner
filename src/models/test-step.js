@@ -39,6 +39,7 @@ const VariableSetFromJavascriptStep = require('./steps/variable-set-step-from-ja
 const VariableSetStep = require('./steps/variable-set-step.js');
 const WaitForExistStep = require('./steps/wait-for-exist-step.js');
 const WaitForNotExistStep = require('./steps/wait-for-not-exist-step.js');
+const SwitchFrameStep = require('./steps/switch-frame-step.js');
 
 const { TestDefinitionError } = require('../helpers/test-errors');
 
@@ -53,6 +54,8 @@ function stepFactory(sequence, step) {
             return new AppActivateStep(sequence, step);
         case 'app-background':
             return new AppBackgroundStep(sequence, step);
+        case 'switch-frame':
+            return new SwitchFrameStep(sequence, step);
 
         //settings
         case 'toggle-location-services':

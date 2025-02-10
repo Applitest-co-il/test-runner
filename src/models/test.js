@@ -95,8 +95,11 @@ class Test {
             this.#videoRecorder.start();
         }
 
-        const activateAppStep = new AppActivateStep(0, { command: 'app-activate', value: 'current-app' });
-        await activateAppStep.run(driver, this.variables, conf, null);
+        //TBD: chnage with test type
+        if (conf.runType === 'mobile') {
+            const activateAppStep = new AppActivateStep(0, { command: 'app-activate', value: 'current-app' });
+            await activateAppStep.run(driver, this.variables, conf, null);
+        }
 
         const steps = this.#steps;
 

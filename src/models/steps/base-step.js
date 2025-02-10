@@ -31,6 +31,7 @@ class BaseStep {
         'navigate',
         'app-activate',
         'app-background',
+        'switch-frame',
 
         //settings
         'toggle-location-services',
@@ -104,7 +105,8 @@ class BaseStep {
         'wait-for-not-exist',
         'assert-is-not-displayed',
         'scroll-up-to-element',
-        'scroll-down-to-element'
+        'scroll-down-to-element',
+        'switch-frame'
     ];
     static #commandsRequireValue = [
         'app-activate',
