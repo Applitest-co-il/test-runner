@@ -7,6 +7,7 @@ const AppActivateStep = require('./steps/app-activate-step');
 class Test {
     #id = '';
     #name = '';
+    #type = '';
     #suiteIndex = -1;
     #index = -1;
     #variables = {};
@@ -22,6 +23,7 @@ class Test {
     constructor(test) {
         this.#id = test.id ?? '';
         this.#name = test.name ?? '';
+        this.#type = test.type ?? '';
         this.#suiteIndex = test.suiteIndex ?? -1;
         this.#index = test.index ?? -1;
         this.#skip = test.skip ?? false;
@@ -48,6 +50,10 @@ class Test {
 
     get name() {
         return this.#name;
+    }
+
+    get type() {
+        return this.#type;
     }
 
     get index() {
@@ -96,7 +102,7 @@ class Test {
         }
 
         //TBD: chnage with test type
-        if (conf.runType === 'mobile') {
+        if (this.type === 'mobile') {
             const activateAppStep = new AppActivateStep(0, { command: 'app-activate', value: 'current-app' });
             await activateAppStep.run(driver, this.variables, conf, null);
         }
