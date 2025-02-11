@@ -68,6 +68,7 @@ class BaseStep {
         'press-key',
         'execute-script',
         'perform-actions',
+        'drag-and-drop',
 
         //assertions
         'wait-for-exist',
@@ -97,7 +98,8 @@ class BaseStep {
         'assert-text',
         'assert-number',
         'assert-css-property',
-        'assert-attribute'
+        'assert-attribute',
+        'drag-and-drop'
     ];
     static #commandsRequireSelector = [
         ...BaseStep.#commandsRequireItem,
@@ -138,7 +140,8 @@ class BaseStep {
         'perform-actions',
         'set-variable',
         'set-variable-from-script',
-        'navigate'
+        'navigate',
+        'drag-and-drop'
     ];
 
     constructor(sequence, step) {

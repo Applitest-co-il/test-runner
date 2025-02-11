@@ -1,3 +1,5 @@
+const { TestDefinitionError } = require('../helpers/test-errors');
+
 const AddValueStep = require('./steps/add-value-step.js');
 const AppActivateStep = require('./steps/app-activate-step.js');
 const AppBackgroundStep = require('./steps/app-background-step.js');
@@ -40,8 +42,7 @@ const VariableSetStep = require('./steps/variable-set-step.js');
 const WaitForExistStep = require('./steps/wait-for-exist-step.js');
 const WaitForNotExistStep = require('./steps/wait-for-not-exist-step.js');
 const SwitchFrameStep = require('./steps/switch-frame-step.js');
-
-const { TestDefinitionError } = require('../helpers/test-errors');
+const DragAndDropStep = require('./steps/drag-and-drop-step.js');
 
 function stepFactory(sequence, step) {
     switch (step.command) {
@@ -119,6 +120,8 @@ function stepFactory(sequence, step) {
             return new ExecuteScriptStep(sequence, step);
         case 'perform-actions':
             return new PerformActionsStep(sequence, step);
+        case 'drag-and-drop':
+            return new DragAndDropStep(sequence, step);
 
         //assertions
         case 'wait-for-exist':
