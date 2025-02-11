@@ -114,7 +114,7 @@ class PerformActionsStep extends BaseStep {
                             if (action.origin == 'pointer' || action.origin == 'viewport') {
                                 origin = action.origin;
                             } else {
-                                origin = await this.selectItem(driver);
+                                origin = await driver.$(action.origin);
                                 if (!origin) {
                                     throw new TestRunnerError(
                                         `PerformAction::Origin item was not found for action ${i}`
