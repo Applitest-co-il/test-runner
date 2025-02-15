@@ -6,6 +6,7 @@ class RunConfigurationWeb extends RunConfiguration {
     #browserVersion = '';
     #platformName = '';
     #startUrl = '';
+    #incognito = false;
     #startMaximized = false;
     #resolution = '1920x1080';
     #emulate = '';
@@ -20,6 +21,7 @@ class RunConfigurationWeb extends RunConfiguration {
         this.#platformName = options.browser.platform ?? 'Windows 10';
         this.#resolution = options.browser.resolution ?? '1920x1080';
         this.#startUrl = options.browser.startUrl ?? '';
+        this.#incognito = options.browser.incognito ?? false;
         this.#startMaximized = options.browser.startMaximized ?? false;
         this.#emulate = options.browser.emulate ?? false;
 
