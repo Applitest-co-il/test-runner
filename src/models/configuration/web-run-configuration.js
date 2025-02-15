@@ -47,9 +47,6 @@ class RunConfigurationWeb extends RunConfiguration {
             if (this.#startMaximized) {
                 wdio.capabilities['goog:chromeOptions'].args.push('--start-maximized');
             }
-            if (this.#incognito) {
-                wdio.capabilities['goog:chromeOptions'].args.push('--incognito');
-            }
         } else if (this.#browserName === 'firefox') {
             wdio.capabilities['moz:firefoxOptions'] = {
                 args: []
