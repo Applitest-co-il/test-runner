@@ -1,0 +1,368 @@
+{
+    "runConfiguration": {
+        "farm": "saucelabs",
+        "runType": "mixed",
+        "enableVideo": true,
+        "noFollowReset": false,
+        "sessions": [
+            {
+                "type": "mobile",
+                "appium": {
+                    "port": 4723,
+                    "host": "localhost",
+                    "platformName": "android",
+                    "automationName": "UiAutomator2",
+                    "deviceName": "Samsung_Galaxy_S23_Ultra_14_real",
+                    "app": "tms.android.agritask-agritask-release-9.0.0.34888.apk",
+                    "appName": "tms.android.agritask-agritask-release-9.0.0.34888.apk",
+                    "appPackage": "com.agritask.mobile.android",
+                    "appActivity": "com.scantask.tms.droid.tasker.gis.MapActivity2"
+                }
+            },
+            {
+                "type": "web",
+                "browser": {
+                    "name": "chrome",
+                    "startUrl": "https://www.applitest.co.il",
+                    "emulate": "",
+                    "resolution": "1366x768",
+                    "incognito": false
+                }
+            }
+        ]
+    },
+    "variables": {
+        "startUrl": "https://www.applitest.co.il",
+        "baseUrl": "https://br.pescout.com/b/mobile",
+        "password": "DevelopersApplitest2023!",
+        "username": "applitest_manager_il"
+    },
+    "suites": [
+        {
+            "id": "AS-abf0ea1f-30e1-4bf4-8dd8-6c9d47f15452",
+            "name": "Mobile Login validation",
+            "type": "mobile",
+            "waitBetweenTests": 0,
+            "stopOnFailure": true,
+            "tests": [
+                {
+                    "id": "T-71994d42-6141-4197-85e6-2bc690fbee54",
+                    "name": "Setup Base URL ",
+                    "steps": [
+                        { "selectors": [], "value": "current-app", "command": "app-activate" },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.ImageView[@resource-id=\"com.agritask.mobile.android:id/loginBrandLogoImageView\"]"
+                            ],
+                            "value": 5000,
+                            "command": "wait-for-exist",
+                            "operator": null
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.ImageView[@resource-id=\"com.agritask.mobile.android:id/loginBrandLogoImageView\"]"
+                            ],
+                            "value": 3,
+                            "command": "multiple-clicks"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//androidx.recyclerview.widget.RecyclerView[@resource-id=\"com.agritask.mobile.android:id/recycler_view\"]/android.widget.LinearLayout[5]/android.widget.RelativeLayout"
+                            ],
+                            "value": 5000,
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//androidx.recyclerview.widget.RecyclerView[@resource-id=\"com.agritask.mobile.android:id/recycler_view\"]/android.widget.LinearLayout[5]/android.widget.RelativeLayout"
+                            ],
+                            "command": "click"
+                        },
+                        { "value": 1000, "command": "pause" },
+                        {
+                            "selectors": ["android|||//android.widget.EditText[@resource-id=\"android:id/edit\"]"],
+                            "value": "{{baseUrl}}",
+                            "command": "set-value"
+                        },
+                        {
+                            "selectors": ["android|||//android.widget.Button[@resource-id=\"android:id/button1\"]"],
+                            "command": "click"
+                        },
+                        { "value": 1000, "command": "pause" },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.ImageButton[@resource-id=\"com.agritask.mobile.android:id/manager_frag_button_back\"]"
+                            ],
+                            "command": "click"
+                        },
+                        { "selectors": [], "command": "app-background" },
+                        { "selectors": [], "value": "3000", "command": "pause" },
+                        { "selectors": [], "value": "current-app", "command": "app-activate" }
+                    ]
+                },
+                {
+                    "id": "T-a7cd69ae-acd5-4803-b78c-19f08dbd7cf1",
+                    "name": "Login failed: missing username",
+                    "steps": [
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginButton\"]"
+                            ],
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginButton\"]"
+                            ],
+                            "command": "click"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
+                            ],
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
+                            ],
+                            "value": "Please enter a valid username",
+                            "command": "assert-text"
+                        }
+                    ]
+                },
+                {
+                    "id": "T-d3d4691e-70c9-432a-8c36-21479b530372",
+                    "name": "Login failed: missing password",
+                    "steps": [
+                        {
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
+                            ],
+                            "command": "wait-for-exist",
+                            "operator": null
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
+                            ],
+                            "value": "{{username}}",
+                            "command": "set-value"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginButton\"]"
+                            ],
+                            "command": "click"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
+                            ],
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
+                            ],
+                            "value": "Please enter a valid password",
+                            "command": "assert-text"
+                        }
+                    ]
+                },
+                {
+                    "id": "T-b92dcd41-f67c-4e4e-9d56-662a036e91f0",
+                    "name": "Login failed: wrong username or password",
+                    "steps": [
+                        {
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
+                            ],
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editUserName\"]"
+                            ],
+                            "value": "{{username}}",
+                            "command": "set-value"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.EditText[@resource-id=\"com.agritask.mobile.android:id/editPassword\"]"
+                            ],
+                            "value": "wrongpassword",
+                            "command": "set-value"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginButton\"]"
+                            ],
+                            "command": "click"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
+                            ],
+                            "value": 10000,
+                            "command": "wait-for-exist"
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/loginErrorMessage\"]"
+                            ],
+                            "value": "Invalid username or password",
+                            "command": "assert-text"
+                        }
+                    ]
+                },
+                {
+                    "id": "T-af389761-5b3e-47aa-9c51-977712ef1d8d",
+                    "name": "Login",
+                    "steps": [
+                        {
+                            "note": "Wait for user name filed",
+                            "selectors": ["android|||id=editUserName"],
+                            "command": "wait-for-exist",
+                            "operator": null
+                        },
+                        { "selectors": ["android|||id=editUserName"], "value": "{{username}}", "command": "set-value" },
+                        { "selectors": ["android|||id=editPassword"], "value": "{{password}}", "command": "set-value" },
+                        { "selectors": [], "value": 66, "command": "press-key" },
+                        { "selectors": ["android|||id=loginButton"], "command": "click" },
+                        {
+                            "selectors": ["android|||//android.widget.ImageButton"],
+                            "value": "60000",
+                            "command": "wait-for-exist"
+                        },
+                        { "selectors": [], "value": "5000", "command": "pause" },
+                        { "selectors": [], "command": "app-background" },
+                        { "selectors": [], "value": "3000", "command": "pause" },
+                        { "selectors": [], "value": "current-app", "command": "app-activate" },
+                        { "selectors": [], "value": "2000", "command": "pause" }
+                    ]
+                },
+                {
+                    "id": "T-f52b92ca-4d0a-4373-bdb0-46a4ac13500a",
+                    "name": "Logout",
+                    "steps": [
+                        { "selectors": [], "value": "current-app", "command": "app-activate" },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[5]/android.widget.ImageView"
+                            ],
+                            "command": "wait-for-exist",
+                            "operator": null
+                        },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.FrameLayout[@resource-id=\"android:id/content\"]/android.widget.FrameLayout/android.widget.FrameLayout/android.widget.LinearLayout/android.widget.LinearLayout[5]/android.widget.ImageView"
+                            ],
+                            "command": "click"
+                        },
+                        { "value": 1000, "command": "pause" },
+                        {
+                            "position": 0,
+                            "selectors": ["android|||//android.widget.TextView"],
+                            "value": "Settings",
+                            "command": "assert-text"
+                        },
+                        { "selectors": ["android|||//android.widget.TextView[@text=\"Logout\"]"], "command": "click" },
+                        { "value": 1000, "command": "pause" },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.TextView[@resource-id=\"com.agritask.mobile.android:id/alertTitle\"]"
+                            ],
+                            "value": "Logout",
+                            "command": "assert-text"
+                        },
+                        {
+                            "selectors": ["android|||//android.widget.Button[@resource-id=\"android:id/button1\"]"],
+                            "command": "click"
+                        },
+                        { "value": 1000, "command": "pause" },
+                        {
+                            "selectors": [
+                                "android|||//android.widget.ImageView[@resource-id=\"com.agritask.mobile.android:id/loginBrandLogoImageView\"]"
+                            ],
+                            "command": "assert-is-displayed"
+                        },
+                        { "selectors": [], "value": "current-app", "command": "app-activate", "operator": null }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "AS-177b78ed-52ef-4df7-a42f-0ecfc69b47ef",
+            "name": "Applitest Demo",
+            "type": "web",
+            "waitBetweenTests": 0,
+            "stopOnFailure": true,
+            "tests": [
+                {
+                    "id": "T-59c68e1f-8fe0-4a43-b175-15737a319836",
+                    "name": "Applitest demo 1",
+                    "steps": [
+                        {
+                            "note": "Check Logo is visible",
+                            "selectors": [
+                                "default|||//a[@data-testid=\"linkElement\"]//img[@alt=\"Applitest automation regression test\"]"
+                            ],
+                            "command": "assert-is-displayed",
+                            "operator": ""
+                        },
+                        { "selectors": [], "value": "1000", "command": "pause" },
+                        {
+                            "selectors": ["//section[@id=\"comp-lcemmg50\"]//h1/span"],
+                            "note": "Check main text is visible",
+                            "command": "assert-is-displayed"
+                        },
+                        {
+                            "selectors": ["//section[@id=\"comp-lcemmg50\"]//h1/span"],
+                            "value": "Keep",
+                            "command": "assert-text",
+                            "operator": "starts-with"
+                        },
+                        {
+                            "selectors": ["default|||//wix-dropdown-menu//a[//p = \"Our Solution\"]"],
+                            "command": "click"
+                        },
+                        { "selectors": [], "value": "5000", "command": "pause" },
+                        { "selectors": ["//*[@id=\"comp-ld1em85n\"]/h2/span/span"], "command": "assert-is-displayed" },
+                        {
+                            "selectors": ["default|||//*[@id=\"comp-ld1em85n\"]/h2/span/span"],
+                            "value": "How do we work?",
+                            "command": "assert-text"
+                        }
+                    ]
+                },
+                {
+                    "id": "T-b43cd83f-99d1-4203-9a09-e629ee7e8094",
+                    "name": "Applitest demo 2",
+                    "steps": [
+                        { "selectors": [], "value": "3000", "command": "pause", "operator": null },
+                        {
+                            "note": "Check Logo is visible",
+                            "selectors": [
+                                "default|||//a[@data-testid=\"linkElement\"]//img[@alt=\"Applitest automation regression test\"]"
+                            ],
+                            "command": "assert-is-displayed",
+                            "operator": ""
+                        },
+                        { "selectors": ["default|||//wix-dropdown-menu//a[.//p = \"About us\"]"], "command": "click" },
+                        { "selectors": [], "value": 1000, "command": "pause" },
+                        {
+                            "selectors": ["default|||//*[@id=\"comp-ldfmtwh4\"]/h2/span/span"],
+                            "command": "assert-is-displayed"
+                        },
+                        {
+                            "selectors": ["default|||//*[@id=\"comp-ldfmtwh4\"]/h2/span/span"],
+                            "value": "We are your automation team",
+                            "command": "assert-text"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
