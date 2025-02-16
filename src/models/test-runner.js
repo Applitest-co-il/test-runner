@@ -4,10 +4,10 @@ const { runConfigurationFactory } = require('./test-run-configuration');
 const { mergeVariables } = require('../helpers/utils');
 
 class TestRunner {
-    static #savedDriver = null;
+    static #savedWebDriver = null;
 
     #runConfiguration = null;
-    #driver = null;
+    #sessions = [];
 
     #suites = [];
     #variables = {};
@@ -42,55 +42,85 @@ class TestRunner {
         }
     }
 
+    get sessions() {
+        return this.#sessions;
+    }
+
     get variables() {
         return this.#variables;
     }
 
+    getSession(type) {
+        return this.#sessions.find((session) => session.type === type);
+    }
+
+    async initSessions() {
+        console.log('Init sessions...');
+
+        this.#sessions = runConfigurationFactory(this.#runConfiguration);
+
+        for (const session of this.#sessions) {
+            await this.startSession(session.type);
+        }
+    }
+
     async startSession(runType) {
-        console.log('Requesting session...');
+        console.log(`Starting session for type ${runType}...`);
 
-        const runConf = runConfigurationFactory(this.#runConfiguration, runType);
-
-        if (this.#driver) {
-            return runConf;
-        } else if (runType == 'web' && TestRunner.#savedDriver) {
-            console.log('Using saved driver');
-            this.#driver = TestRunner.#savedDriver;
-            return runConf;
-        } else if (TestRunner.#savedDriver) {
-            console.log('Closing session...');
-            await TestRunner.#savedDriver.deleteSession();
-            TestRunner.#savedDriver = null;
-        } else {
-            console.log('No saved driver found');
+        const runSession = this.getSession(runType);
+        if (!runSession) {
+            throw new TestRunnerError(`No Existing session found for type: ${runType}`);
         }
 
-        this.#driver = await runConf.startSession();
-        if (!this.#driver) {
+        if (runSession.driver) {
+            return runSession;
+        } else if (runType == 'web') {
+            if (TestRunner.#savedWebDriver) {
+                console.log('Using saved driver');
+                runSession.driver = TestRunner.#savedWebDriver;
+                return runSession;
+            } else {
+                console.log('No web saved driver found');
+            }
+        }
+
+        runSession.driver = await runSession.runConf.startSession();
+        if (!runSession.driver) {
             console.error('Driver could not be set');
             throw new TestRunnerError('Driver could not be set');
         }
 
-        return runConf;
+        return runSession;
     }
 
-    async closeSession(forceEndSession = false) {
-        if (this.#driver) {
+    async closeSession(runSession) {
+        console.log(`Closing session type ${runSession.type}...`);
+        if (runSession.driver) {
             if (this.#runConfiguration.keepSession) {
                 console.log('Saving driver...');
-                TestRunner.#savedDriver = this.#driver;
-            } else if (!forceEndSession && this.#runConfiguration.noFollowReset) {
+                TestRunner.#savedWebDriver = runSession.driver;
+            } else if (this.#runConfiguration.noFollowReset) {
                 console.log('Mobile No follow reset flag set - skipping closing or resetting session');
             } else {
                 console.log('Closing session...');
                 try {
-                    await this.#driver.deleteSession();
-                    this.#driver = null;
+                    await runSession.driver.deleteSession();
+                    runSession.driver = null;
                 } catch (error) {
                     console.error('Error closing session (could be already lost):', error);
+                } finally {
+                    if (runSession.type == 'web') {
+                        TestRunner.#savedWebDriver = null;
+                    }
                 }
-                TestRunner.#savedDriver = null;
             }
+        }
+    }
+
+    async terminateAllSessions() {
+        console.log('Terminating all sessions...');
+        for (let i = 0; i < this.#sessions.length; i++) {
+            await this.closeSession(this.#sessions[i]);
         }
     }
 
@@ -99,7 +129,8 @@ class TestRunner {
 
         let promises = [];
         let suiteResults = [];
-        let currentRunType = this.#suites.length ? this.#suites[0].type : '';
+
+        await this.initSessions();
 
         for (let i = 0; i < this.#suites.length; i++) {
             console.log(
@@ -107,14 +138,8 @@ class TestRunner {
             );
             const suite = this.#suites[i];
 
-            if (currentRunType !== suite.type) {
-                currentRunType = suite.type;
-            }
-
             try {
-                const runConf = await this.startSession(suite.type);
-
-                const suitePromises = await suite.run(this.#driver, this.variables, runConf);
+                const suitePromises = await suite.run(this.#sessions, this.variables);
 
                 console.log(`Adding videos promises for suite ${i} to main promises`);
                 promises = promises.concat(suitePromises);
@@ -124,11 +149,9 @@ class TestRunner {
                 let suiteResult = await suite.report();
                 suiteResults.push(suiteResult);
 
-                const forceEndSession = i == this.#suites.length - 1 || this.#suites[i + 1].type != currentRunType;
-                await this.closeSession(forceEndSession);
                 console.log(`TestRunner::Suite ${i} run complete`);
             } catch (error) {
-                await this.closeSession(true);
+                await this.closeSession(this.getSession(suite.type));
                 if (error instanceof TestAbuseError) {
                     throw error;
                 } else {
@@ -138,9 +161,15 @@ class TestRunner {
             }
         }
 
+        await this.terminateAllSessions();
+
         console.log('Test run complete waiting for all video promises to complete');
-        await Promise.all(promises);
-        console.log('All video promises completed');
+        if (promises.length > 0) {
+            await Promise.all(promises);
+            console.log('All video promises completed');
+        } else {
+            console.log('No video promises found');
+        }
 
         return suiteResults;
     }

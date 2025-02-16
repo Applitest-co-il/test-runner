@@ -57,7 +57,7 @@ class Suite {
         return this.#variables;
     }
 
-    async run(driver, variables, conf) {
+    async run(sessions, variables) {
         let promises = [];
 
         const tests = this.#tests;
@@ -71,7 +71,9 @@ class Suite {
                 continue;
             }
 
-            const testPromises = await test.run(driver, this.variables, conf);
+            const runSession = sessions.find((session) => session.type === test.type);
+
+            const testPromises = await test.run(runSession.driver, this.variables, runSession.runConf);
 
             console.log(`Adding video promise "${this.#index}_${i}" to suite promises`);
             promises = promises.concat(testPromises);
@@ -83,7 +85,7 @@ class Suite {
             mergeVariables(this.#variables, test.variables);
 
             if (this.#waitBetweenTests > 0) {
-                await driver.pause(this.#waitBetweenTests);
+                await runSession.driver.pause(this.#waitBetweenTests);
             }
             console.log(`TestSuite::Finished test #${i}`);
         }
