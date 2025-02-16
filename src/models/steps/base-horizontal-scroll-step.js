@@ -20,9 +20,9 @@ class BaseHorizontalScrollStep extends BaseStep {
 
         const { width, height } = await driver.getWindowSize();
         const origin = originItem ? originItem : 'viewport';
-        const anchorY = originItem ? 0 : height * anchorPercentage;
-        const startX = originItem ? 0 : width * startPercentage;
-        const endX = width * endPercentage;
+        const anchorY = originItem ? 0 : Math.floor(height * anchorPercentage);
+        const startX = originItem ? 0 : Math.floor(width * startPercentage);
+        const endX = Math.floor(width * endPercentage);
         const fixedScroll = left ? -endX : endX;
         const scrollX = originItem ? fixedScroll : endX - startX;
         const pointerType = this.conf.runType == 'mobile' ? 'touch' : 'mouse';
