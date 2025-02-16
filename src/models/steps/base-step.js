@@ -5,7 +5,6 @@ const vmRun = require('@danielyaghil/vm-helper');
 
 class BaseStep {
     #session = null;
-    #conf = null;
 
     #sequence = 0;
     #command = '';
