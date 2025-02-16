@@ -20,9 +20,9 @@ class BaseVerticalScrollStep extends BaseStep {
 
         const { width, height } = await driver.getWindowSize();
         const origin = originItem ? originItem : 'viewport';
-        const anchorX = originItem ? 0 : width * anchorPercentage;
-        const startY = originItem ? 0 : height * startPercentage;
-        const endY = height * endPercentage;
+        const anchorX = originItem ? 0 : Math.floor(width * anchorPercentage);
+        const startY = originItem ? 0 : Math.floor(height * startPercentage);
+        const endY = Math.floor(height * endPercentage);
         const fixedScroll = down ? -endY : endY;
         const scrollY = originItem ? fixedScroll : endY - startY;
 
