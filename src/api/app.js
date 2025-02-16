@@ -21,16 +21,17 @@ app.patch('/test-runner', async (req, res) => {
 
     if (['mobile', 'mixed'].includes(options?.runConfiguration?.runType)) {
         console.log('Received mobile run configuration');
-        if (options?.runConfiguration?.appium?.app?.startsWith('s3:')) {
-            const appName = options.runConfiguration.appium.appName;
-            const url = options.runConfiguration.appium.app.replace('s3:', '');
+        const session = options.runConfiguration.sessions.find((session) => session.type === 'mobile');
+        if (session.appium?.app?.startsWith('s3:')) {
+            const appName = session.appium.appName;
+            const url = session.appium.app.replace('s3:', '');
 
             const appLocalPath = await downloadFile(url, appName);
             if (!appLocalPath) {
                 res.status(500).send('App download failed');
                 return;
             }
-            options.runConfiguration.appium.app = appLocalPath;
+            session.appium.app = appLocalPath;
         }
     } else if (options?.runConfiguration?.runType === 'web') {
         console.log('Received web run configuration');

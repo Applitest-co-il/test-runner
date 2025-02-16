@@ -4,6 +4,7 @@ const TestCondition = require('./test-condition');
 const vmRun = require('@danielyaghil/vm-helper');
 
 class BaseStep {
+    #session = null;
     #conf = null;
 
     #sequence = 0;
@@ -196,7 +197,11 @@ class BaseStep {
     }
 
     get conf() {
-        return this.#conf;
+        return this.#session?.runConf;
+    }
+
+    get session() {
+        return this.#session;
     }
 
     //#endregion
@@ -303,7 +308,7 @@ class BaseStep {
     }
 
     async highlightElement(driver, item) {
-        if (!item || item === 'noItem' || this.#conf.runType !== 'web') {
+        if (!item || item === 'noItem' || this.#session.type !== 'web') {
             return;
         }
 
@@ -324,7 +329,7 @@ class BaseStep {
     }
 
     async revertElement(driver, item) {
-        if (!item || item === 'noItem' || !this.#originalBorderCSS || this.#conf.runType !== 'web') {
+        if (!item || item === 'noItem' || !this.#originalBorderCSS || this.#session.type !== 'web') {
             return;
         }
 
@@ -349,14 +354,14 @@ class BaseStep {
         }
     }
 
-    async run(driver, variables, conf, videoRecorder) {
-        this.#conf = conf;
+    async run(session, variables, videoRecorder) {
+        this.#session = session;
         this.#variables = variables;
         this.#videoRecorder = videoRecorder;
 
         try {
             if (this.#condition) {
-                let conditionResult = await this.#condition.evaluate(driver, variables, conf);
+                let conditionResult = await this.#condition.evaluate(session.driver, variables, session.runConf);
                 if (!conditionResult) {
                     this.#status = 'skipped';
                     console.log(`TestStep::Condition for step ${this.#sequence} was not met - step skipped`);
@@ -364,18 +369,18 @@ class BaseStep {
                 }
             }
 
-            const item = this.#requiresItem(this.#command) ? await this.selectItem(driver) : 'noItem';
+            const item = this.#requiresItem(this.#command) ? await this.selectItem(session.driver) : 'noItem';
             if (!item) {
                 throw new TestItemNotFoundError(`Item with selectors [${this.#usedSelectors}]  not found`);
             }
 
-            await this.highlightElement(driver, item);
+            await this.highlightElement(session.driver, item);
 
-            await this.execute(driver, item);
+            await this.execute(session.driver, item);
 
             await this.addFrameToVideo();
 
-            await this.revertElement(driver, item);
+            await this.revertElement(session.driver, item);
         } catch (error) {
             this.#status = 'failed';
             this.#errorDetails = `${error.message}`;

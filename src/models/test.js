@@ -88,23 +88,23 @@ class Test {
         return this.#variables;
     }
 
-    async run(driver, variables, conf) {
+    async run(session, variables) {
         const promises = [];
 
-        if (conf.enableVideo) {
+        if (session.runConf.enableVideo) {
             const options = {
                 baseName: `${this.#suiteIndex}_${this.#index}`,
-                outputDir: conf.videosPath,
+                outputDir: session.runConf.videosPath,
                 screenShotInterval: 0
             };
-            this.#videoRecorder = new VideoRecorder(driver, options);
+            this.#videoRecorder = new VideoRecorder(session.driver, options);
             this.#videoRecorder.start();
         }
 
         //TBD: chnage with test type
         if (this.type === 'mobile') {
             const activateAppStep = new AppActivateStep(0, { command: 'app-activate', value: 'current-app' });
-            await activateAppStep.run(driver, this.variables, conf, null);
+            await activateAppStep.run(session, this.variables, null);
         }
 
         const steps = this.#steps;
@@ -115,9 +115,14 @@ class Test {
             throw new TestDefinitionError(`Test "${this.#name}" has no steps`);
         }
 
-        const startFromSteps = conf.startFromStep > 0 && conf.startFromStep < steps.length ? conf.startFromStep : 0;
+        const startFromSteps =
+            session.runConf.startFromStep > 0 && session.runConf.startFromStep < steps.length
+                ? session.runConf.startFromStep
+                : 0;
         const stopAtStep =
-            conf.stopAtStep > startFromSteps && conf.stopAtStep < steps.length ? conf.stopAtStep : steps.length;
+            session.runConf.stopAtStep > startFromSteps && session.runConf.stopAtStep < steps.length
+                ? session.runConf.stopAtStep
+                : steps.length;
 
         for (let i = startFromSteps; i < stopAtStep; i++) {
             if (this.#videoRecorder) {
@@ -126,7 +131,7 @@ class Test {
 
             const step = steps[i];
             try {
-                const success = await step.run(driver, this.variables, conf, this.#videoRecorder);
+                const success = await step.run(session, this.variables, this.#videoRecorder);
                 if (!success) {
                     this.#status = 'failed';
                     this.#lastStep = i;

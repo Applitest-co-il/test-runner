@@ -13,17 +13,17 @@ class RunConfigurationWeb extends RunConfiguration {
 
     #restoreEmulateFunc = null;
 
-    constructor(options) {
+    constructor(options, session) {
         super(options);
 
-        this.#browserName = options.browser.name ?? 'chrome';
-        this.#browserVersion = options.browser.version ?? 'latest';
-        this.#platformName = options.browser.platform ?? 'Windows 10';
-        this.#resolution = options.browser.resolution ?? '1920x1080';
-        this.#startUrl = options.browser.startUrl ?? '';
-        this.#incognito = options.browser.incognito ?? false;
-        this.#startMaximized = options.browser.startMaximized ?? false;
-        this.#emulate = options.browser.emulate ?? false;
+        this.#browserName = session.browser.name ?? 'chrome';
+        this.#browserVersion = session.browser.version ?? 'latest';
+        this.#platformName = session.browser.platform ?? 'Windows 10';
+        this.#resolution = session.browser.resolution ?? '1920x1080';
+        this.#startUrl = session.browser.startUrl ?? '';
+        this.#incognito = session.browser.incognito ?? false;
+        this.#startMaximized = session.browser.startMaximized ?? false;
+        this.#emulate = session.browser.emulate ?? false;
 
         if (!this.#startUrl) {
             throw new TestRunnerConfigurationError('No start URL provided');
@@ -117,7 +117,7 @@ class RunConfigurationWeb extends RunConfiguration {
 
         await driver.url(this.#startUrl);
 
-        await driver.pause(10000);
+        await driver.pause(5000);
 
         return driver;
     }

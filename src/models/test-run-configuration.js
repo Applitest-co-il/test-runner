@@ -2,23 +2,33 @@ const RunConfigurationWeb = require('./configuration/web-run-configuration');
 const RunConfigurationMobile = require('./configuration/mobile-run-configuration');
 const { TestRunnerConfigurationError } = require('../helpers/test-errors');
 
-function runConfigurationFactory(options, runType) {
+function runConfigurationFactory(options) {
     if (!options) {
         throw new TestRunnerConfigurationError('No options provided');
     }
 
-    if (!runType) {
-        throw new TestRunnerConfigurationError('No run type provided');
+    if (!options.sessions || options.sessions.length === 0) {
+        throw new TestRunnerConfigurationError('No sessions found');
     }
 
-    switch (runType) {
-        case 'mobile':
-            return new RunConfigurationMobile(options);
-        case 'web':
-            return new RunConfigurationWeb(options);
-        default:
-            throw new TestRunnerConfigurationError('Invalid run type provided');
+    const runSessions = [];
+    for (let i = 0; i < options.sessions.length; i++) {
+        let session = options.sessions[i];
+
+        let runConf = null;
+        switch (session.type) {
+            case 'mobile':
+                runConf = new RunConfigurationMobile(options, session);
+                break;
+            case 'web':
+                runConf = new RunConfigurationWeb(options, session);
+                break;
+            default:
+                throw new TestRunnerConfigurationError('Invalid session type provided');
+        }
+        runSessions.push({ type: session.type, runConf: runConf, driver: null });
     }
+    return runSessions;
 }
 
 module.exports = {

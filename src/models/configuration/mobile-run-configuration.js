@@ -12,18 +12,18 @@ class RunConfigurationMobile extends RunConfiguration {
     #forceAppInstall = false;
     #reset = true;
 
-    constructor(options) {
+    constructor(options, session) {
         super(options);
 
-        this.#platformName = options.appium.platformName ?? 'Android';
-        this.#automationName = options.appium.automationName ?? 'UiAutomator2';
-        this.#deviceName = options.appium.deviceName ?? 'Android';
-        this.#app = options.appium.app ?? '';
-        this.#appPackage = options.appium.appPackage ?? '';
-        this.#appActivity = options.appium.appActivity ?? '';
-        this.#autoGrantPermissions = options.appium.autoGrantPermissions ?? true;
-        this.#reset = options.appium.reset ?? true;
-        this.#forceAppInstall = options.appium.forceAppInstall ?? false;
+        this.#platformName = session.appium.platformName ?? 'Android';
+        this.#automationName = session.appium.automationName ?? 'UiAutomator2';
+        this.#deviceName = session.appium.deviceName ?? 'Android';
+        this.#app = session.appium.app ?? '';
+        this.#appPackage = session.appium.appPackage ?? '';
+        this.#appActivity = session.appium.appActivity ?? '';
+        this.#autoGrantPermissions = session.appium.autoGrantPermissions ?? true;
+        this.#reset = session.appium.reset ?? true;
+        this.#forceAppInstall = session.appium.forceAppInstall ?? false;
     }
 
     get reset() {
@@ -53,14 +53,15 @@ class RunConfigurationMobile extends RunConfiguration {
 
         if (this.farm === 'local') {
             wdio.capabilities['platformName'] = this.#platformName;
-            wdio.capabilities[this.capabilityPropertyName('automationName')] = this.#automationName;
-            wdio.capabilities[this.capabilityPropertyName('deviceName')] = this.#deviceName;
-            wdio.capabilities[this.capabilityPropertyName('app')] = this.#app;
-            wdio.capabilities[this.capabilityPropertyName('appPackage')] = this.#appPackage;
-            wdio.capabilities[this.capabilityPropertyName('appActivity')] = this.#appActivity;
-            wdio.capabilities[this.capabilityPropertyName('autoGrantPermissions')] = this.#autoGrantPermissions;
+            wdio.capabilities['appium:automationName'] = this.#automationName;
+            wdio.capabilities['appium:deviceName'] = this.#deviceName;
+            wdio.capabilities['appium:app'] = this.#app;
+            wdio.capabilities['appium:appPackage'] = this.#appPackage;
+            wdio.capabilities['appium:appActivity'] = this.#appActivity;
+            wdio.capabilities['appium:autoGrantPermissions'] = this.#autoGrantPermissions;
+            wdio.capabilities['appium:newCommandTimeout'] = 90;
             if (!this.#reset) {
-                wdio.capabilities[this.capabilityPropertyName('noReset')] = true;
+                wdio.capabilities['appium:noReset'] = true;
             }
         } else if (this.farm === 'saucelabs') {
             wdio.user = this.user;
@@ -69,13 +70,13 @@ class RunConfigurationMobile extends RunConfiguration {
             wdio.port = this.port;
             wdio.baseUrl = 'wd/hub';
             wdio.capabilities['platformName'] = this.#platformName;
-            wdio.capabilities[this.capabilityPropertyName('app')] = `storage:filename=${this.#app}`;
-            wdio.capabilities[this.capabilityPropertyName('appPackage')] = this.#appPackage;
-            wdio.capabilities[this.capabilityPropertyName('appActivity')] = this.#appActivity;
-            wdio.capabilities[this.capabilityPropertyName('autoGrantPermissions')] = this.#autoGrantPermissions;
-            wdio.capabilities[this.capabilityPropertyName('deviceName')] = this.#deviceName;
-            wdio.capabilities[this.capabilityPropertyName('automationName')] =
-                this.#platformName == 'android' ? 'UiAutomator2' : '';
+            wdio.capabilities['appium:app'] = `storage:filename=${this.#app}`;
+            wdio.capabilities['appium:appPackage'] = this.#appPackage;
+            wdio.capabilities['appium:appActivity'] = this.#appActivity;
+            wdio.capabilities['appium:autoGrantPermissions'] = this.#autoGrantPermissions;
+            wdio.capabilities['appium:deviceName'] = this.#deviceName;
+            wdio.capabilities['appium:automationName'] = this.#platformName == 'android' ? 'UiAutomator2' : '';
+            wdio.capabilities['appium:newCommandTimeout'] = 90;
             wdio.capabilities['sauce:options'] = {
                 name: this.runName,
                 appiumVersion: 'latest',
@@ -85,14 +86,14 @@ class RunConfigurationMobile extends RunConfiguration {
             // Implement AWS capabilities
             wdio['path'] = process.env.APPIUM_BASE_PATH;
             wdio.capabilities['platformName'] = process.env.DEVICEFARM_DEVICE_PLATFORM_NAME;
-            wdio.capabilities[this.capabilityPropertyName('automationName')] = this.#automationName;
-            wdio.capabilities[this.capabilityPropertyName('deviceName')] = process.env.DEVICEFARM_DEVICE_NAME;
-            wdio.capabilities[this.capabilityPropertyName('app')] = process.env.DEVICEFARM_APP_PATH;
-            wdio.capabilities[this.capabilityPropertyName('appPackage')] = this.#appPackage;
-            wdio.capabilities[this.capabilityPropertyName('appActivity')] = this.#appActivity;
-            wdio.capabilities[this.capabilityPropertyName('autoGrantPermissions')] = this.#autoGrantPermissions;
+            wdio.capabilities['appium:automationName'] = this.#automationName;
+            wdio.capabilities['appium:deviceName'] = process.env.DEVICEFARM_DEVICE_NAME;
+            wdio.capabilities['appium:app'] = process.env.DEVICEFARM_APP_PATH;
+            wdio.capabilities['appium:appPackage'] = this.#appPackage;
+            wdio.capabilities['appium:appActivity'] = this.#appActivity;
+            wdio.capabilities['appium:autoGrantPermissions'] = this.#autoGrantPermissions;
             if (!this.#reset) {
-                wdio.capabilities[this.capabilityPropertyName('noReset')] = true;
+                wdio.capabilities['appium:noReset'] = true;
             }
         }
         return wdio;
@@ -111,10 +112,6 @@ class RunConfigurationMobile extends RunConfiguration {
 
         const driver = await super.startSession();
         return driver;
-    }
-
-    capabilityPropertyName(name) {
-        return `appium:${name}`;
     }
 }
 

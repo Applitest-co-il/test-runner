@@ -36,7 +36,7 @@ class ClickCoordinatesStep extends BaseStep {
             y = parseInt(params[1]);
         }
 
-        const pointerType = this.conf.runType == 'mobile' ? 'touch' : 'mouse';
+        const pointerType = this.session.type == 'mobile' ? 'touch' : 'mouse';
 
         if (isNaN(x) || isNaN(y)) {
             throw new TestRunnerError(
