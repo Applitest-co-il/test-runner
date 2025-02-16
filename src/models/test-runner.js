@@ -104,8 +104,8 @@ class TestRunner {
             if (this.#runConfiguration.keepSession) {
                 console.log('Saving driver...');
                 TestRunner.#savedWebDriver = runSession.driver;
-            } else if (this.#runConfiguration.noFollowReset) {
-                console.log('Mobile No follow reset flag set - skipping closing or resetting session');
+                // } else if (this.#runConfiguration.noFollowReset && runSession.type == 'mobile') {
+                //     console.log('Mobile No follow reset flag set - skipping closing or resetting session');
             } else {
                 console.log('Closing session...');
                 try {

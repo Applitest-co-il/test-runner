@@ -1,4 +1,5 @@
 const { mergeVariables } = require('../helpers/utils');
+const { TestRunnerError } = require('../helpers/test-errors');
 const Test = require('./test');
 
 class Suite {
@@ -72,6 +73,10 @@ class Suite {
             }
 
             const runSession = sessions.find((session) => session.type === test.type);
+            if (!runSession) {
+                console.error(`No session found for test ${test.id} - ${test.name} - ${test.type}`);
+                throw new TestRunnerError(`No session found for test ${test.id} - ${test.name} - ${test.type}`);
+            }
 
             const testPromises = await test.run(runSession, this.variables);
 
