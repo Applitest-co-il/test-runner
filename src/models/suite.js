@@ -73,7 +73,7 @@ class Suite {
 
             const runSession = sessions.find((session) => session.type === test.type);
 
-            const testPromises = await test.run(runSession.driver, this.variables, runSession.runConf);
+            const testPromises = await test.run(runSession, this.variables);
 
             console.log(`Adding video promise "${this.#index}_${i}" to suite promises`);
             promises = promises.concat(testPromises);

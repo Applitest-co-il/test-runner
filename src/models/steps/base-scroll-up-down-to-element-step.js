@@ -23,9 +23,13 @@ class BaseScrollUpDownToElementStep extends BaseVerticalScrollStep {
             } else {
                 const isDisplayed = await item.isDisplayed();
                 if (isDisplayed) {
-                    const isClickable = await item.isClickable();
-                    if (isClickable) {
-                        break;
+                    if (this.session.type === 'web') {
+                        const isClickable = await item.isClickable();
+                        if (isClickable) {
+                            break;
+                        }
+                    } else {
+                        break; // for mobile is displayed is enough
                     }
                 }
             }

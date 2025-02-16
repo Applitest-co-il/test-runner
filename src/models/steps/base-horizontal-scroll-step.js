@@ -25,7 +25,7 @@ class BaseHorizontalScrollStep extends BaseStep {
         const endX = Math.floor(width * endPercentage);
         const fixedScroll = left ? -endX : endX;
         const scrollX = originItem ? fixedScroll : endX - startX;
-        const pointerType = this.conf.runType == 'mobile' ? 'touch' : 'mouse';
+        const pointerType = this.session.type == 'mobile' ? 'touch' : 'mouse';
 
         const scrollEvt = count > 1 ? count : 1;
         for (let i = 0; i < scrollEvt; i++) {

@@ -28,7 +28,7 @@ class BaseVerticalScrollStep extends BaseStep {
 
         const scrollEvt = count > 1 ? count : 1;
         for (let i = 0; i < scrollEvt; i++) {
-            if (this.conf.runType == 'web') {
+            if (this.session.type == 'web') {
                 const actualScrollY = -scrollY;
 
                 await driver

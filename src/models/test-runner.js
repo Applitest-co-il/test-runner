@@ -2,12 +2,14 @@ const { TestRunnerError, TestDefinitionError, TestAbuseError } = require('../hel
 const Suite = require('./suite');
 const { runConfigurationFactory } = require('./test-run-configuration');
 const { mergeVariables } = require('../helpers/utils');
+const SessionPinger = require('../helpers/session-pinger');
 
 class TestRunner {
     static #savedWebDriver = null;
 
     #runConfiguration = null;
     #sessions = [];
+    #sessionPinger = null;
 
     #suites = [];
     #variables = {};
@@ -62,6 +64,9 @@ class TestRunner {
         for (const session of this.#sessions) {
             await this.startSession(session.type);
         }
+
+        this.#sessionPinger = new SessionPinger(this.#sessions);
+        this.#sessionPinger.start();
     }
 
     async startSession(runType) {
@@ -119,6 +124,9 @@ class TestRunner {
 
     async terminateAllSessions() {
         console.log('Terminating all sessions...');
+        if (this.#sessionPinger) {
+            await this.#sessionPinger.stop();
+        }
         for (let i = 0; i < this.#sessions.length; i++) {
             await this.closeSession(this.#sessions[i]);
         }
@@ -130,45 +138,49 @@ class TestRunner {
         let promises = [];
         let suiteResults = [];
 
-        await this.initSessions();
+        try {
+            await this.initSessions();
 
-        for (let i = 0; i < this.#suites.length; i++) {
-            console.log(
-                `TestRunner::Running suite #${i} of type ${this.#suites[i].type} out of ${this.#suites.length}`
-            );
-            const suite = this.#suites[i];
+            for (let i = 0; i < this.#suites.length; i++) {
+                console.log(
+                    `TestRunner::Running suite #${i} of type ${this.#suites[i].type} out of ${this.#suites.length}`
+                );
+                const suite = this.#suites[i];
 
-            try {
-                const suitePromises = await suite.run(this.#sessions, this.variables);
+                try {
+                    const suitePromises = await suite.run(this.#sessions, this.variables);
 
-                console.log(`Adding videos promises for suite ${i} to main promises`);
-                promises = promises.concat(suitePromises);
+                    console.log(`Adding videos promises for suite ${i} to main promises`);
+                    promises = promises.concat(suitePromises);
 
-                mergeVariables(this.#variables, suite.variables);
+                    mergeVariables(this.#variables, suite.variables);
 
-                let suiteResult = await suite.report();
-                suiteResults.push(suiteResult);
+                    let suiteResult = await suite.report();
+                    suiteResults.push(suiteResult);
 
-                console.log(`TestRunner::Suite ${i} run complete`);
-            } catch (error) {
-                await this.closeSession(this.getSession(suite.type));
-                if (error instanceof TestAbuseError) {
-                    throw error;
-                } else {
-                    console.error('Error running suite:', error);
-                    throw new Error(`error running suite: ${error.message}`);
+                    console.log(`TestRunner::Suite ${i} run complete`);
+                } catch (error) {
+                    if (error instanceof TestAbuseError) {
+                        throw error;
+                    } else {
+                        console.error('Error running suite:', error);
+                        throw new Error(`error running suite: ${error.message}`);
+                    }
                 }
             }
-        }
 
-        await this.terminateAllSessions();
-
-        console.log('Test run complete waiting for all video promises to complete');
-        if (promises.length > 0) {
-            await Promise.all(promises);
-            console.log('All video promises completed');
-        } else {
-            console.log('No video promises found');
+            console.log('Test run complete waiting for all video promises to complete');
+            if (promises.length > 0) {
+                await Promise.all(promises);
+                console.log('All video promises completed');
+            } else {
+                console.log('No video promises found');
+            }
+        } catch (error) {
+            console.error('Error running:', error);
+            throw new Error(`error running test: ${error.message}`);
+        } finally {
+            await this.terminateAllSessions();
         }
 
         return suiteResults;
