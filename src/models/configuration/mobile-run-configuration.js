@@ -77,10 +77,11 @@ class RunConfigurationMobile extends RunConfiguration {
             wdio.capabilities['appium:deviceName'] = this.#deviceName;
             wdio.capabilities['appium:automationName'] = this.#platformName == 'android' ? 'UiAutomator2' : '';
             wdio.capabilities['appium:newCommandTimeout'] = 90;
+            wdio.capabilities['appium:orientation'] = 'LANDSCAPE';
             wdio.capabilities['sauce:options'] = {
                 name: this.runName,
                 appiumVersion: 'latest',
-                deviceOrientation: 'PORTRAIT',
+                deviceOrientation: 'LANDSCAPE',
                 setupDeviceLock: true
             };
         } else if (this.farm === 'aws') {
