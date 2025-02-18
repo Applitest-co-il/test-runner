@@ -80,7 +80,8 @@ class RunConfigurationMobile extends RunConfiguration {
             wdio.capabilities['sauce:options'] = {
                 name: this.runName,
                 appiumVersion: 'latest',
-                deviceOrientation: 'PORTRAIT'
+                deviceOrientation: 'PORTRAIT',
+                setupDeviceLock: true
             };
         } else if (this.farm === 'aws') {
             // Implement AWS capabilities
