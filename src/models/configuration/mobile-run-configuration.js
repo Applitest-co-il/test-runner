@@ -11,6 +11,8 @@ class RunConfigurationMobile extends RunConfiguration {
     #autoGrantPermissions = true;
     #forceAppInstall = false;
     #reset = true;
+    #deviceLock = false;
+    #orientation = 'PORTRAIT';
 
     constructor(options, session) {
         super(options);
@@ -24,6 +26,8 @@ class RunConfigurationMobile extends RunConfiguration {
         this.#autoGrantPermissions = session.appium.autoGrantPermissions ?? true;
         this.#reset = session.appium.reset ?? true;
         this.#forceAppInstall = session.appium.forceAppInstall ?? false;
+        this.#deviceLock = session.appium.deviceLock ?? false;
+        this.#orientation = session.appium.orientation ?? 'PORTRAIT';
     }
 
     get reset() {
@@ -40,6 +44,10 @@ class RunConfigurationMobile extends RunConfiguration {
 
     get appPackage() {
         return this.#appPackage;
+    }
+
+    get orientation() {
+        return this.#orientation;
     }
 
     async conf() {
@@ -60,6 +68,7 @@ class RunConfigurationMobile extends RunConfiguration {
             wdio.capabilities['appium:appActivity'] = this.#appActivity;
             wdio.capabilities['appium:autoGrantPermissions'] = this.#autoGrantPermissions;
             wdio.capabilities['appium:newCommandTimeout'] = 90;
+            //wdio.capabilities['appium:orientation'] = this.#orientation;
             if (!this.#reset) {
                 wdio.capabilities['appium:noReset'] = true;
             }
@@ -77,12 +86,12 @@ class RunConfigurationMobile extends RunConfiguration {
             wdio.capabilities['appium:deviceName'] = this.#deviceName;
             wdio.capabilities['appium:automationName'] = this.#platformName == 'android' ? 'UiAutomator2' : '';
             wdio.capabilities['appium:newCommandTimeout'] = 90;
-            wdio.capabilities['appium:orientation'] = 'LANDSCAPE';
+            wdio.capabilities['appium:orientation'] = this.#orientation;
             wdio.capabilities['sauce:options'] = {
                 name: this.runName,
                 appiumVersion: 'latest',
-                deviceOrientation: 'LANDSCAPE',
-                setupDeviceLock: true
+                deviceOrientation: this.#orientation,
+                setupDeviceLock: this.#deviceLock
             };
         } else if (this.farm === 'aws') {
             // Implement AWS capabilities
@@ -113,6 +122,7 @@ class RunConfigurationMobile extends RunConfiguration {
         }
 
         const driver = await super.startSession();
+
         return driver;
     }
 }
