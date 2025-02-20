@@ -72,6 +72,9 @@ class RunConfigurationWeb extends RunConfiguration {
             wdio.capabilities['sauce:options'] = {
                 name: this.runName
             };
+            if (this.#resolution) {
+                wdio.capabilities['sauce:options'].screenResolution = this.#resolution;
+            }
         } else if (this.farm === 'aws') {
             // Implement AWS capabilities
             let url = new URL(process.env.TR_FARM_SESSION_URL);
