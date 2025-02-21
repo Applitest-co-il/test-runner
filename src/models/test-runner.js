@@ -6,6 +6,7 @@ const SessionPinger = require('../helpers/session-pinger');
 
 class TestRunner {
     static #savedWebDriver = null;
+    static #savedMobileDriver = null;
 
     #runConfiguration = null;
     #sessions = [];
@@ -81,11 +82,19 @@ class TestRunner {
             return runSession;
         } else if (runType == 'web') {
             if (TestRunner.#savedWebDriver) {
-                console.log('Using saved driver');
+                console.log('Using saved web driver');
                 runSession.driver = TestRunner.#savedWebDriver;
                 return runSession;
             } else {
                 console.log('No web saved driver found');
+            }
+        } else if (runType == 'mobile') {
+            if (TestRunner.#savedMobileDriver) {
+                console.log('Using saved mobile driver');
+                runSession.driver = TestRunner.#savedMobileDriver;
+                return runSession;
+            } else {
+                console.log('No mobile saved driver found');
             }
         }
 
@@ -103,7 +112,11 @@ class TestRunner {
         if (runSession.driver) {
             if (this.#runConfiguration.keepSession) {
                 console.log('Saving driver...');
-                TestRunner.#savedWebDriver = runSession.driver;
+                if (runSession.type == 'web') {
+                    TestRunner.#savedWebDriver = runSession.driver;
+                } else if (runSession.type == 'mobile') {
+                    TestRunner.#savedMobileDriver = runSession.driver;
+                }
                 // } else if (this.#runConfiguration.noFollowReset && runSession.type == 'mobile') {
                 //     console.log('Mobile No follow reset flag set - skipping closing or resetting session');
             } else {
