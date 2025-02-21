@@ -39,7 +39,7 @@ class Test {
 
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
-            let testStep = stepFactory(i, step);
+            let testStep = stepFactory(i + 1, step);
             this.#steps.push(testStep);
         }
     }

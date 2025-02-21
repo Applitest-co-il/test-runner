@@ -393,6 +393,8 @@ class BaseStep {
     }
 
     async selectItem(driver) {
+        await this.hideKeyboard(driver);
+
         // Implement item selection logic
         let selectors = this.#selectorsForPlatform(driver.capabilities.platformName.toLowerCase());
         let item = null;
@@ -421,6 +423,15 @@ class BaseStep {
         }
         return item;
     }
+
+    async execute(driver, item) {
+        console.log(`Execute method is not implemented - ${driver} - ${item}`);
+        throw new TestRunnerError('Execute method is not implemented');
+    }
+
+    //#endregion
+
+    //#region utils
 
     async executeScript(driver) {
         try {
@@ -456,9 +467,13 @@ class BaseStep {
         }
     }
 
-    async execute(driver, item) {
-        console.log(`Execute method is not implemented - ${driver} - ${item}`);
-        throw new TestRunnerError('Execute method is not implemented');
+    async hideKeyboard(driver) {
+        if (this.session.type == 'mobile') {
+            const isKeyBoaordShown = await driver.isKeyboardShown();
+            if (isKeyBoaordShown) {
+                await driver.hideKeyboard();
+            }
+        }
     }
 
     //#endregion

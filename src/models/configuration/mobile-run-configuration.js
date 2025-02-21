@@ -68,7 +68,6 @@ class RunConfigurationMobile extends RunConfiguration {
             wdio.capabilities['appium:appActivity'] = this.#appActivity;
             wdio.capabilities['appium:autoGrantPermissions'] = this.#autoGrantPermissions;
             wdio.capabilities['appium:newCommandTimeout'] = 90;
-            //wdio.capabilities['appium:orientation'] = this.#orientation;
             if (!this.#reset) {
                 wdio.capabilities['appium:noReset'] = true;
             }

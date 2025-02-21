@@ -1,0 +1,13 @@
+const BaseStep = require('./base-step');
+
+class HideKeyboardStep extends BaseStep {
+    constructor(sequence, step) {
+        super(sequence, step);
+    }
+
+    async execute(driver, _) {
+        await this.hideKeyboard(driver);
+    }
+}
+
+module.exports = HideKeyboardStep;
