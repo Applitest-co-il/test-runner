@@ -24,6 +24,7 @@ class BaseStep {
     #condition = null;
 
     #originalBorderCSS = '';
+    #hideKeyboard = false;
 
     static #commands = [
         //generic
@@ -157,7 +158,7 @@ class BaseStep {
         this.#isValid();
     }
 
-    //#region getters
+    //#region getters-setters
 
     get command() {
         return this.#command;
@@ -201,6 +202,14 @@ class BaseStep {
 
     get session() {
         return this.#session;
+    }
+
+    get hideKeyboard() {
+        return this.#hideKeyboard;
+    }
+
+    set hideKeyboard(value) {
+        this.#hideKeyboard = value;
     }
 
     //#endregion
@@ -393,7 +402,7 @@ class BaseStep {
     }
 
     async selectItem(driver) {
-        await this.hideKeyboard(driver);
+        await this.doHideKeyboard(driver);
 
         // Implement item selection logic
         let selectors = this.#selectorsForPlatform(driver.capabilities.platformName.toLowerCase());
@@ -467,8 +476,8 @@ class BaseStep {
         }
     }
 
-    async hideKeyboard(driver) {
-        if (this.session.type == 'mobile') {
+    async doHideKeyboard(driver) {
+        if (this.session.type == 'mobile' && this.hideKeyboard) {
             const isKeyBoaordShown = await driver.isKeyboardShown();
             if (isKeyBoaordShown) {
                 await driver.hideKeyboard();
