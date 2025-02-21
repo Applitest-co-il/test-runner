@@ -4,6 +4,8 @@ const { TestRunnerError } = require('../../helpers/test-errors');
 class WaitForNotExistStep extends BaseStep {
     constructor(sequence, step) {
         super(sequence, step);
+
+        this.hideKeyboard = true;
     }
 
     async execute(driver, _) {

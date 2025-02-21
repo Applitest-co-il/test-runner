@@ -3,6 +3,8 @@ const BaseStep = require('./base-step');
 class ClickMultipleStep extends BaseStep {
     constructor(sequence, step) {
         super(sequence, step);
+
+        this.hideKeyboard = true;
     }
 
     async execute(driver, item) {
