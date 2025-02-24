@@ -25,6 +25,7 @@ class BaseStep {
 
     #originalBorderCSS = '';
     #hideKeyboard = false;
+    #takeSnapshot = false;
 
     static #commands = [
         //generic
@@ -33,6 +34,7 @@ class BaseStep {
         'app-activate',
         'app-background',
         'switch-frame',
+        'hide-keyboard',
 
         //settings
         'toggle-location-services',
@@ -70,6 +72,8 @@ class BaseStep {
         'execute-script',
         'perform-actions',
         'drag-and-drop',
+        'mouse-hover',
+        'mouse-move',
 
         //assertions
         'wait-for-exist',
@@ -100,7 +104,8 @@ class BaseStep {
         'assert-number',
         'assert-css-property',
         'assert-attribute',
-        'drag-and-drop'
+        'drag-and-drop',
+        'mouse-hover'
     ];
     static #commandsRequireSelector = [
         ...BaseStep.#commandsRequireItem,
@@ -142,7 +147,9 @@ class BaseStep {
         'set-variable',
         'set-variable-from-script',
         'navigate',
-        'drag-and-drop'
+        'drag-and-drop',
+        'mouse-hover',
+        'mouse-move'
     ];
 
     constructor(sequence, step) {
@@ -210,6 +217,14 @@ class BaseStep {
 
     set hideKeyboard(value) {
         this.#hideKeyboard = value;
+    }
+
+    get takeSnapshot() {
+        return this.#takeSnapshot;
+    }
+
+    set takeSnapshot(value) {
+        this.#takeSnapshot = value;
     }
 
     //#endregion
@@ -307,10 +322,10 @@ class BaseStep {
 
     //#endregion
 
-    //#region run
+    //#region highlight & video
 
-    async addFrameToVideo() {
-        if (this.#videoRecorder) {
+    async addFrameToVideo(forced) {
+        if (this.#videoRecorder && (this.takeSnapshot || forced)) {
             await this.#videoRecorder.addFrame();
         }
     }
@@ -361,6 +376,10 @@ class BaseStep {
             this.#originalBorderCSS = '';
         }
     }
+
+    //#endregion
+
+    //#region run
 
     async run(session, variables, videoRecorder) {
         this.#session = session;

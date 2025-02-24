@@ -1,6 +1,6 @@
 const BaseStep = require('./base-step');
 
-class MiddleClickStep extends BaseStep {
+class MouseHoverStep extends BaseStep {
     constructor(sequence, step) {
         super(sequence, step);
 
@@ -8,11 +8,13 @@ class MiddleClickStep extends BaseStep {
     }
 
     async execute(driver, item) {
+        const duration = parseInt(this.value) || 100;
+
         const action = await driver.action('pointer', { pointerType: 'mouse' });
-        await action.move({ origin: item }).pause(1);
-        await action.down('middle').pause(1).up('middle').pause(1);
+        await action.move({ origin: item, x: 0, y: 0, duration: 100 });
+        await action.pause(duration);
         await action.perform();
     }
 }
 
-module.exports = MiddleClickStep;
+module.exports = MouseHoverStep;

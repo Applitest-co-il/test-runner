@@ -5,6 +5,7 @@ class ClickStep extends BaseStep {
         super(sequence, step);
 
         this.hideKeyboard = true;
+        this.takeSnapshot = true;
     }
 
     async execute(_, item) {

@@ -4,6 +4,8 @@ const BaseStep = require('./base-step');
 class DragAndDropStep extends BaseStep {
     constructor(sequence, step) {
         super(sequence, step);
+
+        this.takeSnapshot = true;
     }
 
     async execute(driver, item) {

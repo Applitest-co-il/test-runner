@@ -43,10 +43,13 @@ const WaitForExistStep = require('./steps/wait-for-exist-step.js');
 const WaitForNotExistStep = require('./steps/wait-for-not-exist-step.js');
 const SwitchFrameStep = require('./steps/switch-frame-step.js');
 const DragAndDropStep = require('./steps/drag-and-drop-step.js');
+const HideKeyboardStep = require('./steps/hide-keyboard-step.js');
+const MouseHoverStep = require('./steps/mouse-hover-step.js');
+const MouseMoveStep = require('./steps/mouse-move-step.js');
 
 function stepFactory(sequence, step) {
     switch (step.command) {
-        //generic
+        //#region generic
         case 'pause':
             return new PauseStep(sequence, step);
         case 'navigate':
@@ -57,16 +60,20 @@ function stepFactory(sequence, step) {
             return new AppBackgroundStep(sequence, step);
         case 'switch-frame':
             return new SwitchFrameStep(sequence, step);
+        case 'hide-keyboard':
+            return new HideKeyboardStep(sequence, step);
+        //#endregion
 
-        //settings
+        //#region settings
         case 'toggle-location-services':
             return new ToggleLocationServicesStep(sequence, step);
         case 'toggle-airplane-mode':
             return new ToggleAirplaneModeStep(sequence, step);
         case 'set-geolocation':
             return new SetLocationStep(sequence, step);
+        //#endregion
 
-        //variables
+        //#region variables
         case 'generate-random-integer':
             return new VariableRandomIntegerStep(sequence, step);
         case 'generate-random-string':
@@ -76,8 +83,9 @@ function stepFactory(sequence, step) {
             return new VariableSetStep(sequence, step);
         case 'set-variable-from-script':
             return new VariableSetFromJavascriptStep(sequence, step);
+        //#endregion
 
-        //actions
+        //#region actions
         case 'click':
             return new ClickStep(sequence, step);
         case 'multiple-clicks':
@@ -122,8 +130,13 @@ function stepFactory(sequence, step) {
             return new PerformActionsStep(sequence, step);
         case 'drag-and-drop':
             return new DragAndDropStep(sequence, step);
+        case 'mouse-hover':
+            return new MouseHoverStep(sequence, step);
+        case 'mouse-move':
+            return new MouseMoveStep(sequence, step);
+        //#endregion
 
-        //assertions
+        //#region assertions
         case 'wait-for-exist':
             return new WaitForExistStep(sequence, step);
         case 'wait-for-not-exist':
@@ -142,8 +155,8 @@ function stepFactory(sequence, step) {
             return new AssertAttributeStep(sequence, step);
         case 'assert-app-installed':
             return new AssertAppInstalledStep(sequence, step);
+        //#endregion
 
-        //default
         default:
             throw new TestDefinitionError(`Step command ${step.command} is not a valid one`);
     }

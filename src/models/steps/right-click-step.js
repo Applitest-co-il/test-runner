@@ -3,6 +3,8 @@ const BaseStep = require('./base-step');
 class RightClickStep extends BaseStep {
     constructor(sequence, step) {
         super(sequence, step);
+
+        this.takeSnapshot = true;
     }
 
     async execute(driver, item) {

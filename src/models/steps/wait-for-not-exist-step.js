@@ -6,6 +6,7 @@ class WaitForNotExistStep extends BaseStep {
         super(sequence, step);
 
         this.hideKeyboard = true;
+        this.takeSnapshot = true;
     }
 
     async execute(driver, _) {
@@ -16,7 +17,7 @@ class WaitForNotExistStep extends BaseStep {
                 async () => {
                     let item = await that.selectItem(driver);
                     if (item) {
-                        await that.addFrameToVideo();
+                        await that.addFrameToVideo(true);
                         return false;
                     } else {
                         return true;

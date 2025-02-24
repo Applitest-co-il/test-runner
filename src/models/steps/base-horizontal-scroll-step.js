@@ -41,7 +41,7 @@ class BaseHorizontalScrollStep extends BaseStep {
                 .up()
                 .pause(10)
                 .perform();
-            await this.addFrameToVideo();
+            await this.addFrameToVideo(true);
         }
         return;
     }

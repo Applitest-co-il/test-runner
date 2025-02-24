@@ -50,7 +50,7 @@ class BaseVerticalScrollStep extends BaseStep {
                     .pause(10)
                     .perform();
             }
-            await this.addFrameToVideo();
+            await this.addFrameToVideo(true);
             console.log(`VerticalScroll::Scrolled: ${down ? 'down' : 'up'} - iteration: ${i} - Y: ${scrollY}px`);
         }
         return;
