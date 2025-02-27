@@ -5,6 +5,7 @@ class ClickMultipleStep extends BaseStep {
         super(sequence, step);
 
         this.hideKeyboard = true;
+        this.takeSnapshot = true;
     }
 
     async execute(driver, item) {

@@ -70,7 +70,8 @@ class RunConfigurationWeb extends RunConfiguration {
             wdio.capabilities['platformName'] = this.#platformName;
 
             wdio.capabilities['sauce:options'] = {
-                name: this.runName
+                name: this.runName,
+                recordScreenshots: false
             };
             if (this.#resolution) {
                 wdio.capabilities['sauce:options'].screenResolution = this.#resolution;

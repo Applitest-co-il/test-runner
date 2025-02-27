@@ -90,7 +90,8 @@ class RunConfigurationMobile extends RunConfiguration {
                 name: this.runName,
                 appiumVersion: 'latest',
                 deviceOrientation: this.#orientation,
-                setupDeviceLock: this.#deviceLock
+                setupDeviceLock: this.#deviceLock,
+                recordScreenshots: false
             };
         } else if (this.farm === 'aws') {
             // Implement AWS capabilities
