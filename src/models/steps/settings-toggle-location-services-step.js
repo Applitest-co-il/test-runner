@@ -11,10 +11,18 @@ class ToggleLocationServicesStep extends BaseStep {
         const value = replaceVariables(this.value, this.variables);
         try {
             if (driver.capabilities.platformName.toLowerCase() === 'android') {
-                // Toggle location services using shell command
-                const toggleCommand =
-                    value === 'on' ? 'settings put secure location_mode 3' : 'settings put secure location_mode 0';
-                await driver.execute('mobile: shell', { command: toggleCommand });
+                if (driver.capabilities.platformVersion >= 10.0) {
+                    // Toggle location services using shell command
+                    const toggleCommand =
+                        value === 'on' ? 'settings put secure location_mode 3' : 'settings put secure location_mode 0';
+                    await driver.execute('mobile: shell', { command: toggleCommand });
+                } else {
+                    const toggleCommand =
+                        value === 'on'
+                            ? 'settings put secure location_providers_allowed +gps'
+                            : 'settings put secure location_providers_allowed -gps';
+                    await driver.execute('mobile: shell', { command: toggleCommand });
+                }
             }
         } catch (error) {
             throw new TestRunnerError(

@@ -6,8 +6,11 @@ const {
     TestItemNotFoundError,
     TestAbuseError
 } = require('../helpers/test-errors');
+const libVersion = require('../../package.json').version;
 
 async function runTests(options) {
+    console.log(`TestRunnerLib::runTests::${libVersion}`);
+
     const startDate = new Date();
     const testRunner = new TestRunner(options);
 

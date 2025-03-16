@@ -116,6 +116,9 @@ class RunConfiguration {
         let conf = null;
         try {
             conf = await this.conf();
+
+            console.log(`Starting driver with conf: ${JSON.stringify(conf)}`);
+
             let driver = await remote(conf);
             if (!driver) {
                 console.error('Driver could not be set');

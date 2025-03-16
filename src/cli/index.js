@@ -3,7 +3,7 @@ const commander = require('commander');
 const fs = require('fs');
 
 const { downloadFile } = require('../helpers/download-file.js');
-const { runTests } = require('../lib/runner.js');
+const { runTests } = require('../lib/index.js');
 
 commander
     .version('0.0.1', '-v, --version')
