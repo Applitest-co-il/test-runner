@@ -14,6 +14,7 @@ class Test {
     #skip = false;
 
     #steps = [];
+    #savedElements = {};
 
     #status = 'pending';
     #lastStep = 0;
@@ -88,6 +89,10 @@ class Test {
         return this.#variables;
     }
 
+    get savedElements() {
+        return this.#savedElements;
+    }
+
     async run(session, variables) {
         const promises = [];
 
@@ -131,7 +136,7 @@ class Test {
 
             const step = steps[i];
             try {
-                const success = await step.run(session, this.variables, this.#videoRecorder);
+                const success = await step.run(session, this.variables, this.savedElements, this.#videoRecorder);
                 if (!success) {
                     this.#status = 'failed';
                     this.#lastStep = i;

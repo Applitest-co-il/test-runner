@@ -27,7 +27,7 @@ class WaitForNotExistStep extends BaseStep {
             );
         } catch {
             throw new TestRunnerError(
-                `Element with selector [${this.usedSelectors}] did not disappear off screen up to ${timeout}ms`
+                `Element with ${this.namedElementOrUsedSelectorsComment} did not disappear off screen up to ${timeout}ms`
             );
         }
     }

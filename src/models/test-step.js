@@ -46,6 +46,9 @@ const DragAndDropStep = require('./steps/drag-and-drop-step.js');
 const HideKeyboardStep = require('./steps/hide-keyboard-step.js');
 const MouseHoverStep = require('./steps/mouse-hover-step.js');
 const MouseMoveStep = require('./steps/mouse-move-step.js');
+const ItemSelectStep = require('./steps/item-select-step.js');
+const ItemClearStep = require('./steps/item-clear-step.js');
+const VariableClearStep = require('./steps/variable-clear-step.js');
 
 function stepFactory(sequence, step) {
     switch (step.command) {
@@ -83,6 +86,12 @@ function stepFactory(sequence, step) {
             return new VariableSetStep(sequence, step);
         case 'set-variable-from-script':
             return new VariableSetFromJavascriptStep(sequence, step);
+        case 'clear-variable':
+            return new VariableClearStep(sequence, step);
+        case 'item-select':
+            return new ItemSelectStep(sequence, step);
+        case 'item-clear':
+            return new ItemClearStep(sequence, step);
         //#endregion
 
         //#region actions

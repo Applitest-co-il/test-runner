@@ -12,7 +12,7 @@ class AssertNumberStep extends BaseStep {
         const number = +text;
         if (isNaN(number)) {
             throw new TestRunnerError(
-                `AssertNumber::Text "${text}" is not a valid number on element with selectors [${this.usedSelectors}]`
+                `AssertNumber::Text "${text}" is not a valid number on element with ${this.namedElementOrUsedSelectorsComment}`
             );
         }
 
@@ -47,7 +47,7 @@ class AssertNumberStep extends BaseStep {
 
         if (!result) {
             throw new TestRunnerError(
-                `AssertNumber::Text "${text}" does not match expected value "${actualValue}" using operator "${operator}" on element with selectors [${this.usedSelectors}]`
+                `AssertNumber::Text "${text}" does not match expected value "${actualValue}" using operator "${operator}" on element with ${this.namedElementOrUsedSelectorsComment}`
             );
         }
     }
