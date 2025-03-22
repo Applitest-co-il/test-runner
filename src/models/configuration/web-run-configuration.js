@@ -71,7 +71,9 @@ class RunConfigurationWeb extends RunConfiguration {
 
             wdio.capabilities['sauce:options'] = {
                 name: this.runName,
-                recordScreenshots: false
+                recordScreenshots: false,
+                commandTimeout: 600,
+                idleTimeout: 600
             };
             if (this.#resolution) {
                 wdio.capabilities['sauce:options'].screenResolution = this.#resolution;

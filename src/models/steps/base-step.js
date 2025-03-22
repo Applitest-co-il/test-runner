@@ -421,8 +421,6 @@ class BaseStep {
     }
 
     async selectItem(driver) {
-        await this.doHideKeyboard(driver);
-
         // Implement item selection logic
         let selectors = this.#selectorsForPlatform(driver.capabilities.platformName.toLowerCase());
         let item = null;
@@ -436,6 +434,12 @@ class BaseStep {
 
             if (this.#position == -1) {
                 item = await driver.$(selector);
+                if (!item || item.error) {
+                    const keyboardHidden = await this.doHideKeyboard(driver);
+                    if (keyboardHidden) {
+                        item = await driver.$(selector);
+                    }
+                }
             } else {
                 const items = await driver.$$(selector);
                 if (items && !items.error && items.length > this.#position) {
@@ -500,8 +504,11 @@ class BaseStep {
             const isKeyBoaordShown = await driver.isKeyboardShown();
             if (isKeyBoaordShown) {
                 await driver.hideKeyboard();
+                return true;
             }
         }
+
+        return false;
     }
 
     //#endregion
