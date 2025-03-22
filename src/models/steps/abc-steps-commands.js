@@ -8,6 +8,9 @@ class StepsCommands {
         'switch-frame',
         'hide-keyboard',
 
+        //function
+        'call-function',
+
         //settings
         'toggle-location-services',
         'toggle-airplane-mode',
@@ -131,7 +134,8 @@ class StepsCommands {
         'mouse-hover',
         'mouse-move',
         'item-select',
-        'item-clear'
+        'item-clear',
+        'call-function'
     ];
 
     static get commands() {

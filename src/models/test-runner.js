@@ -1,6 +1,6 @@
 const { TestRunnerError, TestDefinitionError, TestAbuseError } = require('../helpers/test-errors');
 const Suite = require('./suite');
-const Function = require('./function');
+const TRFunction = require('./function');
 const { runConfigurationFactory } = require('./test-run-configuration');
 const { mergeVariables } = require('../helpers/utils');
 const SessionPinger = require('../helpers/session-pinger');
@@ -32,7 +32,7 @@ class TestRunner {
         if (options.functions) {
             for (let i = 0; i < options.functions.length; i++) {
                 options.functions[i].index = i;
-                const func = new Function(options.functions[i]);
+                const func = new TRFunction(options.functions[i]);
                 this.#functions.push(func);
             }
         }
@@ -171,7 +171,7 @@ class TestRunner {
                 const suite = this.#suites[i];
 
                 try {
-                    const suitePromises = await suite.run(this.#sessions, this.variables);
+                    const suitePromises = await suite.run(this.#sessions, this.#functions, this.variables);
 
                     console.log(`Adding videos promises for suite ${i} to main promises`);
                     promises = promises.concat(suitePromises);

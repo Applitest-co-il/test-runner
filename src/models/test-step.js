@@ -49,6 +49,7 @@ const MouseMoveStep = require('./steps/mouse-move-step.js');
 const ItemSelectStep = require('./steps/item-select-step.js');
 const ItemClearStep = require('./steps/item-clear-step.js');
 const VariableClearStep = require('./steps/variable-clear-step.js');
+const FunctionStep = require('./steps/function-step.js');
 
 function stepFactory(sequence, step) {
     switch (step.command) {
@@ -65,6 +66,13 @@ function stepFactory(sequence, step) {
             return new SwitchFrameStep(sequence, step);
         case 'hide-keyboard':
             return new HideKeyboardStep(sequence, step);
+        //#endregion
+
+        //#region functions
+
+        case 'call-function':
+            return new FunctionStep(sequence, step);
+
         //#endregion
 
         //#region settings

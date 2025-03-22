@@ -19,6 +19,7 @@ class BaseStep {
     #variables = null;
     #savedElements = null;
     #videoRecorder = null;
+    #functions = null;
 
     #status = 'pending';
     #usedSelectors = '';
@@ -88,6 +89,10 @@ class BaseStep {
 
     get savedElements() {
         return this.#savedElements;
+    }
+
+    get functions() {
+        return this.#functions;
     }
 
     get conf() {
@@ -260,8 +265,9 @@ class BaseStep {
 
     //#region run
 
-    async run(session, variables, savedElements, videoRecorder) {
+    async run(session, functions, variables, savedElements, videoRecorder) {
         this.#session = session;
+        this.#functions = functions;
         this.#variables = variables;
         this.#savedElements = savedElements;
         this.#videoRecorder = videoRecorder;
@@ -328,6 +334,12 @@ class BaseStep {
                 }
             } else {
                 const items = await driver.$$(selector);
+                if (!items || items.error) {
+                    const keyboardHidden = await this.doHideKeyboard(driver);
+                    if (keyboardHidden) {
+                        item = await driver.$$(selector);
+                    }
+                }
                 if (items && !items.error && items.length > this.#position) {
                     item = items[this.#position];
                 }
