@@ -1,5 +1,6 @@
 const { TestRunnerError, TestDefinitionError, TestAbuseError } = require('../helpers/test-errors');
 const Suite = require('./suite');
+const Function = require('./function');
 const { runConfigurationFactory } = require('./test-run-configuration');
 const { mergeVariables } = require('../helpers/utils');
 const SessionPinger = require('../helpers/session-pinger');
@@ -13,6 +14,7 @@ class TestRunner {
     #sessionPinger = null;
 
     #suites = [];
+    #functions = [];
     #variables = {};
 
     constructor(options) {
@@ -24,6 +26,14 @@ class TestRunner {
                 options.suites[i].index = i;
                 const suite = new Suite(options.suites[i]);
                 this.#suites.push(suite);
+            }
+        }
+
+        if (options.functions) {
+            for (let i = 0; i < options.functions.length; i++) {
+                options.functions[i].index = i;
+                const func = new Function(options.functions[i]);
+                this.#functions.push(func);
             }
         }
 
