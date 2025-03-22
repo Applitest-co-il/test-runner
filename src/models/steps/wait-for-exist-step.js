@@ -5,7 +5,6 @@ class WaitForExistStep extends BaseStep {
     constructor(sequence, step) {
         super(sequence, step);
 
-        this.hideKeyboard = true;
         this.takeSnapshot = true;
     }
 
