@@ -48,7 +48,7 @@ class TrFunction {
         return this.#variables;
     }
 
-    async run(session, propertiesValues, variables, videoRecorder) {
+    async run(session, propertiesValues, functions, videoRecorder) {
         const steps = this.#steps;
 
         if (steps.length == 0) {
@@ -66,20 +66,17 @@ class TrFunction {
 
         for (let i = 0; i < this.#properties.length; i++) {
             const prop = this.#properties[i];
-            const value = propertiesValues[i];
+            const value = propertiesValues[i].trim();
             if (value === undefined) {
                 throw new TestDefinitionError(`Missing property value for "${prop}"`);
             }
             actualProperties[prop] = value;
         }
 
-        mergeVariables(this.#variables, variables);
-        mergeVariables(this.#variables, actualProperties);
-
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
             try {
-                const success = await step.run(session, this.variables, this.savedElements, videoRecorder);
+                const success = await step.run(session, functions, actualProperties, this.savedElements, videoRecorder);
                 if (!success) {
                     return {
                         success: false,
@@ -87,7 +84,6 @@ class TrFunction {
                         error: steps.errorDetails
                     };
                 }
-                mergeVariables(this.#variables, step.variables);
             } catch (err) {
                 return {
                     success: false,

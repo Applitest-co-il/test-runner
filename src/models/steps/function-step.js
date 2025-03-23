@@ -7,7 +7,7 @@ class FunctionStep extends BaseStep {
         super(sequence, step);
     }
 
-    async execute(driver) {
+    async execute(_, __) {
         const actualValue = replaceVariables(this.value, this.variables);
         const valueParts = actualValue.split('|||');
         if (valueParts.length < 1) {
@@ -22,14 +22,16 @@ class FunctionStep extends BaseStep {
             propertiesValues = valueParts[1].split(',');
         }
 
-        const func = this.functons.find((f) => f.id === functionId);
+        const func = this.functions.find((f) => f.id === functionId);
         if (func) {
-            const result = await func.run(driver, propertiesValues, this.variables, this.videoRecorder);
+            const result = await func.run(this.session, propertiesValues, this.functions, this.videoRecorder);
             if (!result.success) {
                 throw new TestRunnerError(
                     `Function::Failed "${functionId}" at step "${result.failedStep}" with error "${result.error}"`
                 );
             }
+        } else {
+            throw new TestRunnerError(`Function::Not found "${functionId}"`);
         }
     }
 }
