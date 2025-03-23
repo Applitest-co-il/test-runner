@@ -1,5 +1,6 @@
 const BaseStep = require('./base-step');
 const { TestRunnerError } = require('../../helpers/test-errors');
+const { replaceVariables } = require('../../helpers/utils');
 
 class FunctionStep extends BaseStep {
     constructor(sequence, step) {
@@ -7,17 +8,18 @@ class FunctionStep extends BaseStep {
     }
 
     async execute(driver) {
-        const valueParts = this.value.split('|||');
+        const actualValue = replaceVariables(this.value, this.variables);
+        const valueParts = actualValue.split('|||');
         if (valueParts.length < 1) {
             throw new TestRunnerError(
-                `Function::Invalid value "${this.value}" - format should be "<functionName>|||<param1>|||<param2>|||..."`
+                `Function::Invalid value "${this.value}" - format should be "<functionId>[|||<prop1>,<prop2>...]"`
             );
         }
 
         const functionId = valueParts[0];
         let propertiesValues = [];
-        if (valueParts.length > 1) {
-            propertiesValues = valueParts.slice(1);
+        if (valueParts.length == 2) {
+            propertiesValues = valueParts[1].split(',');
         }
 
         const func = this.functons.find((f) => f.id === functionId);
