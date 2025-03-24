@@ -1,4 +1,3 @@
-const { mergeVariables } = require('../helpers/utils');
 const { stepFactory } = require('./test-step');
 const { TestDefinitionError } = require('../helpers/test-errors');
 
@@ -9,6 +8,8 @@ class TrFunction {
     #properties = [];
     #variables = {};
     #steps = [];
+
+    #savedElements = {};
 
     constructor(func) {
         this.#id = func.id ?? '';
@@ -48,6 +49,10 @@ class TrFunction {
         return this.#variables;
     }
 
+    get savedElements() {
+        return this.#savedElements;
+    }
+
     async run(session, propertiesValues, functions, videoRecorder) {
         const steps = this.#steps;
 
@@ -81,13 +86,13 @@ class TrFunction {
                     return {
                         success: false,
                         failedStep: i,
-                        error: steps.errorDetails
+                        error: step.errorDetails
                     };
                 }
             } catch (err) {
                 return {
                     success: false,
-                    failedStep: i,
+                    failedStep: i + 1,
                     error: err.message
                 };
             }
