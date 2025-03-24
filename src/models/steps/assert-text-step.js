@@ -34,7 +34,7 @@ class AssertTextStep extends BaseStep {
         }
         if (!result) {
             throw new TestRunnerError(
-                `AssertText::Text "${text}" does not match expected value "${actualValue}" using operator "${operator} on element with selectors [${this.usedSelectors}]"`
+                `AssertText::Text "${text}" does not match expected value "${actualValue}" using operator "${operator}" on element with ${this.namedElementOrUsedSelectorsComment}`
             );
         }
     }

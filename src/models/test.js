@@ -14,6 +14,7 @@ class Test {
     #skip = false;
 
     #steps = [];
+    #savedElements = {};
 
     #status = 'pending';
     #lastStep = 0;
@@ -88,8 +89,17 @@ class Test {
         return this.#variables;
     }
 
-    async run(session, variables) {
+    get savedElements() {
+        return this.#savedElements;
+    }
+
+    async run(session, functions, variables) {
         const promises = [];
+
+        const steps = this.#steps;
+        if (steps.length == 0) {
+            throw new TestDefinitionError(`Test "${this.#name}" has no steps`);
+        }
 
         if (session.runConf.enableVideo) {
             const options = {
@@ -107,13 +117,7 @@ class Test {
             await activateAppStep.run(session, this.variables, null);
         }
 
-        const steps = this.#steps;
-
         mergeVariables(this.#variables, variables);
-
-        if (steps.length == 0) {
-            throw new TestDefinitionError(`Test "${this.#name}" has no steps`);
-        }
 
         const startFromSteps =
             session.runConf.startFromStep > 0 && session.runConf.startFromStep < steps.length
@@ -131,7 +135,13 @@ class Test {
 
             const step = steps[i];
             try {
-                const success = await step.run(session, this.variables, this.#videoRecorder);
+                const success = await step.run(
+                    session,
+                    functions,
+                    this.variables,
+                    this.savedElements,
+                    this.#videoRecorder
+                );
                 if (!success) {
                     this.#status = 'failed';
                     this.#lastStep = i;

@@ -27,7 +27,7 @@ class VariableSetStep extends BaseStep {
             let item = await this.selectItem(driver);
             if (!item) {
                 throw new TestRunnerError(
-                    `SetVariable::Item with selectors [${this.usedSelectors}] was not found and this could not set his value into variable "${varName}"`
+                    `SetVariable::Item with ${this.namedElementOrUsedSelectorsComment} was not found and this could not set his value into variable "${varName}"`
                 );
             }
             await this.highlightElement(driver, item);

@@ -12,6 +12,31 @@
             "appActivity": "com.scantask.tms.droid.tasker.gis.MapActivity2"
         }
     },
+    "functions": [
+        {
+            "name": "generate-random-integer",
+            "properties": {
+                "generate-random-integer-min": 10000,
+                "generate-random-integer-max": 99999
+            },
+            "steps": [
+                {
+                    "command": "wait-for-exist",
+                    "selectors": [
+                        "android|||//android.widget.ImageView[@resource-id=\"com.agritask.mobile.android:id/loginBrandLogoImageView\"]"
+                    ],
+                    "value": 5000
+                },
+                {
+                    "command": "multiple-clicks",
+                    "selectors": [
+                        "android|||//android.widget.ImageView[@resource-id=\"com.agritask.mobile.android:id/loginBrandLogoImageView\"]"
+                    ],
+                    "value": 3
+                }
+            ]
+        }
+    ],
     "suites": [
         {
             "name": "Suite",

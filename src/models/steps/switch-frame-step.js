@@ -15,7 +15,7 @@ class SwitchFrameStep extends BaseStep {
         const item = await this.selectItem(driver);
         if (!item) {
             throw new TestRunnerError(
-                `SwitchFrame::Could not find indicated frame with selectors [${this.usedSelectors}]`
+                `SwitchFrame::Could not find indicated frame with ${this.namedElementOrUsedSelectorsComment}`
             );
         }
         await driver.switchFrame(item);

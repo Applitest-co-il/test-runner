@@ -10,7 +10,7 @@ class AssertIsDisplayedStep extends BaseStep {
         const isDisplayed = await item.isDisplayed();
         if (!isDisplayed) {
             throw new TestRunnerError(
-                `AssertIsDisplayed::Item with selectors [${this.usedSelectors}] was not found or is not displayed`
+                `AssertIsDisplayed::Item with ${this.namedElementOrUsedSelectorsComment} was not found or is not displayed`
             );
         }
     }

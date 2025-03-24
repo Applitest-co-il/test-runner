@@ -2,6 +2,7 @@ const { TestDefinitionError, TestItemNotFoundError, TestRunnerError } = require(
 const { replaceVariables, prepareLocalScript } = require('../../helpers/utils');
 const TestCondition = require('./test-condition');
 const vmRun = require('@danielyaghil/vm-helper');
+const StepsCommands = require('./abc-steps-commands');
 
 class BaseStep {
     #session = null;
@@ -9,13 +10,16 @@ class BaseStep {
     #sequence = 0;
     #command = '';
     #selectors = [];
+    #namedElement = '';
     #position = -1;
     #value = null;
     #operator = null;
 
     #selectorsPerPlatform = {};
     #variables = null;
+    #savedElements = null;
     #videoRecorder = null;
+    #functions = null;
 
     #status = 'pending';
     #usedSelectors = '';
@@ -27,135 +31,11 @@ class BaseStep {
     #hideKeyboard = false;
     #takeSnapshot = false;
 
-    static #commands = [
-        //generic
-        'pause',
-        'navigate',
-        'app-activate',
-        'app-background',
-        'switch-frame',
-        'hide-keyboard',
-
-        //settings
-        'toggle-location-services',
-        'toggle-airplane-mode',
-        //'set-google-account',
-        'set-geolocation',
-
-        //variables
-        'set-variable',
-        'set-variable-from-element',
-        'set-variable-from-script',
-        'generate-random-integer',
-        'generate-random-string',
-
-        //actions
-        'click',
-        'multiple-clicks',
-        'click-coordinates',
-        'right-click',
-        'middle-click',
-        'set-value',
-        'clear-value',
-        'add-value',
-        'scroll-up',
-        'scroll-down',
-        'scroll-up-to-element',
-        'scroll-down-to-element',
-        'scroll-up-from-element',
-        'scroll-down-from-element',
-        'scroll-right',
-        'scroll-left',
-        'scroll-right-from-element',
-        'scroll-left-from-element',
-        'press-key',
-        'execute-script',
-        'perform-actions',
-        'drag-and-drop',
-        'mouse-hover',
-        'mouse-move',
-
-        //assertions
-        'wait-for-exist',
-        'wait-for-not-exist',
-        'assert-is-displayed',
-        'assert-is-not-displayed',
-        'assert-text',
-        'assert-number',
-        'assert-css-property',
-        'assert-attribute',
-        'assert-app-installed'
-    ];
-    static #commandsRequireItem = [
-        'click',
-        'multiple-clicks',
-        'right-click',
-        'middle-click',
-        'set-value',
-        'clear-value',
-        'add-value',
-        'scroll-up-from-element',
-        'scroll-down-from-element',
-        'scroll-right-from-element',
-        'scroll-left-from-element',
-        'set-variable-from-element',
-        'assert-is-displayed',
-        'assert-text',
-        'assert-number',
-        'assert-css-property',
-        'assert-attribute',
-        'drag-and-drop',
-        'mouse-hover'
-    ];
-    static #commandsRequireSelector = [
-        ...BaseStep.#commandsRequireItem,
-        'wait-for-exist',
-        'wait-for-not-exist',
-        'assert-is-not-displayed',
-        'scroll-up-to-element',
-        'scroll-down-to-element',
-        'switch-frame'
-    ];
-    static #commandsRequireValue = [
-        'app-activate',
-        'multiple-clicks',
-        'click-coordinates',
-        'set-value',
-        'press-key',
-        'assert-text',
-        'assert-number',
-        'assert-css-property',
-        'assert-attribute',
-        'assert-app-installed',
-        'scroll-up',
-        'scroll-down',
-        'scroll-up-to-element',
-        'scroll-down-to-element',
-        'scroll-up-from-element',
-        'scroll-down-from-element',
-        'scroll-right',
-        'scroll-left',
-        'scroll-right-from-element',
-        'scroll-left-from-element',
-        'generate-random-integer',
-        'generate-random-string',
-        'toggle-location-services',
-        //'set-google-account',
-        'set-geolocation',
-        'execute-script',
-        'perform-actions',
-        'set-variable',
-        'set-variable-from-script',
-        'navigate',
-        'drag-and-drop',
-        'mouse-hover',
-        'mouse-move'
-    ];
-
     constructor(sequence, step) {
         this.#sequence = sequence;
         this.#command = step.command;
         this.#selectors = step.selectors;
+        this.#namedElement = step.namedElement;
         this.#position = step.position ?? -1;
         this.#value = step.value;
         this.#operator = step.operator;
@@ -173,6 +53,10 @@ class BaseStep {
 
     get selectors() {
         return this.#selectors;
+    }
+
+    get namedElement() {
+        return this.#namedElement;
     }
 
     get value() {
@@ -203,6 +87,14 @@ class BaseStep {
         return this.#variables;
     }
 
+    get savedElements() {
+        return this.#savedElements;
+    }
+
+    get functions() {
+        return this.#functions;
+    }
+
     get conf() {
         return this.#session?.runConf;
     }
@@ -227,36 +119,28 @@ class BaseStep {
         this.#takeSnapshot = value;
     }
 
+    get namedElementOrUsedSelectorsComment() {
+        return `${this.namedElement ? 'named element [' + this.namedElement + ']' : 'selectors [' + this.usedSelectors + ']'}`;
+    }
+
     //#endregion
 
     //#region  validation
-
-    #requiresItem(command) {
-        return BaseStep.#commandsRequireItem.includes(command);
-    }
-
-    #requiresSelector(command) {
-        return BaseStep.#commandsRequireSelector.includes(command);
-    }
-
-    #requiresValue(command) {
-        return BaseStep.#commandsRequireValue.includes(command);
-    }
 
     #isValid() {
         if (!this.#command) {
             throw new TestDefinitionError(`Command is required for step ${this.#sequence}`);
         }
 
-        if (!BaseStep.#commands.includes(this.#command)) {
+        if (!StepsCommands.commands.includes(this.#command)) {
             throw new TestDefinitionError(`Command ${this.#command} is not a valid one - step ${this.#sequence}`);
         }
 
-        if (this.#requiresSelector(this.#command) && !this.#selectors && this.#selectors.length === 0) {
+        if (StepsCommands.RequiresSelector(this.#command) && !this.#selectors && this.#selectors.length === 0) {
             throw new TestDefinitionError(`Selector is required for step ${this.#sequence}`);
         }
 
-        if (this.#requiresValue(this.#command) && !this.#value) {
+        if (StepsCommands.RequiresValue(this.#command) && !this.#value) {
             throw new TestDefinitionError(`Value is required for step ${this.#sequence}`);
         }
 
@@ -381,12 +265,16 @@ class BaseStep {
 
     //#region run
 
-    async run(session, variables, videoRecorder) {
+    async run(session, functions, variables, savedElements, videoRecorder) {
         this.#session = session;
+        this.#functions = functions;
         this.#variables = variables;
+        this.#savedElements = savedElements;
         this.#videoRecorder = videoRecorder;
 
         try {
+            await this.doHideKeyboard(session.driver);
+
             if (this.#condition) {
                 let conditionResult = await this.#condition.evaluate(session.driver, variables, session.runConf);
                 if (!conditionResult) {
@@ -396,7 +284,7 @@ class BaseStep {
                 }
             }
 
-            const item = this.#requiresItem(this.#command) ? await this.selectItem(session.driver) : 'noItem';
+            const item = StepsCommands.RequiresItem(this.#command) ? await this.selectItem(session.driver) : 'noItem';
             if (!item) {
                 throw new TestItemNotFoundError(`Item with selectors [${this.#usedSelectors}]  not found`);
             }
@@ -421,6 +309,10 @@ class BaseStep {
     }
 
     async selectItem(driver) {
+        if (this.savedElements && this.#namedElement && this.savedElements[this.#namedElement]) {
+            return this.savedElements[this.#namedElement];
+        }
+
         // Implement item selection logic
         let selectors = this.#selectorsForPlatform(driver.capabilities.platformName.toLowerCase());
         let item = null;
@@ -442,6 +334,12 @@ class BaseStep {
                 }
             } else {
                 const items = await driver.$$(selector);
+                if (!items || items.error) {
+                    const keyboardHidden = await this.doHideKeyboard(driver);
+                    if (keyboardHidden) {
+                        item = await driver.$$(selector);
+                    }
+                }
                 if (items && !items.error && items.length > this.#position) {
                     item = items[this.#position];
                 }

@@ -66,6 +66,7 @@ async function runTests(options) {
         };
     }
 
+    console.log(`TestRunnerLib::runTests::${libVersion}:Ended`);
     return output;
 }
 
