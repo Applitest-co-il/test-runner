@@ -139,6 +139,8 @@ class TestRunner {
                 } finally {
                     if (runSession.type == 'web') {
                         TestRunner.#savedWebDriver = null;
+                    } else if (runSession.type == 'mobile') {
+                        TestRunner.#savedMobileDriver = null;
                     }
                 }
             }
