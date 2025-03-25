@@ -8,9 +8,18 @@ class SetValueStep extends BaseStep {
         this.takeSnapshot = true;
     }
 
-    async execute(_, item) {
+    async execute(driver, item) {
         const actualValue = replaceVariables(this.value, this.variables);
-        await item.setValue(actualValue);
+        try {
+            await item.setValue(actualValue);
+        } catch (error) {
+            if (error.name === 'invalid element state') {
+                const keys = actualValue.split('');
+                await driver.keys(keys);
+            } else {
+                throw error;
+            }
+        }
     }
 }
 
