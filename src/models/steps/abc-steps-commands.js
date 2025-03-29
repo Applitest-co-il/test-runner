@@ -52,6 +52,7 @@ class StepsCommands {
         'drag-and-drop',
         'mouse-hover',
         'mouse-move',
+        'upload-file',
 
         //assertions
         'wait-for-exist',
@@ -85,7 +86,8 @@ class StepsCommands {
         'assert-attribute',
         'drag-and-drop',
         'mouse-hover',
-        'item-select'
+        'item-select',
+        'upload-file'
     ];
 
     static #commandsRequireSelector = [
@@ -135,7 +137,8 @@ class StepsCommands {
         'mouse-move',
         'item-select',
         'item-clear',
-        'call-function'
+        'call-function',
+        'upload-file'
     ];
 
     static get commands() {

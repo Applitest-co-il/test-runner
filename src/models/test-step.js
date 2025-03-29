@@ -50,6 +50,7 @@ const ItemSelectStep = require('./steps/item-select-step.js');
 const ItemClearStep = require('./steps/item-clear-step.js');
 const VariableClearStep = require('./steps/variable-clear-step.js');
 const FunctionStep = require('./steps/function-step.js');
+const UploadFileStep = require('./steps/upload-file-step.js');
 
 function stepFactory(sequence, step) {
     switch (step.command) {
@@ -151,6 +152,8 @@ function stepFactory(sequence, step) {
             return new MouseHoverStep(sequence, step);
         case 'mouse-move':
             return new MouseMoveStep(sequence, step);
+        case 'upload-file':
+            return new UploadFileStep(sequence, step);
         //#endregion
 
         //#region assertions

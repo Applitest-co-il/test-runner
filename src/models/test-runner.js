@@ -4,6 +4,7 @@ const TRFunction = require('./function');
 const { runConfigurationFactory } = require('./test-run-configuration');
 const { mergeVariables } = require('../helpers/utils');
 const SessionPinger = require('../helpers/session-pinger');
+const { downloadFile } = require('../helpers/download-file');
 
 class TestRunner {
     static #savedWebDriver = null;
@@ -157,6 +158,32 @@ class TestRunner {
         }
     }
 
+    async updateConfiguration() {
+        console.log('Updating configuration...');
+
+        // ... inside class
+        for (const suite of this.#suites) {
+            for (const test of suite.tests) {
+                for (const step of test.steps) {
+                    if (step.command === 'upload-file') {
+                        try {
+                            if (!step.valueUrl || !step.valueFilename) {
+                                continue;
+                            }
+                            const url = step.valueUrl.replace('s3::', '');
+                            const fileName = step.valueFilename;
+                            const localPath = await downloadFile(url, fileName, true);
+                            step.value = localPath;
+                        } catch (error) {
+                            console.error(`Failed to download file for step: ${error.message}`);
+                            throw new TestRunnerError(`Failed to download file: ${error.message}`);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     async run() {
         console.log('Starting run...');
 
@@ -165,6 +192,8 @@ class TestRunner {
 
         try {
             await this.initSessions();
+
+            await this.updateConfiguration();
 
             for (let i = 0; i < this.#suites.length; i++) {
                 console.log(
