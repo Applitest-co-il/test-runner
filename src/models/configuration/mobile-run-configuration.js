@@ -13,6 +13,7 @@ class RunConfigurationMobile extends RunConfiguration {
     #reset = true;
     #deviceLock = false;
     #orientation = 'PORTRAIT';
+    #cacheId = '0';
 
     constructor(options, session) {
         super(options);
@@ -28,6 +29,7 @@ class RunConfigurationMobile extends RunConfiguration {
         this.#forceAppInstall = session.appium.forceAppInstall ?? false;
         this.#deviceLock = session.appium.deviceLock ?? false;
         this.#orientation = session.appium.orientation ?? 'PORTRAIT';
+        this.#cacheId = new Date().getTime().toString();
     }
 
     get reset() {
@@ -92,7 +94,8 @@ class RunConfigurationMobile extends RunConfiguration {
                 deviceOrientation: this.#orientation,
                 setupDeviceLock: this.#deviceLock,
                 recordScreenshots: false,
-                resigningEnabled: false
+                resigningEnabled: false,
+                cacheId: this.#cacheId
             };
         } else if (this.farm === 'aws') {
             // Implement AWS capabilities

@@ -70,13 +70,11 @@ class TestRunner {
 
     async initSessions() {
         console.log('Init sessions...');
-
         this.#sessions = runConfigurationFactory(this.#runConfiguration);
+    }
 
-        for (const session of this.#sessions) {
-            await this.startSession(session.type);
-        }
-
+    async startSessionsPinger() {
+        console.log('Starting sessions pinger...');
         this.#sessionPinger = new SessionPinger(this.#sessions);
         this.#sessionPinger.start();
     }
@@ -114,6 +112,7 @@ class TestRunner {
             console.error('Driver could not be set');
             throw new TestRunnerError('Driver could not be set');
         }
+        runSession;
 
         return runSession;
     }
@@ -149,10 +148,11 @@ class TestRunner {
     }
 
     async terminateAllSessions() {
-        console.log('Terminating all sessions...');
+        console.log('Terminating sessions pinger...');
         if (this.#sessionPinger) {
             await this.#sessionPinger.stop();
         }
+        console.log('Terminating all sessions...');
         for (let i = 0; i < this.#sessions.length; i++) {
             await this.closeSession(this.#sessions[i]);
         }
@@ -201,6 +201,25 @@ class TestRunner {
                 );
                 const suite = this.#suites[i];
 
+                //starting sessions at start of suite
+                const runSessions = [];
+                if (suite.type === 'web') {
+                    const sess = await this.startSession('web');
+                    runSessions.push(sess);
+                } else if (suite.type === 'mobile') {
+                    const sess = await this.startSession('mobile');
+                    runSessions.push(sess);
+                } else if (suite.type === 'mixed') {
+                    let sess = await this.startSession('web');
+                    runSessions.push(sess);
+                    sess = await this.startSession('mobile');
+                    runSessions.push(sess);
+                } else {
+                    const msg = `Suite type: ${suite.type} do not match sessions type ${this.sessions.map((s) => s.type)}`;
+                    console.log(msg);
+                    throw new TestRunnerError(msg);
+                }
+
                 try {
                     const suitePromises = await suite.run(this.#sessions, this.#functions, this.variables);
 
@@ -220,6 +239,11 @@ class TestRunner {
                         console.error('Error running suite:', error);
                         throw new Error(`error running suite: ${error.message}`);
                     }
+                }
+
+                // closing sessions at end of suite
+                for (let j = 0; j < runSessions.length; j++) {
+                    await this.closeSession(runSessions[j]);
                 }
             }
 
