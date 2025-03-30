@@ -18,7 +18,7 @@ class FunctionStep extends BaseStep {
 
         const functionId = valueParts[0];
         let propertiesValues = [];
-        if (valueParts.length == 2) {
+        if (valueParts.length == 2 && valueParts[1].length > 0) {
             propertiesValues = valueParts[1].split(',');
         }
 
