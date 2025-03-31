@@ -77,15 +77,16 @@ class TestRunner {
             throw new TestRunnerError('No sessions found');
         }
 
-        this.#sessionPinger = new SessionPinger(this.#sessions);
+        this.startSessionsPinger();
     }
 
-    async startSessionsPinger() {
+    startSessionsPinger() {
         console.log('Starting sessions pinger...');
+        this.#sessionPinger = new SessionPinger(this.#sessions);
         this.#sessionPinger.start();
     }
 
-    async stopSessionsPinger() {
+    stopSessionsPinger() {
         console.log('Stopping sessions pinger...');
         this.#sessionPinger.stop();
     }
