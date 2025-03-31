@@ -21,10 +21,12 @@ class SessionPinger {
                     } else {
                         await session.driver.getDeviceTime(); // Simple command to keep the session alive
                     }
-                    console.log(`Pinged session for type ${session.type}`);
+                    console.log(`PingSession::Success for session type ${session.type}`);
                 } catch (error) {
-                    console.error(`Error pinging session for type ${session.type}:`, error);
+                    console.error(`PingSession::Error for session type ${session.type}:`, error);
                 }
+            } else {
+                console.warn(`PingSession::Session driver is not available for type ${session.type}`);
             }
         }
     }
