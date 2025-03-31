@@ -14,8 +14,6 @@ async function runTests(options) {
     const startDate = new Date();
     const testRunner = new TestRunner(options);
 
-    await testRunner.updateConfiguration();
-
     const suiteResults = await testRunner.run();
 
     const endDate = new Date();
