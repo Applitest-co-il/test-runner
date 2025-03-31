@@ -71,12 +71,23 @@ class TestRunner {
     async initSessions() {
         console.log('Init sessions...');
         this.#sessions = runConfigurationFactory(this.#runConfiguration);
+
+        if (!this.#sessions || this.#sessions.length === 0) {
+            console.error('No sessions found');
+            throw new TestRunnerError('No sessions found');
+        }
+
+        this.#sessionPinger = new SessionPinger(this.#sessions);
     }
 
     async startSessionsPinger() {
         console.log('Starting sessions pinger...');
-        this.#sessionPinger = new SessionPinger(this.#sessions);
         this.#sessionPinger.start();
+    }
+
+    async stopSessionsPinger() {
+        console.log('Stopping sessions pinger...');
+        this.#sessionPinger.stop();
     }
 
     async startSession(runType) {
@@ -148,10 +159,8 @@ class TestRunner {
     }
 
     async terminateAllSessions() {
-        console.log('Terminating sessions pinger...');
-        if (this.#sessionPinger) {
-            await this.#sessionPinger.stop();
-        }
+        this.stopSessionsPinger();
+
         console.log('Terminating all sessions...');
         for (let i = 0; i < this.#sessions.length; i++) {
             await this.closeSession(this.#sessions[i]);
