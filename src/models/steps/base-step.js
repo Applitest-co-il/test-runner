@@ -273,8 +273,6 @@ class BaseStep {
         this.#videoRecorder = videoRecorder;
 
         try {
-            await this.doHideKeyboard(session.driver);
-
             if (this.#condition) {
                 let conditionResult = await this.#condition.evaluate(session.driver, variables, session.runConf);
                 if (!conditionResult) {
@@ -286,7 +284,13 @@ class BaseStep {
 
             const item = StepsCommands.RequiresItem(this.#command) ? await this.selectItem(session.driver) : 'noItem';
             if (!item) {
-                throw new TestItemNotFoundError(`Item with selectors [${this.#usedSelectors}]  not found`);
+                if (this.#namedElement) {
+                    throw new TestItemNotFoundError(
+                        `Item with named element [${this.#namedElement}] not found - check previous steps`
+                    );
+                } else {
+                    throw new TestItemNotFoundError(`Item with selectors [${this.#usedSelectors}]  not found`);
+                }
             }
 
             await this.highlightElement(session.driver, item);
@@ -309,8 +313,18 @@ class BaseStep {
     }
 
     async selectItem(driver) {
-        if (this.savedElements && this.#namedElement && this.savedElements[this.#namedElement]) {
-            return this.savedElements[this.#namedElement];
+        if (this.#namedElement) {
+            if (this.savedElements && this.savedElements[this.#namedElement]) {
+                const saved = this.savedElements[this.#namedElement];
+                if (saved && saved.isDisplayed()) {
+                    return saved;
+                } else {
+                    this.doHideKeyboard(driver);
+                    return saved;
+                }
+            } else {
+                return null;
+            }
         }
 
         // Implement item selection logic

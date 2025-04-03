@@ -23,7 +23,12 @@ class VariableRandomStringStep extends BaseStep {
             throw new TestRunnerError(`GenerateRandowString::max words in "${this.value}" should be a number`);
         }
 
-        const randomValue = await randomstring.generate(maxLen);
+        const operator = this.operator ? this.operator : 'alphanumeric';
+        const generateOptions = {
+            charset: operator,
+            length: maxLen
+        };
+        const randomValue = await randomstring.generate(generateOptions);
         if (prefix) {
             this.variables[varName] = `${prefix}-${randomValue}`;
         } else {
