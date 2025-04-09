@@ -102,7 +102,7 @@ class RunConfiguration {
         return this.#videosPath;
     }
 
-    async conf() {
+    async conf(_) {
         return null;
     }
 
@@ -110,12 +110,12 @@ class RunConfiguration {
         return name;
     }
 
-    async startSession() {
+    async startSession(sessionName) {
         console.log('Starting session...');
 
         let conf = null;
         try {
-            conf = await this.conf();
+            conf = await this.conf(sessionName);
 
             console.log(`Starting driver with conf: ${JSON.stringify(conf)}`);
 

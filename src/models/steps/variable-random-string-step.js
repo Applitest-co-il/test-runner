@@ -15,13 +15,16 @@ class VariableRandomStringStep extends BaseStep {
                 `GenerateRandomString::Invalid random value format "${this.value}" - format should be "<var name>|||<prefix>|||<max length>" `
             );
         }
+
+        if (isNaN(randomParts[2])) {
+            throw new TestRunnerError(
+                `GenerateRandowString::max words "${randomParts[2]}" in "${this.value}" should be a number`
+            );
+        }
+
         const varName = randomParts[0];
         const prefix = randomParts[1] != 'none' ? replaceVariables(randomParts[1], this.variables) : '';
         const maxLen = randomParts[2] > 0 ? parseInt(randomParts[2]) : 10;
-
-        if (isNaN(maxLen)) {
-            throw new TestRunnerError(`GenerateRandowString::max words in "${this.value}" should be a number`);
-        }
 
         const operator = this.operator ? this.operator : 'alphanumeric';
         const generateOptions = {

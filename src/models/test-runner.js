@@ -91,7 +91,7 @@ class TestRunner {
         this.#sessionPinger.stop();
     }
 
-    async startSession(runType) {
+    async startSession(runType, sessionName) {
         console.log(`Starting session for type ${runType}...`);
 
         const runSession = this.getSession(runType);
@@ -119,7 +119,7 @@ class TestRunner {
             }
         }
 
-        runSession.driver = await runSession.runConf.startSession();
+        runSession.driver = await runSession.runConf.startSession(sessionName);
         if (!runSession.driver) {
             console.error('Driver could not be set');
             throw new TestRunnerError('Driver could not be set');
@@ -205,24 +205,28 @@ class TestRunner {
 
             await this.updateConfiguration();
 
+            const runName = `Run - ${new Date().toISOString()}`;
+
             for (let i = 0; i < this.#suites.length; i++) {
                 console.log(
                     `TestRunner::Running suite #${i} of type ${this.#suites[i].type} out of ${this.#suites.length}`
                 );
                 const suite = this.#suites[i];
 
+                const sessionName = `${runName} - ${suite.name ? suite.name : 'Suite-' + i}`;
+
                 //starting sessions at start of suite
                 const runSessions = [];
                 if (suite.type === 'web') {
-                    const sess = await this.startSession('web');
+                    const sess = await this.startSession('web', sessionName);
                     runSessions.push(sess);
                 } else if (suite.type === 'mobile') {
-                    const sess = await this.startSession('mobile');
+                    const sess = await this.startSession('mobile', sessionName);
                     runSessions.push(sess);
                 } else if (suite.type === 'mixed') {
-                    let sess = await this.startSession('web');
+                    let sess = await this.startSession('web', sessionName);
                     runSessions.push(sess);
-                    sess = await this.startSession('mobile');
+                    sess = await this.startSession('mobile', sessionName);
                     runSessions.push(sess);
                 } else {
                     const msg = `Suite type: ${suite.type} do not match sessions type ${this.sessions.map((s) => s.type)}`;

@@ -52,7 +52,7 @@ class RunConfigurationMobile extends RunConfiguration {
         return this.#orientation;
     }
 
-    async conf() {
+    async conf(sessionName) {
         let wdio = {
             connectionRetryTimeout: 900000,
             hostname: this.hostname,
@@ -74,6 +74,8 @@ class RunConfigurationMobile extends RunConfiguration {
                 wdio.capabilities['appium:noReset'] = true;
             }
         } else if (this.farm === 'saucelabs') {
+            const runName = sessionName || this.runName;
+
             wdio.user = this.user;
             wdio.key = this.user_key;
             wdio.hostname = this.hostname;
@@ -89,7 +91,7 @@ class RunConfigurationMobile extends RunConfiguration {
             wdio.capabilities['appium:newCommandTimeout'] = 90;
             wdio.capabilities['appium:orientation'] = this.#orientation;
             wdio.capabilities['sauce:options'] = {
-                name: this.runName,
+                name: runName,
                 appiumVersion: 'latest',
                 deviceOrientation: this.#orientation,
                 setupDeviceLock: this.#deviceLock,
@@ -114,10 +116,10 @@ class RunConfigurationMobile extends RunConfiguration {
         return wdio;
     }
 
-    async startSession() {
+    async startSession(sessionName) {
         if (this.forceAppInstall) {
             console.log('Resetting device...');
-            const resetDriver = await super.startSession();
+            const resetDriver = await super.startSession(`${sessionName}-reset`);
             await resetDriver.execute('mobile: terminateApp', { appId: this.#appPackage });
             await resetDriver.removeApp(this.#appPackage);
             await resetDriver.deleteSession();
@@ -125,7 +127,7 @@ class RunConfigurationMobile extends RunConfiguration {
             await pauseApp(20000);
         }
 
-        const driver = await super.startSession();
+        const driver = await super.startSession(sessionName);
 
         return driver;
     }

@@ -30,7 +30,7 @@ class RunConfigurationWeb extends RunConfiguration {
         }
     }
 
-    async conf() {
+    async conf(sessionName) {
         let wdio = {
             connectionRetryTimeout: 900000,
             logLevel: this.logLevel,
@@ -59,6 +59,8 @@ class RunConfigurationWeb extends RunConfiguration {
         if (this.farm === 'local') {
             wdio.capabilities['browserName'] = this.#browserName;
         } else if (this.farm === 'saucelabs') {
+            const runName = sessionName || this.runName;
+
             wdio.user = this.user;
             wdio.key = this.user_key;
             wdio.hostname = this.hostname;
@@ -70,7 +72,7 @@ class RunConfigurationWeb extends RunConfiguration {
             wdio.capabilities['platformName'] = this.#platformName;
 
             wdio.capabilities['sauce:options'] = {
-                name: this.runName,
+                name: runName,
                 recordScreenshots: false,
                 commandTimeout: 600,
                 idleTimeout: 600
@@ -100,8 +102,8 @@ class RunConfigurationWeb extends RunConfiguration {
         return this.#restoreEmulateFunc;
     }
 
-    async startSession() {
-        let driver = await super.startSession();
+    async startSession(sessionName) {
+        let driver = await super.startSession(sessionName);
 
         // Maximize or set window size based on browser
         if (this.#startMaximized) {
