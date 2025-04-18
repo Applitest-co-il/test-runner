@@ -15,7 +15,7 @@ class TrFunction {
         this.#id = func.id ?? '';
         this.#name = func.name ?? '';
         this.#type = func.type ?? '';
-        this.#properties = func.properties ?? {};
+        this.#properties = func.properties ?? [];
         this.#variables = func.variables ?? {};
         this.#buildSteps(func.steps);
     }
@@ -66,7 +66,9 @@ class TrFunction {
             (propertiesValues && propertiesValues.length != this.#properties.length)
         ) {
             const inputProperties = propertiesValues ? propertiesValues.join(',') : [];
-            throw new TestDefinitionError(`Missing properties values for function "${this.#name}": ${inputProperties}`);
+            throw new TestDefinitionError(
+                `Missing properties values for function "${this.#name}": expecting "${this.#properties.join(',')}" and received "${inputProperties}"`
+            );
         }
 
         for (let i = 0; i < this.#properties.length; i++) {
