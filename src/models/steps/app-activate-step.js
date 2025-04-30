@@ -7,7 +7,8 @@ class AppActivateStep extends BaseStep {
 
     async execute(driver, _) {
         const appId = this.value == 'current-app' ? this.conf.appPackage : this.value;
-        await driver.execute('mobile: activateApp', { appId: appId });
+        const options = this.conf.platformName.toLowerCase() === 'android' ? { appId: appId } : { bundleId: appId };
+        await driver.execute('mobile: activateApp', options);
     }
 }
 

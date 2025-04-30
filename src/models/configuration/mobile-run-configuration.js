@@ -81,22 +81,25 @@ class RunConfigurationMobile extends RunConfiguration {
             wdio.hostname = this.hostname;
             wdio.port = this.port;
             wdio.baseUrl = 'wd/hub';
-            wdio.capabilities['platformName'] = this.#platformName;
+            wdio.capabilities['platformName'] = this.#platformName.toLowerCase();
             wdio.capabilities['appium:app'] = `storage:filename=${this.#app}`;
             wdio.capabilities['appium:appPackage'] = this.#appPackage;
-            wdio.capabilities['appium:appActivity'] = this.#appActivity;
+            if (this.#appActivity != 'NA') {
+                wdio.capabilities['appium:appActivity'] = this.#appActivity;
+            }
             wdio.capabilities['appium:autoGrantPermissions'] = this.#autoGrantPermissions;
             wdio.capabilities['appium:deviceName'] = this.#deviceName;
-            wdio.capabilities['appium:automationName'] = this.#platformName == 'android' ? 'UiAutomator2' : '';
+            wdio.capabilities['appium:automationName'] = this.#platformName == 'android' ? 'UiAutomator2' : 'XCUITest';
             wdio.capabilities['appium:newCommandTimeout'] = 90;
             wdio.capabilities['appium:orientation'] = this.#orientation;
+            wdio.capabilities['appium:autoAcceptAlerts'] = true;
             wdio.capabilities['sauce:options'] = {
                 name: runName,
                 appiumVersion: 'latest',
                 deviceOrientation: this.#orientation,
                 setupDeviceLock: this.#deviceLock,
                 recordScreenshots: false,
-                resigningEnabled: false,
+                resigningEnabled: this.#platformName == 'android' ? false : true,
                 cacheId: this.#cacheId
             };
         } else if (this.farm === 'aws') {
