@@ -30,6 +30,9 @@ class FunctionStep extends BaseStep {
                     `Function::Failed "${functionId}" at step "${result.failedStep}" with error "${result.error}"`
                 );
             }
+            if (result.output) {
+                this.variables = { ...this.variables, ...result.output };
+            }
         } else {
             throw new TestRunnerError(`Function::Not found "${functionId}"`);
         }

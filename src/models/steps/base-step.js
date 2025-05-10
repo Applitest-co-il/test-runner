@@ -87,6 +87,10 @@ class BaseStep {
         return this.#variables;
     }
 
+    set variables(value) {
+        this.#variables = value;
+    }
+
     get savedElements() {
         return this.#savedElements;
     }

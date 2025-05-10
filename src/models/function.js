@@ -6,7 +6,7 @@ class TrFunction {
     #name = '';
     #type = '';
     #properties = [];
-    #variables = {};
+    #outputs = [];
     #steps = [];
 
     #savedElements = {};
@@ -16,7 +16,7 @@ class TrFunction {
         this.#name = func.name ?? '';
         this.#type = func.type ?? '';
         this.#properties = func.properties ?? [];
-        this.#variables = func.variables ?? {};
+        this.#outputs = func.outputs ?? [];
         this.#buildSteps(func.steps);
     }
 
@@ -43,10 +43,6 @@ class TrFunction {
 
     get type() {
         return this.#type;
-    }
-
-    get variables() {
-        return this.#variables;
     }
 
     get savedElements() {
@@ -100,8 +96,18 @@ class TrFunction {
             }
         }
 
+        let output = null;
+        if (this.#outputs.length > 0) {
+            output = {};
+            for (let i = 0; i < this.#outputs.length; i++) {
+                const prop = this.#outputs[i];
+                output[prop] = actualProperties[prop];
+            }
+        }
+
         return {
-            success: true
+            success: true,
+            output: output
         };
     }
 }
