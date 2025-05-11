@@ -8,8 +8,7 @@ class FunctionStep extends BaseStep {
     }
 
     async execute(_, __) {
-        const actualValue = replaceVariables(this.value, this.variables);
-        const valueParts = actualValue.split('|||');
+        const valueParts = this.value.split('|||');
         if (valueParts.length < 1) {
             throw new TestRunnerError(
                 `Function::Invalid value "${this.value}" - format should be "<functionId>[|||<prop1>,<prop2>...]"`
@@ -20,6 +19,12 @@ class FunctionStep extends BaseStep {
         let propertiesValues = [];
         if (valueParts.length == 2 && valueParts[1].length > 0) {
             propertiesValues = valueParts[1].split(',');
+        }
+        if (propertiesValues.length > 0) {
+            propertiesValues = propertiesValues.map((value) => {
+                value = value.trim();
+                return replaceVariables(value, this.variables);
+            });
         }
 
         const func = this.functions.find((f) => f.id === functionId);
