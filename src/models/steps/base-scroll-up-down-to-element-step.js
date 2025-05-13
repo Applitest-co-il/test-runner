@@ -12,8 +12,19 @@ class BaseScrollUpDownToElementStep extends BaseVerticalScrollStep {
 
     async scrollUpOrDownToElement(driver, down = true) {
         let count = 0;
-        let maxCount = this.value ? parseInt(this.value) : 1;
-        this.value = 1;
+
+        const valueParts = this.value.split('|||');
+        if (valueParts.length != 3) {
+            throw new TestRunnerError(
+                `ScrollToElement::Invalid scroll value format "${this.value}" - format should be "<var name>|||<var value>|||<max count>"`
+            );
+        }
+
+        let maxCount = parseInt(valueParts[0]);
+        if (isNaN(maxCount) || maxCount < 1) {
+            maxCount = 1;
+        }
+        this.value = `1|||${valueParts[1]}|||${valueParts[2]}`;
 
         let item = null;
         while (count <= maxCount) {
