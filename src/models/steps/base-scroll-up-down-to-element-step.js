@@ -11,26 +11,25 @@ class BaseScrollUpDownToElementStep extends BaseVerticalScrollStep {
     }
 
     async scrollUpOrDownToElement(driver, down = true) {
-        let count = 0;
+        const scrollOptions = this.parseScrollValue();
 
-        const valueParts = this.value.split('|||');
-        if (valueParts.length != 3) {
-            throw new TestRunnerError(
-                `ScrollToElement::Invalid scroll value format "${this.value}" - format should be "<var name>|||<var value>|||<max count>"`
-            );
-        }
+        const startPercentage = down ? scrollOptions.bottomPercentage : scrollOptions.topPercentage;
+        const endPercentage = down ? scrollOptions.topPercentage : scrollOptions.bottomPercentage;
+        const scrollDuration = 500;
 
-        let maxCount = parseInt(valueParts[0]);
-        if (isNaN(maxCount) || maxCount < 1) {
-            maxCount = 1;
-        }
-        this.value = `1|||${valueParts[1]}|||${valueParts[2]}`;
+        const { width, height } = await driver.getWindowSize();
+        const origin = 'viewport';
+        const anchorX = Math.floor(width * scrollOptions.anchorPercentage);
+        const startY = Math.floor(height * startPercentage);
+        const endY = Math.floor(height * endPercentage);
+        const scrollY = endY - startY;
 
         let item = null;
-        while (count <= maxCount) {
+        let count = 0;
+        while (count <= scrollOptions.count) {
             item = await this.selectItem(driver);
             if (!item) {
-                await this.verticalScroll(driver, null, down);
+                await this.doVerticalScroll(driver, scrollDuration, origin, startY, scrollY, anchorX);
             } else {
                 const isDisplayed = await item.isDisplayed();
                 if (isDisplayed) {
