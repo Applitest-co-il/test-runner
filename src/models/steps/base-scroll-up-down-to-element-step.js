@@ -47,7 +47,7 @@ class BaseScrollUpDownToElementStep extends BaseVerticalScrollStep {
         }
         if (!item) {
             throw new TestRunnerError(
-                `ScrollToElement::Item with ${this.namedElementOrUsedSelectorsComment} was not found after scrolling ${maxCount} times`
+                `ScrollToElement::Item with ${this.namedElementOrUsedSelectorsComment} was not found after scrolling ${scrollOptions.count} times`
             );
         }
     }
