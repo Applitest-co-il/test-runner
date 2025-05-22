@@ -2,7 +2,7 @@
 downloads/*
 reports/*
 reports/videos/*
-.env
+.env.local
 
 
 # Logs

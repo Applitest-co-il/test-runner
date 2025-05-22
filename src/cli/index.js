@@ -1,4 +1,7 @@
-require('dotenv').config({ path: './.env', debug: true });
+const dotenv = require('dotenv');
+dotenv.config({ path: '.env', debug: true });
+dotenv.config({ path: '.env.local', debug: true });
+
 const commander = require('commander');
 const fs = require('fs');
 
