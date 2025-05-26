@@ -70,6 +70,9 @@ class RunConfigurationMobile extends RunConfiguration {
             wdio.capabilities['appium:appActivity'] = this.#appActivity;
             wdio.capabilities['appium:autoGrantPermissions'] = this.#autoGrantPermissions;
             wdio.capabilities['appium:newCommandTimeout'] = 90;
+            if (this.#platformName === 'android') {
+                wdio.capabilities['appium:enableMultiWindows'] = true;
+            }
             if (!this.#reset) {
                 wdio.capabilities['appium:noReset'] = true;
             }
@@ -93,6 +96,9 @@ class RunConfigurationMobile extends RunConfiguration {
             wdio.capabilities['appium:newCommandTimeout'] = 90;
             wdio.capabilities['appium:orientation'] = this.#orientation;
             wdio.capabilities['appium:autoAcceptAlerts'] = true;
+            if (this.#platformName === 'android') {
+                wdio.capabilities['appium:enableMultiWindows'] = true;
+            }
             wdio.capabilities['sauce:options'] = {
                 name: runName,
                 appiumVersion: 'latest',
