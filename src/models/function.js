@@ -1,5 +1,6 @@
 const { stepFactory } = require('./test-step');
-const { TestDefinitionError } = require('../helpers/test-errors');
+const FunctionStep = require('./steps/function-step');
+const { TestDefinitionError, TestRunnerError } = require('../helpers/test-errors');
 
 class TrFunction {
     #id = '';
@@ -19,6 +20,8 @@ class TrFunction {
         this.#outputs = func.outputs ?? [];
         this.#buildSteps(func.steps);
     }
+
+    static functionStacks = [];
 
     #buildSteps(steps) {
         if (!steps || steps.length === 0) {
@@ -50,6 +53,8 @@ class TrFunction {
     }
 
     async run(session, propertiesValues, functions, videoRecorder) {
+        TrFunction.functionStacks.push(this.id);
+
         const steps = this.#steps;
 
         if (steps.length == 0) {
@@ -79,6 +84,15 @@ class TrFunction {
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
             try {
+                if (step instanceof FunctionStep) {
+                    const functionId = step.value.split('|||')[0];
+                    if (TrFunction.functionStacks.includes(functionId)) {
+                        throw new TestRunnerError(
+                            `Function "${functionId}" is up in function stack and called again creating a forbidden loop.`
+                        );
+                    }
+                }
+
                 const success = await step.run(session, functions, actualProperties, this.savedElements, videoRecorder);
                 if (!success) {
                     return {
@@ -104,6 +118,8 @@ class TrFunction {
                 output[prop] = actualProperties[prop];
             }
         }
+
+        TrFunction.functionStacks.pop();
 
         return {
             success: true,
