@@ -3,6 +3,7 @@ const { mergeVariables } = require('../helpers/utils');
 const { stepFactory } = require('./test-step');
 const VideoRecorder = require('../helpers/video-recorder');
 const AppActivateStep = require('./steps/app-activate-step');
+const TrFunction = require('./function');
 
 class Test {
     #id = '';
@@ -95,6 +96,7 @@ class Test {
 
     async run(session, functions, variables) {
         const promises = [];
+        TrFunction.functionStacks = [];
 
         const steps = this.#steps;
         if (steps.length == 0) {

@@ -381,10 +381,9 @@ class BaseStep {
 
     //#region utils
 
-    async executeScript(driver) {
+    async executeScript(script, driver) {
         try {
             if (this.#operator === 'sync') {
-                const script = replaceVariables(this.#value, this.#variables);
                 const result = await driver.execute(script);
                 if (!result) {
                     throw new TestRunnerError(`ExecuteScript::Script: script for step ${this.#sequence} failed`);
@@ -392,7 +391,7 @@ class BaseStep {
                 console.log(`ExecuteScript::Script: script for step ${this.#sequence} returns ${result}`);
                 return result;
             } else {
-                const localScript = prepareLocalScript(this.#value, this.#variables);
+                const localScript = prepareLocalScript(script);
                 const result = await vmRun(localScript, this.#variables);
                 if (!result || !result.success) {
                     throw new TestRunnerError(

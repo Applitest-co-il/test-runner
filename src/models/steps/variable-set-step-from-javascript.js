@@ -1,5 +1,6 @@
 const BaseStep = require('./base-step');
 const { TestRunnerError } = require('../../helpers/test-errors');
+const { replaceVariables } = require('../../helpers/utils');
 
 class VariableSetFromJavascriptStep extends BaseStep {
     constructor(sequence, step) {
@@ -15,10 +16,9 @@ class VariableSetFromJavascriptStep extends BaseStep {
         }
 
         const varName = varParts[0];
-        const script = varParts[1];
+        const script = replaceVariables(varParts[1], this.variables);
 
-        this.value = script;
-        const varValue = await this.executeScript(driver);
+        const varValue = await this.executeScript(script, driver);
         this.variables[varName] = varValue;
     }
 }

@@ -1,4 +1,5 @@
 const BaseStep = require('./base-step');
+const { replaceVariables } = require('../../helpers/utils');
 
 class ExecuteScriptStep extends BaseStep {
     constructor(sequence, step) {
@@ -6,7 +7,8 @@ class ExecuteScriptStep extends BaseStep {
     }
 
     async execute(driver, _) {
-        return await this.executeScript(driver);
+        const script = replaceVariables(this.value, this.variables);
+        return await this.executeScript(script, driver);
     }
 }
 
