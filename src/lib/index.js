@@ -6,6 +6,8 @@ const {
     TestItemNotFoundError,
     TestAbuseError
 } = require('../helpers/test-errors');
+const { apiCall } = require('../helpers/apicall.js');
+const { replaceVariables } = require('../helpers/utils.js');
 const libVersion = require('../../package.json').version;
 
 async function runTests(options) {
@@ -70,7 +72,32 @@ async function runTests(options) {
     return output;
 }
 
+async function testApiCall(method, path, headers, data, variables, outputs) {
+    const url = replaceVariables(`${path}`, variables);
+    const apiHeaders = {};
+    if (headers) {
+        Object.keys(headers).forEach((key) => {
+            apiHeaders[key] = replaceVariables(headers[key], variables);
+        });
+    }
+    const apiData = {};
+    if (data) {
+        Object.keys(data).forEach((key) => {
+            apiData[key] = replaceVariables(data[key], variables);
+        });
+    }
+
+    try {
+        const result = await apiCall(outputs, url, method, apiHeaders, apiData);
+        return result;
+    } catch (error) {
+        console.error(`API call error: ${error.message}`);
+        return null;
+    }
+}
+
 module.exports.runTests = runTests;
+module.exports.testApiCall = testApiCall;
 module.exports.TestRunnerConfigurationError = TestRunnerConfigurationError;
 module.exports.TestRunnerError = TestRunnerError;
 module.exports.TestDefinitionError = TestDefinitionError;

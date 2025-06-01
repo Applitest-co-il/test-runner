@@ -6,7 +6,7 @@ const express = require('express');
 const cors = require('cors');
 
 const { downloadFile } = require('../helpers/download-file.js');
-const { runTests } = require('../lib/index.js');
+const { runTests, testApiCall } = require('../lib/index.js');
 
 const app = express();
 app.use(cors());
@@ -69,6 +69,35 @@ app.patch('/test-runner', async (req, res) => {
     }
 
     res.status(200).json(output);
+});
+
+app.patch('/test-api-call', async (req, res) => {
+    console.log('Test API call started');
+
+    if (!req.body) {
+        res.status(400).send('No data found');
+        return;
+    }
+
+    const method = req.body.method;
+    const path = req.body.path;
+    const headers = req.body.headers;
+    const data = req.body.data;
+    const variables = req.body.variables || {};
+    const outputs = req.body.outputs || [];
+
+    if (!method || !path) {
+        res.status(400).send('Invalid request - method and path are required');
+        return;
+    }
+
+    const result = await testApiCall(method, path, headers, data, variables, outputs);
+    if (result) {
+        res.status(200).json(result);
+    } else {
+        res.status(500).send('API call failed');
+    }
+    console.log('Test API call completed');
 });
 
 app.listen(process.env.TR_PORT, () => {

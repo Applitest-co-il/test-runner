@@ -94,7 +94,7 @@ class Test {
         return this.#savedElements;
     }
 
-    async run(session, functions, variables) {
+    async run(session, functions, apis, variables) {
         const promises = [];
         TrFunction.functionStacks = [];
 
@@ -140,6 +140,7 @@ class Test {
                 const success = await step.run(
                     session,
                     functions,
+                    apis,
                     this.variables,
                     this.savedElements,
                     this.#videoRecorder

@@ -10,6 +10,7 @@ class StepsCommands {
 
         //function
         'call-function',
+        'call-api',
 
         //settings
         'toggle-location-services',
@@ -138,6 +139,7 @@ class StepsCommands {
         'item-select',
         'item-clear',
         'call-function',
+        'call-api',
         'upload-file'
     ];
 

@@ -36,7 +36,7 @@
         "@danielyaghil/aws-helpers": "^0.9.72",
         "@danielyaghil/vm-helper": "^0.9.12",
         "@ffmpeg-installer/ffmpeg": "^1.1.0",
-        "axios": "^1.7.7",
+        "axios": "^1.9.0",
         "commander": "^11.1.0",
         "cors": "^2.8.5",
         "dotenv": "^16.4.5",

@@ -110,12 +110,12 @@ class TrFunction {
             }
         }
 
-        let output = null;
+        let outputs = null;
         if (this.#outputs.length > 0) {
-            output = {};
+            outputs = {};
             for (let i = 0; i < this.#outputs.length; i++) {
                 const prop = this.#outputs[i];
-                output[prop] = actualProperties[prop];
+                outputs[prop] = actualProperties[prop];
             }
         }
 
@@ -123,7 +123,7 @@ class TrFunction {
 
         return {
             success: true,
-            output: output
+            outputs: outputs
         };
     }
 }

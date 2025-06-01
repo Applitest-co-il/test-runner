@@ -58,7 +58,7 @@ class Suite {
         return this.#variables;
     }
 
-    async run(sessions, functions, variables) {
+    async run(sessions, functions, apis, variables) {
         let promises = [];
 
         const tests = this.#tests;
@@ -78,7 +78,7 @@ class Suite {
                 throw new TestRunnerError(`No session found for test ${test.id} - ${test.name} - ${test.type}`);
             }
 
-            const testPromises = await test.run(runSession, functions, this.variables);
+            const testPromises = await test.run(runSession, functions, apis, this.variables);
 
             console.log(`Adding video promise "${this.#index}_${i}" to suite promises`);
             promises = promises.concat(testPromises);

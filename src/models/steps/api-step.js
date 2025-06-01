@@ -2,7 +2,7 @@ const BaseStep = require('./base-step');
 const { TestRunnerError } = require('../../helpers/test-errors');
 const { replaceVariables } = require('../../helpers/utils');
 
-class FunctionStep extends BaseStep {
+class ApiStep extends BaseStep {
     constructor(sequence, step) {
         super(sequence, step);
     }
@@ -11,11 +11,11 @@ class FunctionStep extends BaseStep {
         const valueParts = this.value.split('|||');
         if (valueParts.length < 1) {
             throw new TestRunnerError(
-                `Function::Invalid value "${this.value}" - format should be "<functionId>[|||<prop1>,<prop2>...]"`
+                `API::Invalid value "${this.value}" - format should be "<apiId>[|||<prop1>,<prop2>...]"`
             );
         }
 
-        const functionId = valueParts[0];
+        const apiId = valueParts[0];
         let propertiesValues = [];
         if (valueParts.length == 2 && valueParts[1].length > 0) {
             propertiesValues = valueParts[1].split(',');
@@ -27,21 +27,23 @@ class FunctionStep extends BaseStep {
             });
         }
 
-        const func = this.functions.find((f) => f.id === functionId);
-        if (func) {
-            const result = await func.run(this.session, propertiesValues, this.functions, this.videoRecorder);
+        const api = this.apis.find((a) => a.id === apiId);
+        if (api) {
+            api.path = replaceVariables(api.path, this.variables);
+
+            const result = await api.run(propertiesValues);
             if (!result.success) {
                 throw new TestRunnerError(
-                    `Function::Failed "${functionId}" at step "${result.failedStep}" with error "${result.error}"`
+                    `API::Failed "${apiId}" at step "${result.failedStep}" with error "${result.error}"`
                 );
             }
             if (result.outputs) {
                 this.variables = { ...this.variables, ...result.outputs };
             }
         } else {
-            throw new TestRunnerError(`Function::Not found "${functionId}"`);
+            throw new TestRunnerError(`API::Not found "${apiId}"`);
         }
     }
 }
 
-module.exports = FunctionStep;
+module.exports = ApiStep;

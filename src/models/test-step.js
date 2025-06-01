@@ -50,6 +50,7 @@ const ItemSelectStep = require('./steps/item-select-step.js');
 const ItemClearStep = require('./steps/item-clear-step.js');
 const VariableClearStep = require('./steps/variable-clear-step.js');
 const FunctionStep = require('./steps/function-step.js');
+const ApiStep = require('./steps/api-step.js');
 const UploadFileStep = require('./steps/upload-file-step.js');
 
 function stepFactory(sequence, step) {
@@ -69,10 +70,12 @@ function stepFactory(sequence, step) {
             return new HideKeyboardStep(sequence, step);
         //#endregion
 
-        //#region functions
+        //#region functions & Apis
 
         case 'call-function':
             return new FunctionStep(sequence, step);
+        case 'call-api':
+            return new ApiStep(sequence, step);
 
         //#endregion
 

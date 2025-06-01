@@ -20,6 +20,7 @@ class BaseStep {
     #savedElements = null;
     #videoRecorder = null;
     #functions = null;
+    #apis = null;
 
     #status = 'pending';
     #usedSelectors = '';
@@ -97,6 +98,10 @@ class BaseStep {
 
     get functions() {
         return this.#functions;
+    }
+
+    get apis() {
+        return this.#apis;
     }
 
     get conf() {
@@ -269,9 +274,10 @@ class BaseStep {
 
     //#region run
 
-    async run(session, functions, variables, savedElements, videoRecorder) {
+    async run(session, functions, apis, variables, savedElements, videoRecorder) {
         this.#session = session;
         this.#functions = functions;
+        this.#apis = apis;
         this.#variables = variables;
         this.#savedElements = savedElements;
         this.#videoRecorder = videoRecorder;
