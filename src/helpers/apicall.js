@@ -1,6 +1,7 @@
 const axios = require('axios');
+const Ajv = require('ajv');
 
-async function apiCall(outputs, url, method = 'GET', headers = {}, data = null) {
+async function apiCall(outputs, url, method = 'GET', headers = {}, data = null, schema = null) {
     try {
         const axiosOptions = {
             url: url,
@@ -19,18 +20,47 @@ async function apiCall(outputs, url, method = 'GET', headers = {}, data = null) 
             });
         }
 
+        let schemaValidation = false;
+        let schemaValidationErrors = [];
+        if (schema) {
+            try {
+                schema.additionalProperties = false;
+                const ajv = new Ajv({ strict: 'log', strictSchema: false, allErrors: true });
+                const validate = ajv.compile(schema);
+                schemaValidation = validate(response.data);
+                if (!schemaValidation) {
+                    schemaValidationErrors = validate.errors;
+                }
+            } catch (error) {
+                console.error('Schema validation error:', error);
+                schemaValidationErrors = [error.message];
+            }
+        }
+
         const result = {
-            status: response.status,
+            success: true,
+            statusCode: response.status,
             statusText: response.statusText,
             headers: response.headers,
             responseBody: response.data,
+            schemaValidation: schemaValidation,
+            schemaValidationErrors: schemaValidationErrors,
             outputs: extractedOutputs
         };
 
         return result;
     } catch (error) {
         console.error(`API call error: ${error.message}`);
-        throw new Error(`API call failed: ${error.message}`);
+        return {
+            success: false,
+            error: error.message,
+            statusCode: error.response ? error.response.status : null,
+            statusText: error.response ? error.response.statusText : null,
+            headers: error.response ? error.response.headers : {},
+            responseBody: error.response ? error.response.data : null,
+            schemaValidation: false,
+            schemaValidationErrors: []
+        };
     }
 }
 

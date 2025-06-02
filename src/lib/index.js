@@ -72,7 +72,7 @@ async function runTests(options) {
     return output;
 }
 
-async function testApiCall(method, path, headers, data, variables, outputs) {
+async function testApiCall(method, path, headers, data, schema, variables, outputs) {
     const url = replaceVariables(`${path}`, variables);
     const apiHeaders = {};
     if (headers) {
@@ -88,7 +88,7 @@ async function testApiCall(method, path, headers, data, variables, outputs) {
     }
 
     try {
-        const result = await apiCall(outputs, url, method, apiHeaders, apiData);
+        const result = await apiCall(outputs, url, method, apiHeaders, apiData, schema);
         return result;
     } catch (error) {
         console.error(`API call error: ${error.message}`);

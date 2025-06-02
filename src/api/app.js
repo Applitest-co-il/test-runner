@@ -83,6 +83,7 @@ app.patch('/test-api-call', async (req, res) => {
     const path = req.body.path;
     const headers = req.body.headers;
     const data = req.body.data;
+    const schema = req.body.schema || null;
     const variables = req.body.variables || {};
     const outputs = req.body.outputs || [];
 
@@ -91,7 +92,7 @@ app.patch('/test-api-call', async (req, res) => {
         return;
     }
 
-    const result = await testApiCall(method, path, headers, data, variables, outputs);
+    const result = await testApiCall(method, path, headers, data, schema, variables, outputs);
     if (result) {
         res.status(200).json(result);
     } else {

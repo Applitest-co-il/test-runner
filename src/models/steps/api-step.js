@@ -16,8 +16,9 @@ class ApiStep extends BaseStep {
         }
 
         const apiId = valueParts[0];
+
         let propertiesValues = [];
-        if (valueParts.length == 2 && valueParts[1].length > 0) {
+        if (valueParts.length >= 2 && valueParts[1].length > 0) {
             propertiesValues = valueParts[1].split(',');
         }
         if (propertiesValues.length > 0) {
@@ -27,15 +28,35 @@ class ApiStep extends BaseStep {
             });
         }
 
+        let expectedStatus = 200;
+        if (valueParts.length == 3 && valueParts[2].length > 0) {
+            expectedStatus = parseInt(valueParts[2], 10);
+        }
+
         const api = this.apis.find((a) => a.id === apiId);
         if (api) {
-            api.path = replaceVariables(api.path, this.variables);
+            const apiRun = api.duplicate();
+            apiRun.path = replaceVariables(apiRun.path, this.variables);
 
-            const result = await api.run(propertiesValues);
+            const isApiTesting = this.operator === 'validate';
+
+            const result = await apiRun.run(propertiesValues, isApiTesting);
             if (!result.success) {
-                throw new TestRunnerError(
-                    `API::Failed "${apiId}" at step "${result.failedStep}" with error "${result.error}"`
-                );
+                if (isApiTesting) {
+                    // in APi testing case we throw an error only if it does not match target
+                    if (result.statusCode != expectedStatus) {
+                        throw new TestRunnerError(
+                            `API::Failed "${apiId}" with status code ${result.statusCode} (expected ${expectedStatus})`
+                        );
+                    }
+                    if (expectedStatus >= 200 && expectedStatus < 300 && !result.schemaValidation) {
+                        throw new TestRunnerError(
+                            `API::Failed "${apiId}" with schema validation errors: ${result.schemaValidationErrors.join(', ')}`
+                        );
+                    }
+                } else {
+                    throw new TestRunnerError(`API::Failed "${apiId}" with error "${result.error}"`);
+                }
             }
             if (result.outputs) {
                 this.variables = { ...this.variables, ...result.outputs };
