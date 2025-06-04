@@ -29,7 +29,20 @@ class FunctionStep extends BaseStep {
 
         const func = this.functions.find((f) => f.id === functionId);
         if (func) {
-            const result = await func.run(this.session, propertiesValues, this.functions, this.videoRecorder);
+            const duplicatedFunc = func.duplicate();
+
+            if (this.variables && this.variables.apiBaseUrl) {
+                duplicatedFunc.properties.push('apiBaseUrl');
+                propertiesValues.push(this.variables.apiBaseUrl);
+            }
+
+            const result = await duplicatedFunc.run(
+                this.session,
+                propertiesValues,
+                this.functions,
+                this.apis,
+                this.videoRecorder
+            );
             if (!result.success) {
                 throw new TestRunnerError(
                     `Function::Failed "${functionId}" at step "${result.failedStep}" with error "${result.error}"`

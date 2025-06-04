@@ -38,6 +38,8 @@ app.patch('/test-runner', async (req, res) => {
         }
     } else if (options?.runConfiguration?.runType === 'web') {
         console.log('Received web run configuration');
+    } else if (options?.runConfiguration?.runType === 'api') {
+        console.log('Received API run configuration');
     } else {
         res.status(400).send('Invalid run type - only mobile supported .... so far....');
         return;

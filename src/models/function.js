@@ -52,7 +52,24 @@ class TrFunction {
         return this.#savedElements;
     }
 
-    async run(session, propertiesValues, functions, videoRecorder) {
+    get properties() {
+        return this.#properties;
+    }
+
+    duplicate() {
+        const newFunction = new TrFunction({
+            id: this.#id,
+            name: this.#name,
+            type: this.#type,
+            properties: [...this.#properties],
+            outputs: [...this.#outputs],
+            steps: [...this.#steps]
+        });
+        newFunction.#savedElements = { ...this.#savedElements };
+        return newFunction;
+    }
+
+    async run(session, propertiesValues, functions, apis, videoRecorder) {
         TrFunction.functionStacks.push(this.id);
 
         const steps = this.#steps;
@@ -61,7 +78,7 @@ class TrFunction {
             throw new TestDefinitionError(`Function "${this.#name}" has no steps`);
         }
 
-        const actualProperties = {};
+        let actualProperties = {};
         if (
             propertiesValues === undefined ||
             (propertiesValues && propertiesValues.length != this.#properties.length)
@@ -93,7 +110,14 @@ class TrFunction {
                     }
                 }
 
-                const success = await step.run(session, functions, actualProperties, this.savedElements, videoRecorder);
+                const success = await step.run(
+                    session,
+                    functions,
+                    apis,
+                    actualProperties,
+                    this.savedElements,
+                    videoRecorder
+                );
                 if (!success) {
                     return {
                         success: false,

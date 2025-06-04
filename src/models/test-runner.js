@@ -109,6 +109,10 @@ class TestRunner {
             throw new TestRunnerError(`No Existing session found for type: ${runType}`);
         }
 
+        if (runType == 'api') {
+            return runSession; // No session management for API runs
+        }
+
         if (runSession.driver) {
             return runSession;
         } else if (runType == 'web') {
@@ -134,7 +138,6 @@ class TestRunner {
             console.error('Driver could not be set');
             throw new TestRunnerError('Driver could not be set');
         }
-        runSession;
 
         return runSession;
     }
@@ -238,6 +241,9 @@ class TestRunner {
                     runSessions.push(sess);
                     sess = await this.startSession('mobile', sessionName);
                     runSessions.push(sess);
+                } else if (suite.type === 'api') {
+                    // No session management for API runs
+                    runSessions.push(await this.startSession('api', sessionName));
                 } else {
                     const msg = `Suite type: ${suite.type} do not match sessions type ${this.sessions.map((s) => s.type)}`;
                     console.log(msg);

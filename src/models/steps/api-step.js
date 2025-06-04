@@ -33,6 +33,13 @@ class ApiStep extends BaseStep {
             expectedStatus = parseInt(valueParts[2], 10);
         }
 
+        let expectedOutputs = [];
+        if (valueParts.length == 4 && valueParts[3].length > 0) {
+            expectedOutputs = valueParts[3].split(',').map((output) => {
+                return replaceVariables(output.trim(), this.variables);
+            });
+        }
+
         const api = this.apis.find((a) => a.id === apiId);
         if (api) {
             const apiRun = api.duplicate();
@@ -43,7 +50,7 @@ class ApiStep extends BaseStep {
             const result = await apiRun.run(propertiesValues, isApiTesting);
             if (!result.success) {
                 if (isApiTesting) {
-                    // in APi testing case we throw an error only if it does not match target
+                    // in API testing case we throw an error only if it does not match target
                     if (result.statusCode != expectedStatus) {
                         throw new TestRunnerError(
                             `API::Failed "${apiId}" with status code ${result.statusCode} (expected ${expectedStatus})`
@@ -57,9 +64,37 @@ class ApiStep extends BaseStep {
                 } else {
                     throw new TestRunnerError(`API::Failed "${apiId}" with error "${result.error}"`);
                 }
+            } else {
+                if (isApiTesting) {
+                    if (expectedOutputs.length > 0) {
+                        if (api.outputs.length !== expectedOutputs.length) {
+                            throw new TestRunnerError(
+                                `API::Expected outputs for "${apiId}": expected is defined as ${expectedOutputs.length} elements (${expectedOutputs.join(', ')})  while API outputs are defined as ${api.outputs.length} elements (${api.outputs.join(', ')})`
+                            );
+                        }
+                        const resultOutputsKeys = Object.keys(result.outputs);
+                        for (let pos = 0; pos < resultOutputsKeys.length; pos++) {
+                            const key = resultOutputsKeys[pos];
+                            const index = api.outputs.indexOf(key);
+                            if (index === -1) {
+                                throw new TestRunnerError(
+                                    `API::Output "${key}" for "${apiId}" is not defined in API outputs`
+                                );
+                            }
+                            const expectedValue = expectedOutputs[index];
+                            if (result.outputs[key] !== expectedValue) {
+                                throw new TestRunnerError(
+                                    `API::Output "${key}" for "${apiId}" does not match expected value: expected "${expectedValue}", got "${result.outputs[key]}"`
+                                );
+                            }
+                        }
+                    }
+                }
             }
             if (result.outputs) {
-                this.variables = { ...this.variables, ...result.outputs };
+                Object.keys(result.outputs).forEach((key) => {
+                    this.variables[key] = result.outputs[key];
+                });
             }
         } else {
             throw new TestRunnerError(`API::Not found "${apiId}"`);
