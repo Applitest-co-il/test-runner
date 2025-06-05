@@ -83,7 +83,10 @@ async function testApiCall(method, path, headers, data, schema, variables, outpu
     const apiData = {};
     if (data) {
         Object.keys(data).forEach((key) => {
-            apiData[key] = replaceVariables(data[key], variables);
+            const value = data[key];
+            if (typeof value === 'string') {
+                apiData[key] = replaceVariables(data[key], variables);
+            }
         });
     }
 
