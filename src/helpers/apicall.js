@@ -24,7 +24,7 @@ async function apiCall(outputs, url, method = 'GET', headers = '', data = '', sc
 
         let schemaValidation = false;
         let schemaValidationErrors = [];
-        if (schema) {
+        if (schema && Object.keys(schema).length > 0) {
             try {
                 schema.additionalProperties = false;
                 const ajv = new Ajv({ strict: 'log', strictSchema: false, allErrors: true });
