@@ -1,15 +1,17 @@
 const axios = require('axios');
 const Ajv = require('ajv');
 
-async function apiCall(outputs, url, method = 'GET', headers = {}, data = null, schema = null) {
+async function apiCall(outputs, url, method = 'GET', headers = '', data = '', schema = null) {
     try {
         const axiosOptions = {
             url: url,
-            method: method,
-            headers: headers
+            method: method
         };
-        if (data && Object.keys(data).length > 0) {
-            axiosOptions.data = data;
+        if (headers && headers.length > 0) {
+            axiosOptions.headers = JSON.parse(headers);
+        }
+        if (data && data.length > 0) {
+            axiosOptions.data = JSON.parse(data);
         }
         const response = await axios(axiosOptions);
 

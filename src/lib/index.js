@@ -74,20 +74,17 @@ async function runTests(options) {
 
 async function testApiCall(method, path, headers, data, schema, variables, outputs) {
     const url = replaceVariables(`${path}`, variables);
-    const apiHeaders = {};
+
+    let apiHeaders = '';
     if (headers) {
-        Object.keys(headers).forEach((key) => {
-            apiHeaders[key] = replaceVariables(headers[key], variables);
-        });
+        apiHeaders = headers.replace(/\s+/g, ' ').trim();
+        apiHeaders = replaceVariables(apiHeaders, variables);
     }
-    const apiData = {};
+
+    let apiData = '';
     if (data) {
-        Object.keys(data).forEach((key) => {
-            const value = data[key];
-            if (typeof value === 'string') {
-                apiData[key] = replaceVariables(data[key], variables);
-            }
-        });
+        apiData = data.replace(/\s+/g, ' ').trim();
+        apiData = replaceVariables(apiData, variables);
     }
 
     try {

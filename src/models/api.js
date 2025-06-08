@@ -86,17 +86,15 @@ class TrApi {
 
         const url = replaceVariables(this.#path, propertiesMap);
 
-        const apiHeaders = {};
+        let apiHeaders = '';
         if (this.#headers) {
-            Object.keys(this.#headers).forEach((key) => {
-                apiHeaders[key] = replaceVariables(this.#headers[key], propertiesMap);
-            });
+            apiHeaders = this.#headers.replace(/\s+/g, ' ').trim();
+            apiHeaders = replaceVariables(apiHeaders, propertiesMap);
         }
-        const apiData = {};
+        let apiData = '';
         if (this.#body) {
-            Object.keys(this.#body).forEach((key) => {
-                apiData[key] = replaceVariables(this.#body[key], propertiesMap);
-            });
+            apiData = this.#body.replace(/\s+/g, ' ').trim();
+            apiData = replaceVariables(apiData, propertiesMap);
         }
 
         const schema = isApiTesting ? this.#schema : null;
