@@ -57,14 +57,22 @@ class TrFunction {
     }
 
     duplicate() {
+        // Create new function with basic properties but empty steps
         const newFunction = new TrFunction({
             id: this.#id,
             name: this.#name,
             type: this.#type,
             properties: [...this.#properties],
             outputs: [...this.#outputs],
-            steps: [...this.#steps]
+            steps: [] // Start with empty steps array
+        }); // Rebuild steps using the original raw data from each step
+        newFunction.#steps = this.#steps.map((step, index) => {
+            // Get the raw configuration and create a deep copy
+            const rawData = JSON.parse(JSON.stringify(step.rawData));
+            // Use stepFactory to create a new instance
+            return stepFactory(index + 1, rawData);
         });
+
         newFunction.#savedElements = { ...this.#savedElements };
         return newFunction;
     }

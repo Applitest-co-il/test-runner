@@ -32,6 +32,8 @@ class BaseStep {
     #hideKeyboard = false;
     #takeSnapshot = false;
 
+    #rawData = null;
+
     constructor(sequence, step) {
         this.#sequence = sequence;
         this.#command = step.command;
@@ -42,8 +44,15 @@ class BaseStep {
         this.#operator = step.operator;
         this.#condition = step.condition ? new TestCondition(step.condition) : null;
 
+        // Store the original step configuration
+        this.#rawData = { ...step };
+
         this.#build();
         this.#isValid();
+    }
+
+    get rawData() {
+        return this.#rawData;
     }
 
     //#region getters-setters
