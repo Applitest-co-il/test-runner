@@ -28,13 +28,17 @@ class ApiStep extends BaseStep {
             });
         }
 
-        let expectedStatus = 200;
+        let outputVariablesNameOverride = [];
         if (valueParts.length == 3 && valueParts[2].length > 0) {
-            expectedStatus = parseInt(valueParts[2], 10);
+            outputVariablesNameOverride = valueParts[2].split(',');
         }
 
+        let expectedStatus = 200;
         let expectedOutputs = [];
         if (valueParts.length == 4 && valueParts[3].length > 0) {
+            if (valueParts[2].length > 0) {
+                expectedStatus = parseInt(valueParts[2], 10);
+            }
             expectedOutputs = valueParts[3].split(',').map((output) => {
                 return replaceVariables(output.trim(), this.variables);
             });
@@ -69,7 +73,7 @@ class ApiStep extends BaseStep {
                     if (expectedOutputs.length > 0) {
                         if (api.outputs.length !== expectedOutputs.length) {
                             throw new TestRunnerError(
-                                `API::Expected outputs for "${apiId}": expected is defined as ${expectedOutputs.length} elements (${expectedOutputs.join(', ')})  while API outputs are defined as ${api.outputs.length} elements (${api.outputs.join(', ')})`
+                                `API::Expected outputs for "${apiId}": expected is defined as ${expectedOutputs.length} elements (${expectedOutputs.join(', ')})  while API actual outputs are  ${api.outputs.length} elements (${api.outputs.join(', ')})`
                             );
                         }
                         const resultOutputsKeys = Object.keys(result.outputs);
@@ -92,9 +96,15 @@ class ApiStep extends BaseStep {
                 }
             }
             if (result.outputs) {
-                Object.keys(result.outputs).forEach((key) => {
-                    this.variables[key] = result.outputs[key];
-                });
+                const outputsKeys = Object.keys(result.outputs);
+                for (let pos = 0; pos < outputsKeys.length; pos++) {
+                    const key = outputsKeys[pos];
+                    if (outputVariablesNameOverride.length > pos) {
+                        this.variables[outputVariablesNameOverride[pos]] = result.outputs[key];
+                    } else {
+                        this.variables[key] = result.outputs[key];
+                    }
+                }
             }
         } else {
             throw new TestRunnerError(`API::Not found "${apiId}"`);
