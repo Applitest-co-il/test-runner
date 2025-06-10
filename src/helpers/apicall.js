@@ -7,7 +7,7 @@ async function apiCall(outputs, url, method = 'GET', headers = '', data = '', sc
             url: url,
             method: method
         };
-        if (headers && headers.length > 0) {
+        if (headers && headers.length > 2) {
             axiosOptions.headers = JSON.parse(headers);
         }
         if (data && data.length > 2) {
