@@ -10,7 +10,7 @@ async function apiCall(outputs, url, method = 'GET', headers = '', data = '', sc
         if (headers && headers.length > 0) {
             axiosOptions.headers = JSON.parse(headers);
         }
-        if (data && data.length > 0) {
+        if (data && data.length > 2) {
             axiosOptions.data = JSON.parse(data);
         }
         const response = await axios(axiosOptions);
