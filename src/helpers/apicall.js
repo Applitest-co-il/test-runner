@@ -1,5 +1,6 @@
 const axios = require('axios');
 const Ajv = require('ajv');
+const jmesPath = require('jmespath');
 
 async function apiCall(outputs, url, method = 'GET', headers = '', data = '', schema = null) {
     try {
@@ -16,9 +17,19 @@ async function apiCall(outputs, url, method = 'GET', headers = '', data = '', sc
         const response = await axios(axiosOptions);
 
         const extractedOutputs = {};
-        if (outputs && outputs.length > 0) {
+        if (outputs && outputs.length > 0 && response.data) {
             outputs.forEach((output) => {
-                extractedOutputs[output] = response.data[output];
+                const outputParts = output.split('|');
+                const outputKey = outputParts[0];
+                const outputQuery = outputParts.length > 1 ? outputParts[1] : outputKey;
+                const extractedValue = jmesPath.search(response.data, outputQuery);
+                if (extractedValue) {
+                    if (Array.isArray(extractedValue) && extractedValue.length > 0) {
+                        extractedOutputs[outputKey] = extractedValue[0];
+                    } else {
+                        extractedOutputs[outputKey] = extractedValue;
+                    }
+                }
             });
         }
 
