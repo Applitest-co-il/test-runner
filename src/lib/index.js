@@ -77,13 +77,25 @@ async function testApiCall(method, path, headers, data, schema, variables, outpu
 
     let apiHeaders = '';
     if (headers) {
-        apiHeaders = headers.replace(/\s+/g, ' ').trim();
+        if (typeof headers == 'object') {
+            apiHeaders = JSON.stringify(headers);
+        } else {
+            apiHeaders = headers;
+        }
+
+        apiHeaders = apiHeaders.replace(/\s+/g, ' ').trim();
         apiHeaders = replaceVariables(apiHeaders, variables);
     }
 
     let apiData = '';
     if (data) {
-        apiData = data.replace(/\s+/g, ' ').trim();
+        if (typeof data == 'object') {
+            apiData = JSON.stringify(data);
+        } else {
+            apiData = data;
+        }
+
+        apiData = apiData.replace(/\s+/g, ' ').trim();
         apiData = replaceVariables(apiData, variables);
     }
 
