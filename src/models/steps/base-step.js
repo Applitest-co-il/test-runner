@@ -19,6 +19,7 @@ class BaseStep {
     #variables = null;
     #savedElements = null;
     #videoRecorder = null;
+    #videoBaseStep = '';
     #functions = null;
     #apis = null;
 
@@ -53,6 +54,10 @@ class BaseStep {
 
     get rawData() {
         return this.#rawData;
+    }
+
+    get sequence() {
+        return this.#sequence;
     }
 
     //#region getters-setters
@@ -139,6 +144,14 @@ class BaseStep {
 
     get namedElementOrUsedSelectorsComment() {
         return `${this.namedElement ? 'named element [' + this.namedElement + ']' : 'selectors [' + this.usedSelectors + ']'}`;
+    }
+
+    get videoRecorder() {
+        return this.#videoRecorder;
+    }
+
+    get videoBaseStep() {
+        return this.#videoBaseStep;
     }
 
     //#endregion
@@ -283,13 +296,14 @@ class BaseStep {
 
     //#region run
 
-    async run(session, functions, apis, variables, savedElements, videoRecorder) {
+    async run(session, functions, apis, variables, savedElements, videoRecorder, videoBaseStep = '') {
         this.#session = session;
         this.#functions = functions;
         this.#apis = apis;
         this.#variables = variables;
         this.#savedElements = savedElements;
         this.#videoRecorder = videoRecorder;
+        this.#videoBaseStep = videoBaseStep;
 
         try {
             if (this.#condition) {

@@ -4,6 +4,8 @@ const { replaceVariables } = require('../../helpers/utils');
 class NavigateStep extends BaseStep {
     constructor(sequence, step) {
         super(sequence, step);
+
+        this.takeSnapshot = true;
     }
 
     async execute(driver, _) {

@@ -41,7 +41,8 @@ class FunctionStep extends BaseStep {
                 propertiesValues,
                 this.functions,
                 this.apis,
-                this.videoRecorder
+                this.videoRecorder,
+                `${this.videoBaseStep}${this.sequence}`
             );
             if (!result.success) {
                 throw new TestRunnerError(

@@ -53,6 +53,8 @@ class VideoRecorder {
 
         this.#frameCount = 0;
 
+        this.#currentStep = '00';
+
         await this.addFrame();
     }
 
@@ -155,8 +157,9 @@ class VideoRecorder {
 
         try {
             const bkgrColor = Jimp.cssColorToHex('rgba(18, 18, 18, 0.5)');
-            const txtImage = new Jimp.Jimp({ width: 500, height: 150, color: bkgrColor });
-            const font = await Jimp.loadFont(JimpFonts.SANS_128_WHITE);
+            const textWidth = sText.length < 9 ? 350 : 450;
+            const txtImage = new Jimp.Jimp({ width: textWidth, height: 100, color: bkgrColor });
+            const font = await Jimp.loadFont(JimpFonts.SANS_64_WHITE);
             txtImage.print({ font: font, x: 10, y: 10, text: sText });
 
             const image = await Jimp.Jimp.read(filePath);

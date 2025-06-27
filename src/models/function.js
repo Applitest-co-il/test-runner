@@ -77,7 +77,7 @@ class TrFunction {
         return newFunction;
     }
 
-    async run(session, propertiesValues, functions, apis, videoRecorder) {
+    async run(session, propertiesValues, functions, apis, videoRecorder, videoBaseStep) {
         TrFunction.functionStacks.push(this.id);
 
         const steps = this.#steps;
@@ -118,13 +118,16 @@ class TrFunction {
                     }
                 }
 
+                videoRecorder.currentStep = `${videoBaseStep}_${step.sequence}`;
+
                 const success = await step.run(
                     session,
                     functions,
                     apis,
                     actualProperties,
                     this.savedElements,
-                    videoRecorder
+                    videoRecorder,
+                    `${videoBaseStep}_`
                 );
                 if (!success) {
                     return {

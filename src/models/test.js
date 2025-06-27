@@ -110,7 +110,7 @@ class Test {
                 screenShotInterval: 0
             };
             this.#videoRecorder = new VideoRecorder(session.driver, options);
-            this.#videoRecorder.start();
+            await this.#videoRecorder.start();
         }
 
         //TBD: chnage with test type
@@ -131,11 +131,12 @@ class Test {
                 : steps.length;
 
         for (let i = startFromSteps; i < stopAtStep; i++) {
+            const step = steps[i];
+
             if (this.#videoRecorder) {
-                this.#videoRecorder.currentStep = i + 1;
+                this.#videoRecorder.currentStep = step.sequence;
             }
 
-            const step = steps[i];
             try {
                 const success = await step.run(
                     session,
