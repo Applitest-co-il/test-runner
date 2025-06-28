@@ -118,7 +118,9 @@ class TrFunction {
                     }
                 }
 
-                videoRecorder.currentStep = `${videoBaseStep}_${step.sequence}`;
+                if (videoRecorder) {
+                    videoRecorder.currentStep = `${videoBaseStep}_${step.sequence}`;
+                }
 
                 const success = await step.run(
                     session,
