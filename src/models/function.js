@@ -25,7 +25,7 @@ class TrFunction {
 
     #buildSteps(steps) {
         if (!steps || steps.length === 0) {
-            console.error('No test steps found');
+            console.error(`No test steps found in function "${this.#id} - ${this.#name}"`);
             return;
         }
 

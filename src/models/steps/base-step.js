@@ -310,7 +310,7 @@ class BaseStep {
                 let conditionResult = await this.#condition.evaluate(session.driver, variables, session.runConf);
                 if (!conditionResult) {
                     this.#status = 'skipped';
-                    console.log(`TestStep::Condition for step ${this.#sequence} was not met - step skipped`);
+                    //console.log(`TestStep::Condition for step ${this.#sequence} was not met - step skipped`);
                     return true;
                 }
             }

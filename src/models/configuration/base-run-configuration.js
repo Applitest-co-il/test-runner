@@ -124,6 +124,9 @@ class RunConfiguration {
                 console.error('Driver could not be set');
                 throw new TestRunnerConfigurationError('Driver could not be set');
             }
+
+            console.log(`Session started successfully: ${sessionName}`);
+
             return driver;
         } catch (err) {
             if (err.message.indexOf('CCYAbuse - too many jobs when running') > -1) {

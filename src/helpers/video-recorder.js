@@ -143,10 +143,10 @@ class VideoRecorder {
                 return;
             }
 
-            console.log(`Screenshot (frame: ${frame}) to ${filePath} started`);
+            //console.log(`Screenshot (frame: ${frame}) to ${filePath} started`);
             await this.#driver.saveScreenshot(filePath);
             await this.addStepToFrame(filePath, step, frame);
-            console.log(`Screenshot (frame: ${frame}) to ${filePath} complete`);
+            //console.log(`Screenshot (frame: ${frame}) to ${filePath} completed`);
         } catch (error) {
             console.log(`Screenshot not available (frame: ${frame}). Error: ${error}..`);
         }

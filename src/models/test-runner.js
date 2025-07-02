@@ -34,7 +34,6 @@ class TestRunner {
 
         if (options.functions) {
             for (let i = 0; i < options.functions.length; i++) {
-                options.functions[i].index = i;
                 const func = new TRFunction(options.functions[i]);
                 this.#functions.push(func);
             }
@@ -42,7 +41,6 @@ class TestRunner {
 
         if (options.apis) {
             for (let i = 0; i < options.apis.length; i++) {
-                options.apis[i].index = i;
                 const api = new TRApi(options.apis[i]);
                 this.#apis.push(api);
             }
@@ -135,8 +133,8 @@ class TestRunner {
 
         runSession.driver = await runSession.runConf.startSession(sessionName);
         if (!runSession.driver) {
-            console.error('Driver could not be set');
-            throw new TestRunnerError('Driver could not be set');
+            console.error(`Driver could not be set for session "${sessionName}" of type ${runType}`);
+            throw new TestRunnerError(`Driver could not be set for session "${sessionName}" of type ${runType}`);
         }
 
         return runSession;
