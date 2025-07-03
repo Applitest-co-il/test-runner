@@ -153,10 +153,11 @@ class TestRunner {
                 // } else if (this.#runConfiguration.noFollowReset && runSession.type == 'mobile') {
                 //     console.log('Mobile No follow reset flag set - skipping closing or resetting session');
             } else {
-                console.log('Closing session...');
                 try {
+                    const thisSession = runSession.driver;
                     runSession.driver = null;
-                    await runSession.driver.deleteSession();
+                    await thisSession.deleteSession();
+                    console.log('Session closed successfully');
                 } catch (error) {
                     console.error('Error closing session (could be already lost):', error);
                 } finally {
