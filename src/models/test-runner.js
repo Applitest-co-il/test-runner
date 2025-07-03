@@ -3,7 +3,7 @@ const Suite = require('./suite');
 const TRFunction = require('./function');
 const TRApi = require('./api');
 const { runConfigurationFactory } = require('./test-run-configuration');
-const { mergeVariables } = require('../helpers/utils');
+const { mergeVariables, pauseApp } = require('../helpers/utils');
 const SessionPinger = require('../helpers/session-pinger');
 const { downloadFile } = require('../helpers/download-file');
 
@@ -155,8 +155,8 @@ class TestRunner {
             } else {
                 console.log('Closing session...');
                 try {
-                    await runSession.driver.deleteSession();
                     runSession.driver = null;
+                    await runSession.driver.deleteSession();
                 } catch (error) {
                     console.error('Error closing session (could be already lost):', error);
                 } finally {
@@ -261,18 +261,19 @@ class TestRunner {
 
                     console.log(`TestRunner::Suite ${i} run complete`);
                 } catch (error) {
-                    if (error instanceof TestAbuseError) {
-                        throw error;
-                    } else {
-                        console.error('Error running suite:', error);
-                        throw new Error(`error running suite: ${error.message}`);
-                    }
+                    console.error('Error running suite:', error);
+                    throw new Error(`error running suite: ${error.message}`);
                 }
 
                 // closing sessions at end of suite
                 for (let j = 0; j < runSessions.length; j++) {
                     await this.closeSession(runSessions[j]);
                 }
+
+                //Pause to let eventually sauce labs free sesssion in case new sessions are required
+                const pauseTime = 4500;
+                console.log(`TestRunner::Suite ${i} completed, pausing app for ${pauseTime / 1000} seconds`);
+                await pauseApp(pauseTime);
             }
 
             console.log('Test run complete waiting for all video promises to complete');
@@ -283,8 +284,12 @@ class TestRunner {
                 console.log('No video promises found');
             }
         } catch (error) {
-            console.error('Error running:', error);
-            throw new Error(`error running test: ${error.message}`);
+            if (error instanceof TestAbuseError) {
+                throw error;
+            } else {
+                console.error('Error running:', error);
+                throw new Error(`error running test: ${error.message}`);
+            }
         } finally {
             await this.terminateAllSessions();
         }

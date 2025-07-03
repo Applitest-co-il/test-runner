@@ -129,7 +129,7 @@ class RunConfiguration {
 
             return driver;
         } catch (err) {
-            if (err.message.indexOf('CCYAbuse - too many jobs when running') > -1) {
+            if (err.message.indexOf('CCYAbuse') > -1) {
                 const errMsg = conf
                     ? `Error: Too many jobs running on ${conf.hostname}`
                     : 'Error: Too many jobs running';

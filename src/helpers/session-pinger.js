@@ -4,6 +4,7 @@ class SessionPinger {
     #sessions = [];
     #interval = 60000; // Default interval of 60 seconds
     #intervalId = null;
+    #running = false;
 
     constructor(sessions, interval) {
         this.#sessions = sessions;
@@ -13,6 +14,11 @@ class SessionPinger {
     }
 
     async pingSessions() {
+        if (!this.#running) {
+            console.warn('PingSession::Not running, skipping ping');
+            return;
+        }
+
         for (const session of this.#sessions) {
             if (session.driver) {
                 try {
@@ -37,13 +43,17 @@ class SessionPinger {
             return;
         }
 
+        const that = this;
         this.#intervalId = setIntervalAsync(async () => {
-            await this.pingSessions();
+            await that.pingSessions();
         }, this.#interval);
+
+        this.#running = true;
         console.log(`Session pinger started with interval ${this.#interval}ms`);
     }
 
     async stop() {
+        this.#running = false;
         if (this.#intervalId) {
             await clearIntervalAsync(this.#intervalId);
             console.log('Session pinger stopped');

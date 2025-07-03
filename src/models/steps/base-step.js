@@ -284,7 +284,7 @@ class BaseStep {
                 item,
                 this.#originalBorderCSS.value
             );
-            console.log('highlight reverted');
+            //console.log('highlight reverted');
         } catch (error) {
             console.log(`Error reverting border: ${error}`);
         } finally {
