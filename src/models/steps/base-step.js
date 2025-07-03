@@ -260,9 +260,9 @@ class BaseStep {
                 }
                 elt.style.border = '3px solid orangered';
             }, item);
-            console.log('highlighted');
+            //console.log('highlighted');
         } catch {
-            console.log('Could not be highlighted');
+            console.log(`Could not be highlighted: ${JSON.stringify(item)}`);
         }
     }
 
