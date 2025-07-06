@@ -232,10 +232,10 @@ class TestRunner {
                 if (suite.type === 'web') {
                     const sess = await this.startSession('web', sessionName);
                     runSessions.push(sess);
-                } else if (suite.type === 'mobile') {
+                } else if (suite.type.startsWith('mobile')) {
                     const sess = await this.startSession('mobile', sessionName);
                     runSessions.push(sess);
-                } else if (suite.type === 'mixed') {
+                } else if (suite.type.startsWith('mixed')) {
                     let sess = await this.startSession('web', sessionName);
                     runSessions.push(sess);
                     sess = await this.startSession('mobile', sessionName);
