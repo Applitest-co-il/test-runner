@@ -72,7 +72,8 @@ class Suite {
                 continue;
             }
 
-            const runSession = sessions.find((session) => session.type === test.type);
+            const runType = test.type.startsWith('mobile') ? 'mobile' : test.type;
+            const runSession = sessions.find((session) => session.type === runType);
             if (!runSession) {
                 console.error(`No session found for test ${test.id} - ${test.name} - ${test.type}`);
                 throw new TestRunnerError(`No session found for test ${test.id} - ${test.name} - ${test.type}`);
