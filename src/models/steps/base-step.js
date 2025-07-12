@@ -15,7 +15,6 @@ class BaseStep {
     #value = null;
     #operator = null;
 
-    #selectorsPerPlatform = {};
     #variables = null;
     #savedElements = null;
     #videoRecorder = null;
@@ -48,7 +47,7 @@ class BaseStep {
         // Store the original step configuration
         this.#rawData = { ...step };
 
-        this.#build();
+        this.#cleanSelectors();
         this.#isValid();
     }
 
@@ -202,33 +201,18 @@ class BaseStep {
         return true;
     }
 
-    #selectorsForPlatform(platform) {
-        return this.#selectorsPerPlatform[platform] ?? this.#selectorsPerPlatform['default'];
-    }
-
     //#endregion
 
-    //#region build
+    //#region selectors
 
-    #addSelector(platform, selector) {
-        if (!this.#selectorsPerPlatform[platform]) {
-            this.#selectorsPerPlatform[platform] = [];
-        }
-        this.#selectorsPerPlatform[platform].push(selector);
-    }
-
-    #build() {
-        // Build the test step
+    #cleanSelectors() {
+        // clean selectors - backward compatibility
         if (this.#selectors) {
             for (let i = 0; i < this.#selectors.length; i++) {
                 let selector = this.#selectors[i];
                 let selectorParts = selector.split('|||');
-                if (selectorParts.length === 1) {
-                    this.#addSelector('default', selector);
-                } else {
-                    let platform = selectorParts[0];
-                    let value = selectorParts[1];
-                    this.#addSelector(platform, value);
+                if (selectorParts.length > 1) {
+                    this.#selectors[i] = selectorParts[1].trim();
                 }
             }
         }
@@ -361,7 +345,11 @@ class BaseStep {
         }
 
         // Implement item selection logic
-        let selectors = this.#selectorsForPlatform(driver.capabilities.platformName.toLowerCase());
+        let selectors = this.#selectors;
+        if (!selectors || selectors.length === 0) {
+            return null;
+        }
+
         let item = null;
         this.#usedSelectors = '';
         for (let i = 0; i < selectors.length; i++) {
