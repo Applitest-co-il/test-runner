@@ -16,9 +16,10 @@ class RunConfigurationWeb extends RunConfiguration {
     constructor(options, session) {
         super(options);
 
+        this.farm = session.browser.farm || 'local';
         this.#browserName = session.browser.name ?? 'chrome';
         this.#browserVersion = session.browser.version ?? 'latest';
-        this.#platformName = session.browser.platform ?? 'Windows 10';
+        this.#platformName = session.browser.platform ?? '';
         this.#resolution = session.browser.resolution ?? '1920x1080';
         this.#startUrl = session.browser.startUrl ?? '';
         this.#incognito = session.browser.incognito ?? false;
@@ -58,6 +59,22 @@ class RunConfigurationWeb extends RunConfiguration {
         }
 
         if (this.farm === 'local') {
+            wdio.capabilities['browserName'] = this.#browserName;
+            // wdio.capabilities['webSocketUrl'] = false;
+            wdio.enforceWebDriverClassic = true;
+        } else if (this.farm === 'applitest') {
+            let applitestHostname = 'selenium-chrome.applitest.co.il';
+            if (this.#browserName === 'firefox') {
+                applitestHostname = 'selenium-firefox.applitest.co.il';
+            } else if (this.#browserName === 'microsoftedge') {
+                applitestHostname = 'selenium-microsoftedge.applitest.co.il';
+            }
+
+            wdio.protocol = 'https';
+            wdio.hostname = applitestHostname;
+            wdio.port = 443;
+            wdio.path = '/wd/hub';
+
             wdio.capabilities['browserName'] = this.#browserName;
         } else if (this.farm === 'saucelabs') {
             const runName = sessionName || this.runName;
