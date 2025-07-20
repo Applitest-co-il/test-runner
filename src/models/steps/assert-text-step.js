@@ -5,6 +5,8 @@ const { replaceVariables } = require('../../helpers/utils');
 class AssertTextStep extends BaseStep {
     constructor(sequence, step) {
         super(sequence, step);
+
+        this.takeSnapshot = true;
     }
 
     async execute(_, item) {
