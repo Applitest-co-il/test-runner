@@ -62,8 +62,6 @@ class RunConfigurationWeb extends RunConfiguration {
 
         if (this.farm === 'local') {
             wdio.capabilities['browserName'] = this.#browserName;
-            // wdio.capabilities['webSocketUrl'] = false;
-            wdio.enforceWebDriverClassic = true;
         } else if (this.farm === 'applitest') {
             let applitestHostname = 'selenium-chrome.applitest.co.il';
             if (this.#browserName === 'firefox') {
