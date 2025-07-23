@@ -20,7 +20,6 @@ class RunConfigurationWeb extends RunConfiguration {
         }
         this.#browserName = session.browser.name ?? 'chrome';
         this.#browserVersion = session.browser.version ?? 'latest';
-        this.#platformName = session.browser.platform ?? '';
         this.#resolution = session.browser.resolution ?? '1920x1080';
         this.#startUrl = session.browser.startUrl ?? '';
         this.#incognito = session.browser.incognito ?? false;
