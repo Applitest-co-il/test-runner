@@ -46,6 +46,10 @@ class RunConfiguration {
         return this.#farm;
     }
 
+    set farm(value) {
+        this.#farm = value;
+    }
+
     get hostname() {
         return this.#hostname;
     }
