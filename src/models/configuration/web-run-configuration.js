@@ -4,7 +4,6 @@ const { TestRunnerConfigurationError } = require('../../helpers/test-errors');
 class RunConfigurationWeb extends RunConfiguration {
     #browserName = '';
     #browserVersion = '';
-    #platformName = '';
     #startUrl = '';
     #incognito = false;
     #startMaximized = false;
