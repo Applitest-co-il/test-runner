@@ -66,8 +66,8 @@ class RunConfigurationWeb extends RunConfiguration {
             let applitestHostname = 'selenium-chrome.applitest.co.il';
             if (this.#browserName === 'firefox') {
                 applitestHostname = 'selenium-firefox.applitest.co.il';
-            } else if (this.#browserName === 'microsoftedge') {
-                applitestHostname = 'selenium-microsoftedge.applitest.co.il';
+            } else if (this.#browserName === 'MicrosoftEdge') {
+                applitestHostname = 'selenium-edge.applitest.co.il';
             }
 
             wdio.protocol = 'https';
