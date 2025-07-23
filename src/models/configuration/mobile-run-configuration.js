@@ -18,7 +18,9 @@ class RunConfigurationMobile extends RunConfiguration {
     constructor(options, session) {
         super(options);
 
-        this.farm = session.appium.farm || 'local';
+        if (session.appium.farm) {
+            this.farm = session.appium.farm;
+        }
         this.#platformName = session.appium.platformName ?? 'Android';
         this.#automationName = session.appium.automationName ?? 'UiAutomator2';
         this.#deviceName = session.appium.deviceName ?? 'Android';

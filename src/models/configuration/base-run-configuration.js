@@ -20,7 +20,7 @@ class RunConfiguration {
     constructor(options) {
         this.#runName = options.runName ?? `RUN ${new Date().toISOString()}`;
         this.#runType = options.runType ?? 'mobile';
-        this.#farm = process.env.TR_FARM ?? 'local';
+        this.#farm = options.farm ?? process.env.TR_FARM ?? 'local';
         this.#logLevel = options.logLevel ?? 'error';
         this.#hostname = options.host ?? 'localhost';
         this.#port = options.port ?? 4723;

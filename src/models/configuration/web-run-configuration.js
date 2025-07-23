@@ -16,7 +16,9 @@ class RunConfigurationWeb extends RunConfiguration {
     constructor(options, session) {
         super(options);
 
-        this.farm = session.browser.farm || 'local';
+        if (session.browser.farm) {
+            this.farm = session.browser.farm;
+        }
         this.#browserName = session.browser.name ?? 'chrome';
         this.#browserVersion = session.browser.version ?? 'latest';
         this.#platformName = session.browser.platform ?? '';
@@ -85,9 +87,8 @@ class RunConfigurationWeb extends RunConfiguration {
             wdio.port = this.port;
             wdio.path = '/wd/hub';
 
-            wdio.capabilities['browserName'] = this.#browserName;
+            wdio.capabilities['browserName'] = this.#browserName == 'edge' ? 'MicrosoftEdge' : this.#browserName;
             wdio.capabilities['browserVersion'] = this.#browserVersion;
-            wdio.capabilities['platformName'] = this.#platformName;
 
             wdio.capabilities['sauce:options'] = {
                 name: runName,
