@@ -44,12 +44,9 @@ class TestCondition {
                     throw new TestDefinitionError('Value is required for value condition');
                 }
                 break;
-            case 'property':
-                if (!this.#selector) {
-                    throw new TestDefinitionError('Selector is required for property condition');
-                }
+            case 'browser':
                 if (!this.#value) {
-                    throw new TestDefinitionError('Property and value are required for property condition');
+                    throw new TestDefinitionError('Browser name is required for browser condition');
                 }
                 break;
             default:
@@ -69,6 +66,8 @@ class TestCondition {
                 return await this.#scriptCheck(driver, variables, conf);
             case 'value':
                 return await this.#valueCheck(driver, variables);
+            case 'browser':
+                return await this.#browserCheck(driver, variables, conf);
             default:
                 throw new TestDefinitionError(`Condition type ${this.#type} is not a valid one`);
         }
@@ -106,6 +105,15 @@ class TestCondition {
         let text = await item.getText();
         let value = replaceVariables(this.#value, variables);
         return text === value;
+    }
+
+    async #browserCheck(driver, variables, conf) {
+        let browserName = replaceVariables(this.#value, variables);
+        if (conf.runType === 'web') {
+            const actualBrowserName = driver.capabilities.browserName.toLowerCase();
+            return actualBrowserName === browserName;
+        }
+        return false; // For non-web runs, we cannot check browser name
     }
 }
 
