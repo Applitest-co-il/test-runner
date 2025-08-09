@@ -120,27 +120,39 @@ class RunConfigurationWeb extends RunConfiguration {
     async startSession(sessionName) {
         let driver = await super.startSession(sessionName);
 
-        // Maximize or set window size based on browser
-        if (this.#startMaximized) {
-            if (this.#browserName === 'firefox') {
-                await driver.maximizeWindow(); // Maximize Firefox window
-            } else if (this.#browserName === 'chrome') {
-                // Chrome is already maximized via 'start-maximized' argument
+        try {
+            // Maximize or set window size based on browser
+            if (this.#startMaximized) {
+                if (this.#browserName === 'firefox') {
+                    await driver.maximizeWindow(); // Maximize Firefox window
+                } else if (this.#browserName === 'chrome') {
+                    // Chrome is already maximized via 'start-maximized' argument
+                }
             }
-        }
 
-        if (this.#emulate) {
-            this.#restoreEmulateFunc = await driver.emulate('device', this.#emulate);
-        } else {
-            if (this.#resolution) {
-                let [width, height] = this.#resolution.split('x');
-                await driver.setWindowSize(parseInt(width), parseInt(height));
+            if (this.#emulate) {
+                this.#restoreEmulateFunc = await driver.emulate('device', this.#emulate);
+            } else {
+                if (this.#resolution) {
+                    let [width, height] = this.#resolution.split('x');
+                    await driver.setWindowSize(parseInt(width), parseInt(height));
+                }
             }
+
+            try {
+                await driver.url(this.#startUrl, { wait: 'complete' });
+            } catch (error) {
+                console.error(`Failed to navigate to start URL ${this.#startUrl}: ${error.message} - RETRYING`);
+                await driver.pause(5000);
+                await driver.url(this.#startUrl, { wait: 'complete' });
+            }
+
+            await driver.pause(1000);
+        } catch (error) {
+            console.error(`Failed starting web session: ${error.message}`);
+            await driver.deleteSession();
+            throw new TestRunnerConfigurationError(`Failed to start web session: ${error.message}`);
         }
-
-        await driver.url(this.#startUrl);
-
-        await driver.pause(5000);
 
         return driver;
     }
