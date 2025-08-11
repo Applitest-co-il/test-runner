@@ -1,6 +1,6 @@
 {
     "name": "@applitest/test-runner",
-    "version": "0.9.79",
+    "version": "0.9.80",
     "description": "Applitest Test Runner Library: Extends webdiriver.io (web and mobile) allowing to provide a json base tests configuration and activate tests locally or via cloud services",
     "main": "src/lib/index.js",
     "scripts": {
@@ -33,7 +33,6 @@
     },
     "homepage": "https://github.com/Applitest-co-il/test-runner#readme",
     "dependencies": {
-        "@danielyaghil/aws-helpers": "^0.9.72",
         "@danielyaghil/vm-helper": "^0.9.12",
         "@ffmpeg-installer/ffmpeg": "^1.1.0",
         "ajv": "^8.17.1",

@@ -1,6 +1,5 @@
 const dotenv = require('dotenv');
 dotenv.config({ path: '.env', debug: true });
-dotenv.config({ path: '.env.local', debug: true });
 
 const express = require('express');
 const cors = require('cors');

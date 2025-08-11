@@ -1,5 +1,5 @@
 param(
-    [string]$device = "Pixel_3a_API_34_extension_level_7_x86_64"
+    [string]$device = "Pixel_Tablet_API_34"
 )
 
 Start-Process powershell.exe -ArgumentList "appium --relaxed-security"

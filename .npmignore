@@ -7,7 +7,7 @@
 /.prettierignore
 /eslint.config.mjs
 /src/api
-/scr/cli
+/src/cli
 /cmd/
 /docs/
 /downloads/
