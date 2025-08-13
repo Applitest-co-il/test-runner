@@ -8,10 +8,10 @@ const {
 } = require('../helpers/test-errors');
 const { apiCall } = require('../helpers/apicall.js');
 const { replaceVariables } = require('../helpers/utils.js');
-const libVersion = require('../../package.json').version;
+const libVersion = require('./version.json');
 
 async function runTests(options) {
-    console.log(`TestRunnerLib::runTests::${libVersion}`);
+    console.log(`TestRunnerLib::runTests::${libVersion.version}`);
 
     const startDate = new Date();
     const testRunner = new TestRunner(options);
@@ -68,7 +68,7 @@ async function runTests(options) {
         };
     }
 
-    console.log(`TestRunnerLib::runTests::${libVersion}:Ended`);
+    console.log(`TestRunnerLib::runTests::${libVersion.version}:Ended`);
     return output;
 }
 
@@ -115,3 +115,4 @@ module.exports.TestRunnerError = TestRunnerError;
 module.exports.TestDefinitionError = TestDefinitionError;
 module.exports.TestItemNotFoundError = TestItemNotFoundError;
 module.exports.TestAbuseError = TestAbuseError;
+module.exports.libVersion = libVersion;

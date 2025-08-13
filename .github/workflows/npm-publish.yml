@@ -54,6 +54,20 @@ jobs:
             - name: Install
               run: npm ci
 
+            - name: Update version.json
+              run: |
+                  VERSION=$(node -p "require('./package.json').version")
+                  echo "{\"version\": \"$VERSION\"}" > src/lib/version.json
+                  cat src/lib/version.json
+
+            - name: Commit version.json
+              run: |
+                  git config --global user.name 'github-actions[bot]'
+                  git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+                  git add src/lib/version.json
+                  git commit -m "Update version.json to $VERSION" || exit 0
+                  git push
+
             - uses: JS-DevTools/npm-publish@v3
               with:
                   token: ${{ secrets.NPM_TOKEN }}
