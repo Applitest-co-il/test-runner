@@ -244,7 +244,6 @@ class BaseStep {
                 }
                 elt.style.border = '3px solid orangered';
             }, item);
-            //console.log('highlighted');
         } catch {
             console.log(`Could not be highlighted: ${JSON.stringify(item)}`);
         }
@@ -268,9 +267,6 @@ class BaseStep {
                 item,
                 this.#originalBorderCSS.value
             );
-            //console.log('highlight reverted');
-        } catch (error) {
-            console.log(`Error reverting border: ${error}`);
         } finally {
             this.#originalBorderCSS = '';
         }

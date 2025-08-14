@@ -229,24 +229,31 @@ class TestRunner {
 
                 //starting sessions at start of suite
                 const runSessions = [];
-                if (suite.type === 'web') {
-                    const sess = await this.startSession('web', sessionName);
-                    runSessions.push(sess);
-                } else if (suite.type.startsWith('mobile')) {
-                    const sess = await this.startSession('mobile', sessionName);
-                    runSessions.push(sess);
-                } else if (suite.type.startsWith('mixed')) {
-                    let sess = await this.startSession('web', sessionName);
-                    runSessions.push(sess);
-                    sess = await this.startSession('mobile', sessionName);
-                    runSessions.push(sess);
-                } else if (suite.type === 'api') {
-                    // No session management for API runs
-                    runSessions.push(await this.startSession('api', sessionName));
-                } else {
-                    const msg = `Suite type: ${suite.type} do not match sessions type ${this.sessions.map((s) => s.type)}`;
-                    console.log(msg);
-                    throw new TestRunnerError(msg);
+                try {
+                    if (suite.type === 'web') {
+                        const sess = await this.startSession('web', sessionName);
+                        runSessions.push(sess);
+                    } else if (suite.type.startsWith('mobile')) {
+                        const sess = await this.startSession('mobile', sessionName);
+                        runSessions.push(sess);
+                    } else if (suite.type.startsWith('mixed')) {
+                        let sess = await this.startSession('web', sessionName);
+                        runSessions.push(sess);
+                        sess = await this.startSession('mobile', sessionName);
+                        runSessions.push(sess);
+                    } else if (suite.type === 'api') {
+                        // No session management for API runs
+                        runSessions.push(await this.startSession('api', sessionName));
+                    } else {
+                        const msg = `Suite type: ${suite.type} do not match sessions type ${this.sessions.map((s) => s.type)}`;
+                        console.log(msg);
+                        throw new TestRunnerError(msg);
+                    }
+                } catch (error) {
+                    console.error(`Error starting sessions for suite #${i} - ${suite.name} - ${suite.type}: ${error}`);
+                    throw new Error(
+                        `Error starting sessions for suite #${i} - ${suite.name} - ${suite.type}: ${error}`
+                    );
                 }
 
                 try {
@@ -266,9 +273,14 @@ class TestRunner {
                     throw new Error(`error running suite: ${error.message}`);
                 }
 
-                // closing sessions at end of suite
-                for (let j = 0; j < runSessions.length; j++) {
-                    await this.closeSession(runSessions[j]);
+                try {
+                    // closing sessions at end of suite
+                    for (let j = 0; j < runSessions.length; j++) {
+                        await this.closeSession(runSessions[j]);
+                    }
+                } catch (error) {
+                    console.error(`Error closing sessions for suite #${i} - ${suite.name} - ${suite.type}: ${error}`);
+                    throw new Error(`Error closing sessions for suite #${i} - ${suite.name} - ${suite.type}: ${error}`);
                 }
 
                 //Pause to let eventually sauce labs free sesssion in case new sessions are required
@@ -289,7 +301,7 @@ class TestRunner {
                 throw error;
             } else {
                 console.error('Error running:', error);
-                throw new Error(`error running test: ${error.message}`);
+                throw new Error(`Error running test: ${error.message}`);
             }
         } finally {
             await this.terminateAllSessions();
