@@ -252,7 +252,7 @@ class TestRunner {
                 } catch (error) {
                     console.error(`Error starting sessions for suite #${i} - ${suite.name} - ${suite.type}: ${error}`);
                     throw new Error(
-                        `Error starting sessions for suite #${i} - ${suite.name} - ${suite.type}: ${error}`
+                        `${new Date().toUTCString()} Error starting sessions for suite #${i} - ${suite.name} - ${suite.type}: ${error}`
                     );
                 }
 
@@ -279,8 +279,10 @@ class TestRunner {
                         await this.closeSession(runSessions[j]);
                     }
                 } catch (error) {
-                    console.error(`Error closing sessions for suite #${i} - ${suite.name} - ${suite.type}: ${error}`);
-                    throw new Error(`Error closing sessions for suite #${i} - ${suite.name} - ${suite.type}: ${error}`);
+                    console.error(`Error closing sessions for suite #${i} - ${suite.name} - ${suite.type}: ${error} `);
+                    throw new Error(
+                        `${new Date().toUTCString()} Error closing sessions for suite #${i} - ${suite.name} - ${suite.type}: ${error}`
+                    );
                 }
 
                 //Pause to let eventually sauce labs free sesssion in case new sessions are required
