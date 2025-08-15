@@ -383,7 +383,7 @@ class BaseStep {
         return item;
     }
 
-    async execute(driver, item) {
+    async execute(_, _) {
         throw new TestRunnerError('Execute method is not implemented');
     }
 
