@@ -383,7 +383,7 @@ class BaseStep {
         return item;
     }
 
-    async execute(_, _) {
+    async execute(_, __) {
         throw new TestRunnerError('Execute method is not implemented');
     }
 
