@@ -238,7 +238,6 @@ class BaseStep {
             this.#originalBorderCSS = await item.getCSSProperty('border');
             await driver.execute((el) => {
                 let elt = el;
-                console.log(`'elt = ${elt}' - parent = ${elt.parentNode} - children = ${elt.parentNode.children}`);
                 while (elt.parentNode && elt.parentNode.children.length == 1) {
                     elt = elt.parentNode;
                 }
@@ -290,7 +289,6 @@ class BaseStep {
                 let conditionResult = await this.#condition.evaluate(session.driver, variables, session.runConf);
                 if (!conditionResult) {
                     this.#status = 'skipped';
-                    //console.log(`TestStep::Condition for step ${this.#sequence} was not met - step skipped`);
                     return true;
                 }
             }
@@ -386,7 +384,6 @@ class BaseStep {
     }
 
     async execute(driver, item) {
-        console.log(`Execute method is not implemented - ${driver} - ${item}`);
         throw new TestRunnerError('Execute method is not implemented');
     }
 
@@ -401,7 +398,6 @@ class BaseStep {
                 if (!result) {
                     throw new TestRunnerError(`ExecuteScript::Script: script for step ${this.#sequence} failed`);
                 }
-                console.log(`ExecuteScript::Script: script for step ${this.#sequence} returns ${result}`);
                 return result;
             } else {
                 const localScript = prepareLocalScript(script);
@@ -411,9 +407,6 @@ class BaseStep {
                         `ExecuteScript::Script: local script for step ${this.#sequence} failed ${result.error}`
                     );
                 }
-                console.log(
-                    `ExecuteScript::Script: local script for step ${this.#sequence} returns ${JSON.stringify(result)}`
-                );
                 return result.output;
             }
         } catch (error) {

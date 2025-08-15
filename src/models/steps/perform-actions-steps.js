@@ -91,6 +91,7 @@ class PerformActionsStep extends BaseStep {
                         break;
                     default:
                         console.error(`PerformKeyAction::Invalid key action command "${action.command}"`);
+                        break;
                 }
             }
             await actionObj.perform();

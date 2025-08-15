@@ -221,7 +221,7 @@ class TestRunner {
 
             for (let i = 0; i < this.#suites.length; i++) {
                 console.log(
-                    `TestRunner::Running suite #${i} of type ${this.#suites[i].type} out of ${this.#suites.length}`
+                    `TestRunner::Running suite #${i + 1} of type ${this.#suites[i].type} out of ${this.#suites.length}`
                 );
                 const suite = this.#suites[i];
 
