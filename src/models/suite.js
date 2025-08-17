@@ -25,7 +25,7 @@ class Suite {
 
     #buildTests(tests) {
         if (!tests || tests.length === 0) {
-            console.error('No tests found');
+            console.error(`No tests found in suite "${this.#id} - ${this.#name}"`);
             return;
         }
 

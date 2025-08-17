@@ -234,6 +234,10 @@ class BaseStep {
             return;
         }
 
+        if (!(await item.isDisplayed())) {
+            return;
+        }
+
         try {
             this.#originalBorderCSS = await item.getCSSProperty('border');
             await driver.execute((el) => {
@@ -253,6 +257,10 @@ class BaseStep {
             return;
         }
 
+        if (!(await item.isDisplayed())) {
+            return;
+        }
+
         try {
             await driver.execute(
                 (el, css) => {
@@ -266,6 +274,8 @@ class BaseStep {
                 item,
                 this.#originalBorderCSS.value
             );
+        } catch {
+            console.log(`Could not revert highlight: ${JSON.stringify(item)}`);
         } finally {
             this.#originalBorderCSS = '';
         }
