@@ -257,11 +257,11 @@ class BaseStep {
             return;
         }
 
-        if (!(await item.isDisplayed())) {
-            return;
-        }
-
         try {
+            if (!(await item.isExisting()) || !(await item.isDisplayed())) {
+                return;
+            }
+
             await driver.execute(
                 (el, css) => {
                     let elt = el;
