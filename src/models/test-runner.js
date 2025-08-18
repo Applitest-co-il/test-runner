@@ -250,16 +250,18 @@ class TestRunner {
                         throw new TestRunnerError(msg);
                     }
                 } catch (error) {
-                    console.error(`Error starting sessions for suite #${i} - ${suite.name} - ${suite.type}: ${error}`);
+                    console.error(
+                        `Error starting sessions for suite #${i + 1} - ${suite.name} - ${suite.type}: ${error}`
+                    );
                     throw new Error(
-                        `${new Date().toUTCString()} Error starting sessions for suite #${i} - ${suite.name} - ${suite.type}: ${error}`
+                        `${new Date().toUTCString()} Error starting sessions for suite #${i + 1} - ${suite.name} - ${suite.type}: ${error}`
                     );
                 }
 
                 try {
                     const suitePromises = await suite.run(this.#sessions, this.#functions, this.#apis, this.variables);
 
-                    console.log(`Adding videos promises for suite ${i} to main promises`);
+                    console.log(`Adding videos promises for suite ${i + 1} to main promises`);
                     promises = promises.concat(suitePromises);
 
                     mergeVariables(this.#variables, suite.variables);
@@ -267,7 +269,7 @@ class TestRunner {
                     let suiteResult = await suite.report();
                     suiteResults.push(suiteResult);
 
-                    console.log(`TestRunner::Suite ${i} run complete`);
+                    console.log(`TestRunner::Suite ${i + 1} run complete`);
                 } catch (error) {
                     console.error('Error running suite:', error);
                     throw new Error(`error running suite: ${error.message}`);
@@ -279,19 +281,21 @@ class TestRunner {
                         await this.closeSession(runSessions[j]);
                     }
                 } catch (error) {
-                    console.error(`Error closing sessions for suite #${i} - ${suite.name} - ${suite.type}: ${error} `);
+                    console.error(
+                        `Error closing sessions for suite #${i + 1} - ${suite.name} - ${suite.type}: ${error} `
+                    );
                     throw new Error(
-                        `${new Date().toUTCString()} Error closing sessions for suite #${i} - ${suite.name} - ${suite.type}: ${error}`
+                        `${new Date().toUTCString()} Error closing sessions for suite #${i + 1} - ${suite.name} - ${suite.type}: ${error}`
                     );
                 }
 
                 //Pause to let eventually sauce labs free sesssion in case new sessions are required
                 const pauseTime = 4500;
-                console.log(`TestRunner::Suite ${i} completed, pausing app for ${pauseTime / 1000} seconds`);
+                console.log(`TestRunner::Suite ${i + 1} completed, pausing app for ${pauseTime / 1000} seconds`);
                 await pauseApp(pauseTime);
             }
 
-            console.log('Test run complete waiting for all video promises to complete');
+            console.log('Suite run complete waiting for all video promises to complete');
             if (promises.length > 0) {
                 await Promise.all(promises);
                 console.log('All video promises completed');

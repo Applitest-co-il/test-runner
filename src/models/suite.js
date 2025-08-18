@@ -66,7 +66,7 @@ class Suite {
         mergeVariables(this.#variables, variables);
 
         for (let i = 0; i < tests.length; i++) {
-            console.log(`TestSuite::Running test #${i} ${tests[i].name} in suite ${this.#name}`);
+            console.log(`TestSuite::Running test #${i + 1} ${tests[i].name} in suite ${this.#name}`);
             const test = tests[i];
             if (test.skip) {
                 continue;
@@ -93,7 +93,7 @@ class Suite {
             if (this.#waitBetweenTests > 0) {
                 await runSession.driver.pause(this.#waitBetweenTests);
             }
-            console.log(`TestSuite::Finished test #${i}`);
+            console.log(`TestSuite::Finished test #${i + 1}`);
         }
 
         return promises;
