@@ -100,6 +100,11 @@ class TrApi {
         const schema = isApiTesting ? this.#schema : null;
 
         const result = await apiCall(this.#outputs, url, this.#method, apiHeaders, apiData, schema);
+
+        console.log(
+            `API call result for ${this.#id} - ${this.#method} ${url}:  ${result.success ? 'Success' : 'Failed'} (Status: ${result.statusCode}, outputs: ${JSON.stringify(result.outputs)})`
+        );
+
         return result;
     }
 }

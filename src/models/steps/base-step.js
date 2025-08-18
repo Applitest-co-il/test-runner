@@ -408,6 +408,9 @@ class BaseStep {
                 if (!result) {
                     throw new TestRunnerError(`ExecuteScript::Script: script for step ${this.#sequence} failed`);
                 }
+                console.log(
+                    `ExecuteScript::Script: driver script for step ${this.#sequence} succeeded: ${JSON.stringify(result)}`
+                );
                 return result;
             } else {
                 const localScript = prepareLocalScript(script);
@@ -417,6 +420,9 @@ class BaseStep {
                         `ExecuteScript::Script: local script for step ${this.#sequence} failed ${result.error}`
                     );
                 }
+                console.log(
+                    `ExecuteScript::Script: local script for step ${this.#sequence} succeeded: ${JSON.stringify(result)}`
+                );
                 return result.output;
             }
         } catch (error) {
