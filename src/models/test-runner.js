@@ -195,6 +195,10 @@ class TestRunner {
                             const url = step.valueUrl.replace('s3::', '');
                             const fileName = step.valueFilename;
                             const localPath = await downloadFile(url, fileName, true);
+                            if (!localPath) {
+                                console.error(`Failed to download file from ${test.name}`);
+                                throw new TestRunnerError(`Failed to download file: ${test.name}`);
+                            }
                             step.value = localPath;
                         } catch (error) {
                             console.error(`Failed to download file for step: ${error.message}`);
