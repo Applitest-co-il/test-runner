@@ -118,6 +118,7 @@ class Suite {
                 suiteIdx: this.#index,
                 suiteName: this.#name,
                 index: test.index,
+                type: test.type,
                 name: test.name,
                 status: test.status,
                 failedStep: {},
