@@ -1,5 +1,4 @@
 const { mergeVariables } = require('../helpers/utils');
-const { TestRunnerError } = require('../helpers/test-errors');
 const Test = require('./test');
 
 class Suite {
