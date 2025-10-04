@@ -29,8 +29,8 @@ This guide will help you get up and running with Applitest Test Runner quickly.
 
 Download the pre-built desktop applications for your platform:
 
-- **Windows:** Windows Desktop App *(Download link to be provided)*
-- **macOS:** macOS Desktop App *(Download link to be provided)*
+- **Windows:** Windows Desktop App *([Download](https://app.applitest.co.il/downloads/ApplitestLocalRunner-win.exe))*
+- **macOS:** macOS Desktop App *([Download](https://app.applitest.co.il/downloads/ApplitestLocalRunner-macos13.dmg))*
 
 ## Testing the API
 
