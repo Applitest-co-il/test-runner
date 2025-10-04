@@ -1,6 +1,8 @@
 # Applitest Test Runner
 
-A powerful, open-source automation testing framework that enables comprehensive testing across multiple platforms including desktop web browsers, mobile web applications, and native mobile apps.
+An open-source automation testing framework that enables comprehensive testing across multiple platforms including desktop web browsers, mobile web applications, and native mobile apps.
+
+It is designed on top of [webdriver.io](https://github.com/webdriverio/webdriverio) and [appium](https://github.com/appium/appium), providing a unified interface for writing and executing tests via JSON configuration files.
 
 ## 🚀 What is Applitest Test Runner?
 
@@ -25,11 +27,11 @@ This project is open-source and available under the [MIT License](LICENSE).
 - **[API Documentation](docs/api.md)** - REST API endpoints and usage examples
 - **[Local Setup Guide](docs/README-LOCAL.md)** - Setting up local testing environment
 
-## 🔗 Quick Links
+<!-- ## 🔗 Quick Links
 
 - [Sample configurations](samples/json/) - Example test configurations
 - [Step commands reference](docs/step-commands.md) - Complete list of available test commands
-- [Troubleshooting](docs/troubleshooting.md) - Common issues and solutions
+- [Troubleshooting](docs/troubleshooting.md) - Common issues and solutions -->
 
 ---
 

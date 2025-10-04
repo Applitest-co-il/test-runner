@@ -53,12 +53,14 @@ Checks if an element exists on the page/screen.
 Checks if an element does NOT exist on the page/screen.
 
 **Properties:**
+
 - `type`: `"not-exist"`
 - `selector` (required): Element selector to check
 
 **Returns:** `true` if the element does not exist, `false` if it exists
 
 **Example:**
+
 ```json
 {
   "command": "set-value",
@@ -72,6 +74,7 @@ Checks if an element does NOT exist on the page/screen.
 ```
 
 **Use Cases:**
+
 - Fill a field only if it's empty
 - Show elements when others are hidden
 - Handle different UI states
@@ -81,6 +84,7 @@ Checks if an element does NOT exist on the page/screen.
 Checks if an element's text content matches a specific value.
 
 **Properties:**
+
 - `type`: `"value"`
 - `selector` (required): Element selector to check
 - `value` (required): Expected text content
@@ -88,6 +92,7 @@ Checks if an element's text content matches a specific value.
 **Returns:** `true` if the element text equals the expected value (exact match)
 
 **Example:**
+
 ```json
 {
   "command": "click",
@@ -101,6 +106,7 @@ Checks if an element's text content matches a specific value.
 ```
 
 **Use Cases:**
+
 - Conditional actions based on element text
 - Language-specific behavior
 - State-dependent operations
@@ -110,16 +116,19 @@ Checks if an element's text content matches a specific value.
 Executes custom JavaScript code to determine the condition.
 
 **Properties:**
+
 - `type`: `"script"`
 - `script` (required): JavaScript code to execute
 
 **Returns:** The boolean result of the script execution
 
 **Platform Behavior:**
+
 - **Web**: Executes in browser context
 - **Mobile**: Executes in local Node.js context with access to variables
 
 **Example (Web):**
+
 ```json
 {
   "command": "click",
@@ -132,6 +141,7 @@ Executes custom JavaScript code to determine the condition.
 ```
 
 **Example (Mobile/Local):**
+
 ```json
 {
   "command": "set-value",
@@ -145,6 +155,7 @@ Executes custom JavaScript code to determine the condition.
 ```
 
 **Use Cases:**
+
 - Complex conditional logic
 - Screen size or device-specific behavior
 - Time-based conditions
@@ -155,18 +166,21 @@ Executes custom JavaScript code to determine the condition.
 Checks if the current browser matches a specific browser name (web only).
 
 **Properties:**
+
 - `type`: `"browser"`
 - `value` (required): Browser name to check against
 
 **Returns:** `true` if running on the specified browser, `false` otherwise
 
 **Supported Browser Names:**
+
 - `"chrome"`
 - `"firefox"`
 - `"safari"`
 - `"edge"`
 
 **Example:**
+
 ```json
 {
   "command": "click",
@@ -179,6 +193,7 @@ Checks if the current browser matches a specific browser name (web only).
 ```
 
 **Use Cases:**
+
 - Browser-specific workarounds
 - Feature availability checks
 - Cross-browser testing adaptations
@@ -204,6 +219,7 @@ All condition properties support variable substitution using `{{variableName}}` 
 While a single step can only have one condition, you can achieve multiple condition logic by using nested conditions or script conditions:
 
 **Script-based multiple conditions:**
+
 ```json
 {
   "command": "click",
@@ -335,6 +351,7 @@ Use conditions with wait commands for better timing control:
 For complex logic, consider breaking into multiple simpler conditions:
 
 **Good:**
+
 ```json
 {
   "condition": {
@@ -345,6 +362,7 @@ For complex logic, consider breaking into multiple simpler conditions:
 ```
 
 **Better to avoid:**
+
 ```json
 {
   "condition": {
@@ -405,6 +423,7 @@ The test runner validates conditions at runtime:
 ### Common Issues and Solutions
 
 **Invalid selector in condition:**
+
 ```json
 // ❌ Bad
 {
@@ -424,6 +443,7 @@ The test runner validates conditions at runtime:
 ```
 
 **Missing required properties:**
+
 ```json
 // ❌ Bad
 {
@@ -447,16 +467,19 @@ The test runner validates conditions at runtime:
 ## Platform Differences
 
 ### Web Platform
+
 - All condition types are supported
 - Script conditions execute in browser context
 - Browser condition only works on web platform
 
 ### Mobile Platform  
+
 - All condition types supported except `browser`
 - Script conditions execute in Node.js context
 - Element selectors use XPath format
 
 ### API Platform
+
 - Conditions are not applicable for API-only tests
 - Steps with conditions will be skipped
 

@@ -23,6 +23,7 @@ Navigate to a URL (web) or perform navigation actions.
 - `operator` (optional): `"new"` to open in new window
 
 **Example:**
+
 ```json
 {
   "command": "navigate",
@@ -31,6 +32,7 @@ Navigate to a URL (web) or perform navigation actions.
 ```
 
 **With new window:**
+
 ```json
 {
   "command": "navigate", 
@@ -46,6 +48,7 @@ Activate a mobile application.
 - `value` (required): App package/bundle ID or `"current-app"` for current app
 
 **Example:**
+
 ```json
 {
   "command": "app-activate",
@@ -57,6 +60,7 @@ Activate a mobile application.
 Send the current mobile app to background.
 
 **Example:**
+
 ```json
 {
   "command": "app-background"
@@ -70,6 +74,7 @@ Switch to a specific frame/iframe (web only).
 - `selectors` (required): Frame selector
 
 **Example:**
+
 ```json
 {
   "command": "switch-frame",
@@ -87,6 +92,7 @@ Click on an element.
 - `position` (optional): Index when multiple elements match
 
 **Example:**
+
 ```json
 {
   "command": "click",
@@ -102,6 +108,7 @@ Perform multiple clicks on an element.
 - `value` (required): Number of clicks
 
 **Example:**
+
 ```json
 {
   "command": "multiple-clicks",
@@ -117,6 +124,7 @@ Right-click on an element.
 - `selectors` (required): Element selectors
 
 **Example:**
+
 ```json
 {
   "command": "right-click",
@@ -131,6 +139,7 @@ Middle-click on an element.
 - `selectors` (required): Element selectors
 
 **Example:**
+
 ```json
 {
   "command": "middle-click",
@@ -145,6 +154,7 @@ Click at specific coordinates.
 - `value` (required): Coordinates in format "x,y"
 
 **Example:**
+
 ```json
 {
   "command": "click-coordinates", 
@@ -160,6 +170,7 @@ Set value in an input field.
 - `value` (required): Value to set
 
 **Example:**
+
 ```json
 {
   "command": "set-value",
@@ -176,6 +187,7 @@ Append value to existing input field content.
 - `value` (required): Value to append
 
 **Example:**
+
 ```json
 {
   "command": "add-value",
@@ -191,6 +203,7 @@ Clear content of an input field.
 - `selectors` (required): Input field selectors
 
 **Example:**
+
 ```json
 {
   "command": "clear-value",
@@ -205,6 +218,7 @@ Press a keyboard key.
 - `value` (required): Key code (number) or key name
 
 **Example:**
+
 ```json
 {
   "command": "press-key",
@@ -225,6 +239,7 @@ Upload a file to a file input element.
 - `value` (required): Path to file
 
 **Example:**
+
 ```json
 {
   "command": "upload-file",
@@ -241,6 +256,7 @@ Drag an element to another location.
 - `value` (required): Target selector or coordinates
 
 **Example:**
+
 ```json
 {
   "command": "drag-and-drop",
@@ -257,6 +273,7 @@ Hover mouse over an element.
 - `value` (optional): Hover duration in milliseconds
 
 **Example:**
+
 ```json
 {
   "command": "mouse-hover",
@@ -272,6 +289,7 @@ Move mouse to specific coordinates.
 - `value` (required): Coordinates in format "x,y"
 
 **Example:**
+
 ```json
 {
   "command": "mouse-move",
@@ -289,6 +307,7 @@ Wait for an element to appear.
 - `value` (optional): Timeout in milliseconds (default: 5000)
 
 **Example:**
+
 ```json
 {
   "command": "wait-for-exist",
@@ -305,6 +324,7 @@ Wait for an element to disappear.
 - `value` (optional): Timeout in milliseconds (default: 5000)
 
 **Example:**
+
 ```json
 {
   "command": "wait-for-not-exist",
@@ -320,6 +340,7 @@ Wait for a specified time.
 - `value` (required): Time in milliseconds
 
 **Example:**
+
 ```json
 {
   "command": "pause",
@@ -336,6 +357,7 @@ Assert that an element is visible.
 - `selectors` (required): Element selectors
 
 **Example:**
+
 ```json
 {
   "command": "assert-is-displayed",
@@ -350,6 +372,7 @@ Assert that an element is not visible.
 - `selectors` (required): Element selectors
 
 **Example:**
+
 ```json
 {
   "command": "assert-is-not-displayed",
@@ -374,6 +397,7 @@ Assert element text content.
 - `not-contains`: Text does not contain value
 
 **Example:**
+
 ```json
 {
   "command": "assert-text",
@@ -392,6 +416,7 @@ Assert numeric value in element.
 - `operator` (optional): Comparison operator (`==`, `!=`, `>`, `<`, `>=`, `<=`)
 
 **Example:**
+
 ```json
 {
   "command": "assert-number",
@@ -410,6 +435,7 @@ Assert element attribute value.
 - `operator` (optional): `==` (default) or `!=`
 
 **Example:**
+
 ```json
 {
   "command": "assert-attribute",
@@ -426,6 +452,7 @@ Assert CSS property value.
 - `value` (required): Format "property|||expected_value"
 
 **Example:**
+
 ```json
 {
   "command": "assert-css-property",
@@ -441,6 +468,7 @@ Assert that a mobile app is installed.
 - `value` (required): App package/bundle ID
 
 **Example:**
+
 ```json
 {
   "command": "assert-app-installed",
@@ -457,6 +485,7 @@ Scroll up by specified amount.
 - `value` (required): Scroll parameters (see scroll format)
 
 **Example:**
+
 ```json
 {
   "command": "scroll-up",
@@ -471,6 +500,7 @@ Scroll down by specified amount.
 - `value` (required): Scroll parameters
 
 **Example:**
+
 ```json
 {
   "command": "scroll-down",
@@ -486,6 +516,7 @@ Scroll up until element becomes visible.
 - `value` (required): Max scroll attempts or timeout
 
 **Example:**
+
 ```json
 {
   "command": "scroll-up-to-element",
@@ -502,6 +533,7 @@ Scroll down until element becomes visible.
 - `value` (required): Max scroll attempts or timeout
 
 **Example:**
+
 ```json
 {
   "command": "scroll-down-to-element",
@@ -517,6 +549,7 @@ Horizontal scrolling commands.
 - `value` (required): Scroll distance
 
 **Example:**
+
 ```json
 {
   "command": "scroll-right",
@@ -532,6 +565,7 @@ Scroll from a specific element as starting point.
 - `value` (required): Scroll parameters
 
 **Example:**
+
 ```json
 {
   "command": "scroll-down-from-element",
@@ -549,6 +583,7 @@ Set a variable value.
 - `value` (required): Format "variable_name|||value"
 
 **Example:**
+
 ```json
 {
   "command": "set-variable",
@@ -564,6 +599,7 @@ Set variable from element text content.
 - `value` (required): Variable name
 
 **Example:**
+
 ```json
 {
   "command": "set-variable-from-element",
@@ -579,6 +615,7 @@ Set variable from script execution result.
 - `value` (required): Format "variable_name|||script_code"
 
 **Example:**
+
 ```json
 {
   "command": "set-variable-from-script",
@@ -593,6 +630,7 @@ Generate random integer variable.
 - `value` (required): Format "variable_name|||min|||max"
 
 **Example:**
+
 ```json
 {
   "command": "generate-random-integer",
@@ -607,6 +645,7 @@ Generate random string variable.
 - `value` (required): Format "variable_name|||length|||character_set"
 
 **Example:**
+
 ```json
 {
   "command": "generate-random-string",
@@ -621,6 +660,7 @@ Clear/delete a variable.
 - `value` (required): Variable name
 
 **Example:**
+
 ```json
 {
   "command": "clear-variable",
@@ -634,6 +674,7 @@ Clear/delete a variable.
 Hide the mobile keyboard.
 
 **Example:**
+
 ```json
 {
   "command": "hide-keyboard"
@@ -647,6 +688,7 @@ Set device geolocation.
 - `value` (required): Coordinates in format "latitude,longitude"
 
 **Example:**
+
 ```json
 {
   "command": "set-geolocation",
@@ -661,6 +703,7 @@ Toggle location services on/off.
 - `value` (required): `"on"` or `"off"`
 
 **Example:**
+
 ```json
 {
   "command": "toggle-location-services",
@@ -675,6 +718,7 @@ Toggle airplane mode on/off.
 - `value` (required): `"on"` or `"off"`
 
 **Example:**
+
 ```json
 {
   "command": "toggle-airplane-mode",
@@ -692,6 +736,7 @@ Execute JavaScript code.
 - `operator` (optional): `"sync"` (default), `"async"`, or `"local"`
 
 **Example:**
+
 ```json
 {
   "command": "execute-script",
@@ -707,6 +752,7 @@ Perform complex touch/mouse actions.
 - `value` (required): Actions configuration (JSON)
 
 **Example:**
+
 ```json
 {
   "command": "perform-actions",
@@ -721,6 +767,7 @@ Call a reusable function.
 - `value` (required): Format "function_id|||param1|||param2|||..."
 
 **Example:**
+
 ```json
 {
   "command": "call-function",
@@ -735,6 +782,7 @@ Make an API call.
 - `value` (required): API configuration
 
 **Example:**
+
 ```json
 {
   "command": "call-api",
@@ -743,13 +791,16 @@ Make an API call.
 ```
 
 ### item-select
+
 Select item from a list.
 
 **Properties:**
+
 - `selectors` (required): List element selectors
 - `value` (required): Selection criteria
 
 **Example:**
+
 ```json
 {
   "command": "item-select",
@@ -759,12 +810,15 @@ Select item from a list.
 ```
 
 ### item-clear
+
 Clear selection from a list.
 
 **Properties:**
+
 - `selectors` (required): List element selectors
 
 **Example:**
+
 ```json
 {
   "command": "item-clear",
@@ -789,6 +843,7 @@ All step commands support these common properties:
 ## Selector Formats
 
 ### Platform-Specific Selectors
+
 ```json
 {
   "selectors": [
@@ -801,6 +856,7 @@ All step commands support these common properties:
 ```
 
 ### CSS Selectors (Web)
+
 ```json
 {
   "selectors": ["#id", ".class", "tag[attribute='value']"]
@@ -808,6 +864,7 @@ All step commands support these common properties:
 ```
 
 ### XPath Selectors (Mobile)
+
 ```json
 {
   "selectors": [

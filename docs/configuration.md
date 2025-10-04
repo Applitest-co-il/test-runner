@@ -53,19 +53,6 @@ When using `runType: "mixed"` or when you need multiple session types, define se
 }
 ```
 
-### Single Session Configuration (Legacy)
-
-For single session configurations, you can still use the direct approach:
-
-```json
-{
-  "runConfiguration": {
-    "runType": "mobile",
-    "appium": { ... }
-  }
-}
-```
-
 ## Mobile Session Configuration
 
 For mobile testing (`type: "mobile"`):
@@ -196,23 +183,6 @@ Global variables that can be used throughout the test configuration:
 
 Variables are referenced using `{{variableName}}` syntax in test steps.
 
-## Global Variables
-
-Global variables that can be used throughout the test configuration:
-
-```json
-{
-  "variables": {
-    "baseUrl": "https://example.com",
-    "username": "testuser", 
-    "password": "testpass",
-    "timeout": "5000"
-  }
-}
-```
-
-Variables are referenced using `{{variableName}}` syntax in test steps.
-
 ## Test Suites
 
 Suites organize related tests and can be targeted to specific session types:
@@ -327,6 +297,7 @@ Available platforms:
 The Applitest Test Runner supports a comprehensive set of step commands for different types of interactions and assertions. For detailed documentation of all available commands, their parameters, and usage examples, see the [Step Commands Reference](step-commands.md).
 
 **Command Categories:**
+
 - **Navigation**: `navigate`, `app-activate`, `app-background`, `switch-frame`
 - **Element Interaction**: `click`, `set-value`, `clear-value`, `press-key`, `drag-and-drop`
 - **Wait Commands**: `wait-for-exist`, `wait-for-not-exist`, `pause`
@@ -337,6 +308,7 @@ The Applitest Test Runner supports a comprehensive set of step commands for diff
 - **Advanced**: `execute-script`, `perform-actions`, `call-function`, `call-api`
 
 **Common Step Structure:**
+
 ```json
 {
   "command": "click",
