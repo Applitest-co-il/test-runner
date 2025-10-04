@@ -22,12 +22,17 @@ class SessionPinger {
         for (const session of this.#sessions) {
             if (session.driver) {
                 try {
+                    let pingData = null;
                     if (session.type === 'web') {
-                        await session.driver.getTitle(); // Simple command to keep the session alive
+                        pingData = await session.driver.getTitle(); // Simple command to keep the session alive
                     } else {
-                        await session.driver.getDeviceTime(); // Simple command to keep the session alive
+                        pingData = await session.driver.getDeviceTime(); // Simple command to keep the session alive
                     }
-                    console.log(`PingSession::Success for session type ${session.type}`);
+                    if (pingData) {
+                        console.log(`PingSession::Success for session type ${session.type}`);
+                    } else {
+                        console.warn(`PingSession::No valid response for session type ${session.type}`);
+                    }
                 } catch (error) {
                     console.error(`PingSession::Error for session type ${session.type}:`, error);
                 }

@@ -221,7 +221,7 @@ class TestRunner {
 
             await this.updateConfiguration();
 
-            const runName = `Run - ${new Date().toISOString()}`;
+            //const runName = `Run - ${new Date().toISOString()}`;
 
             for (let i = 0; i < this.#suites.length; i++) {
                 console.log(
@@ -229,41 +229,14 @@ class TestRunner {
                 );
                 const suite = this.#suites[i];
 
-                const sessionName = `${runName} - ${suite.name ? suite.name : 'Suite-' + i}`;
-
-                //starting sessions at start of suite
-                const runSessions = [];
                 try {
-                    if (suite.type === 'web') {
-                        const sess = await this.startSession('web', sessionName);
-                        runSessions.push(sess);
-                    } else if (suite.type.startsWith('mobile')) {
-                        const sess = await this.startSession('mobile', sessionName);
-                        runSessions.push(sess);
-                    } else if (suite.type.startsWith('mixed')) {
-                        let sess = await this.startSession('web', sessionName);
-                        runSessions.push(sess);
-                        sess = await this.startSession('mobile', sessionName);
-                        runSessions.push(sess);
-                    } else if (suite.type === 'api') {
-                        // No session management for API runs
-                        runSessions.push(await this.startSession('api', sessionName));
-                    } else {
-                        const msg = `Suite type: ${suite.type} do not match sessions type ${this.sessions.map((s) => s.type)}`;
-                        console.log(msg);
-                        throw new TestRunnerError(msg);
-                    }
-                } catch (error) {
-                    console.error(
-                        `Error starting sessions for suite #${i + 1} - ${suite.name} - ${suite.type}: ${error}`
+                    const suitePromises = await suite.run(
+                        this.#sessions,
+                        this.#functions,
+                        this.#apis,
+                        this.variables,
+                        this
                     );
-                    throw new Error(
-                        `${new Date().toUTCString()} Error starting sessions for suite #${i + 1} - ${suite.name} - ${suite.type}: ${error}`
-                    );
-                }
-
-                try {
-                    const suitePromises = await suite.run(this.#sessions, this.#functions, this.#apis, this.variables);
 
                     console.log(`Adding videos promises for suite ${i + 1} to main promises`);
                     promises = promises.concat(suitePromises);
@@ -281,9 +254,7 @@ class TestRunner {
 
                 try {
                     // closing sessions at end of suite
-                    for (let j = 0; j < runSessions.length; j++) {
-                        await this.closeSession(runSessions[j]);
-                    }
+                    await this.terminateAllSessions();
                 } catch (error) {
                     console.error(
                         `Error closing sessions for suite #${i + 1} - ${suite.name} - ${suite.type}: ${error} `
