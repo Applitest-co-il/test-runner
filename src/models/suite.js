@@ -1,5 +1,4 @@
 const { mergeVariables } = require('../helpers/utils');
-const { TestRunnerError } = require('../helpers/test-errors');
 const Test = require('./test');
 
 class Suite {
@@ -58,7 +57,7 @@ class Suite {
         return this.#variables;
     }
 
-    async run(sessions, functions, apis, variables) {
+    async run(sessions, functions, apis, variables, testRunner) {
         let promises = [];
 
         const tests = this.#tests;
@@ -74,9 +73,19 @@ class Suite {
 
             const runType = test.type.startsWith('mobile') ? 'mobile' : test.type;
             const runSession = sessions.find((session) => session.type === runType);
-            if (!runSession) {
-                console.error(`No session found for test ${test.id} - ${test.name} - ${test.type}`);
-                throw new TestRunnerError(`No session found for test ${test.id} - ${test.name} - ${test.type}`);
+            const sessionName = `Session suite # ${this.#index + 1} - ${runType}`;
+            if (!runSession || !runSession.driver) {
+                // console.error(`No session found for test ${test.id} - ${test.name} - ${test.type}`);
+                // throw new TestRunnerError(`No session found for test ${test.id} - ${test.name} - ${test.type}`);
+                console.log(`Starting session: ${sessionName}`);
+                if (runType === 'web') {
+                    await testRunner.startSession('web', sessionName);
+                } else if (runType.startsWith('mobile')) {
+                    await testRunner.startSession('mobile', sessionName);
+                }
+                console.log(`Session ${sessionName} started successfully`);
+            } else {
+                console.log(`Session ${sessionName} is already running`);
             }
 
             const testPromises = await test.run(runSession, functions, apis, this.variables);

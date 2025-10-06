@@ -1,14 +1,38 @@
 # Applitest Test Runner
 
-This app allows to run automation tests on desktop web, mobile web and mobile appss.
+An open-source automation testing framework that enables comprehensive testing across multiple platforms including desktop web browsers, mobile web applications, and native mobile apps.
 
-It get as a configuration file and depending on the configuration, it can:
+It is designed on top of [webdriver.io](https://github.com/webdriverio/webdriverio) and [appium](https://github.com/appium/appium), providing a unified interface for writing and executing tests via JSON configuration files.
 
-- run tests on desktop web
-- run tests on mobile web
-- run tests on mobile app
+## 🚀 What is Applitest Test Runner?
 
-Depending on configuration, tests are either runs locally or on remote grid (supported grids: Saucelabs).
-Details of the configuration can be found at see [configuration details](https://github.com/applitest/test-runner/docs/README-CONF.md)
+Applitest Test Runner is a versatile automation testing tool that allows you to create, execute, and manage test suites with ease. It supports:
 
-For local run stetup, please see [setup locally](https://github.com/applitest/test-runner/docs/README-LOCAL.md).
+- **Desktop Web Testing** - Chrome, Firefox, Safari, Edge automation
+- **Mobile Web Testing** - Mobile browser automation
+- **Native Mobile App Testing** - iOS and Android app automation
+- **Local & Remote Execution** - Run tests locally or on cloud grids (SauceLabs, AWS Device Farm)
+- **Cross-Platform Support** - Windows, macOS, and Linux compatible
+
+## 📄 License
+
+This project is open-source and available under the [MIT License](LICENSE).
+
+## 📚 Documentation
+
+- **[Getting Started Guide](docs/getting-started.md)** - Learn how to set up and run your first tests
+- **[Configuration Reference](docs/configuration.md)** - Complete guide to test configuration files
+- **[Step Commands Reference](docs/step-commands.md)** - Detailed documentation of all available test commands
+- **[Conditional Execution Reference](docs/conditions.md)** - Complete guide to conditional step execution
+- **[API Documentation](docs/api.md)** - REST API endpoints and usage examples
+- **[Local Setup Guide](docs/README-LOCAL.md)** - Setting up local testing environment
+
+<!-- ## 🔗 Quick Links
+
+- [Sample configurations](samples/json/) - Example test configurations
+- [Step commands reference](docs/step-commands.md) - Complete list of available test commands
+- [Troubleshooting](docs/troubleshooting.md) - Common issues and solutions -->
+
+---
+
+For detailed setup instructions and usage examples, please refer to the documentation files in the `docs/` folder.

@@ -130,7 +130,10 @@ class Test {
                 ? session.runConf.stopAtStep
                 : steps.length;
 
+        console.log(`Starting test "${this.#name}" from step ${startFromSteps + 1} to ${stopAtStep + 1}`);
+
         for (let i = startFromSteps; i < stopAtStep; i++) {
+            console.log(`Running step ${i + 1}`);
             const step = steps[i];
 
             if (this.#videoRecorder) {
@@ -156,8 +159,10 @@ class Test {
                 this.#status = 'failed';
                 this.#lastStep = i;
                 steps[i].errorDetails = err.message;
+                console.error(`Error at step ${i + 1}: ${err.message}`);
                 break;
             }
+            console.log(`Step ${i + 1} completed successfully`);
         }
         if (this.#status === 'pending') {
             this.#status = 'passed';

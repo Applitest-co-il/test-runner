@@ -29,6 +29,8 @@ class FunctionStep extends BaseStep {
 
         const func = this.functions.find((f) => f.id === functionId);
         if (func) {
+            console.log(`Function "${functionId}" executed with properties: ${propertiesValues.join(', ')}`);
+
             const duplicatedFunc = func.duplicate();
 
             if (this.variables && this.variables.apiBaseUrl) {
@@ -44,6 +46,9 @@ class FunctionStep extends BaseStep {
                 this.videoRecorder,
                 `${this.videoBaseStep}${this.sequence}`
             );
+
+            console.log(`Function "${functionId}" executed with result: ${JSON.stringify(result)}`);
+
             if (!result.success) {
                 throw new TestRunnerError(
                     `Function::Failed "${functionId}" at step "${result.failedStep}" with error "${result.error}"`

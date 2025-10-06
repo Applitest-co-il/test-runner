@@ -46,12 +46,17 @@ class ApiStep extends BaseStep {
 
         const api = this.apis.find((a) => a.id === apiId);
         if (api) {
+            console.log(`API "${apiId}" executed with properties: ${propertiesValues.join(', ')}`);
+
             const apiRun = api.duplicate();
             apiRun.path = replaceVariables(apiRun.path, this.variables);
 
             const isApiTesting = this.operator === 'validate';
 
             const result = await apiRun.run(propertiesValues, isApiTesting);
+
+            console.log(`API "${apiId}" executed with result: ${JSON.stringify(result)}`);
+
             if (!result.success) {
                 if (isApiTesting) {
                     // in API testing case we throw an error only if it does not match target
