@@ -20,6 +20,8 @@ class WaitForExistStep extends BaseStep {
                         return false;
                     } else {
                         await that.highlightElement(driver, item);
+                        await driver.pause(500);
+                        await that.revertElement(driver, item);
                         return true;
                     }
                 },

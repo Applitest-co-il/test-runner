@@ -1,4 +1,4 @@
-const { TestRunnerError, TestDefinitionError, TestAbuseError } = require('../helpers/test-errors');
+const { TestRunnerError, TestAbuseError } = require('../helpers/test-errors');
 const Suite = require('./suite');
 const TRFunction = require('./function');
 const TRApi = require('./api');
@@ -24,32 +24,9 @@ class TestRunner {
         this.#runConfiguration = options.runConfiguration;
         this.#variables = options.variables ?? {};
 
-        if (options.suites) {
-            for (let i = 0; i < options.suites.length; i++) {
-                options.suites[i].index = i;
-                const suite = new Suite(options.suites[i]);
-                this.#suites.push(suite);
-            }
-        }
-
-        if (options.functions) {
-            for (let i = 0; i < options.functions.length; i++) {
-                const func = new TRFunction(options.functions[i]);
-                this.#functions.push(func);
-            }
-        }
-
-        if (options.apis) {
-            for (let i = 0; i < options.apis.length; i++) {
-                const api = new TRApi(options.apis[i]);
-                this.#apis.push(api);
-            }
-        }
-
-        if (this.#suites.length === 0) {
-            console.error('No suites found');
-            throw new TestDefinitionError('No suites found');
-        }
+        this.initSuites(options);
+        this.initFunctions(options);
+        this.initApis(options);
 
         if (
             this.#suites.length > 1 &&
@@ -72,8 +49,50 @@ class TestRunner {
         return this.#variables;
     }
 
+    get suites() {
+        return this.#suites;
+    }
+
     getSession(type) {
         return this.#sessions.find((session) => session.type === type);
+    }
+
+    async initSuites(options) {
+        console.log('Init suites...');
+
+        this.#suites = [];
+
+        if (options.suites) {
+            for (let i = 0; i < options.suites.length; i++) {
+                options.suites[i].index = i;
+                const suite = new Suite(options.suites[i]);
+                this.#suites.push(suite);
+            }
+        }
+    }
+
+    async initFunctions(options) {
+        console.log('Init functions...');
+        this.#functions = [];
+
+        if (options.functions) {
+            for (let i = 0; i < options.functions.length; i++) {
+                const func = new TRFunction(options.functions[i]);
+                this.#functions.push(func);
+            }
+        }
+    }
+
+    async initApis(options) {
+        console.log('Init APIs...');
+        this.#apis = [];
+
+        if (options.apis) {
+            for (let i = 0; i < options.apis.length; i++) {
+                const api = new TRApi(options.apis[i]);
+                this.#apis.push(api);
+            }
+        }
     }
 
     async initSessions() {
@@ -210,6 +229,24 @@ class TestRunner {
         }
     }
 
+    async runSuite(suite) {
+        console.log(`Starting suite ${suite.name} run...`);
+
+        try {
+            const suitePromises = await suite.run(this.#sessions, this.#functions, this.#apis, this.variables, this);
+            const suiteResult = await suite.report();
+
+            mergeVariables(this.#variables, suite.variables);
+
+            console.log(`suite ${suite.name} run completed.`);
+
+            return { promises: suitePromises, suiteResult: suiteResult };
+        } catch (error) {
+            console.error('Error running suite:', error);
+            throw new Error(`error running suite: ${error.message}`);
+        }
+    }
+
     async run() {
         console.log('Starting run...');
 
@@ -228,29 +265,11 @@ class TestRunner {
                     `TestRunner::Running suite #${i + 1} of type ${this.#suites[i].type} out of ${this.#suites.length}`
                 );
                 const suite = this.#suites[i];
-
-                try {
-                    const suitePromises = await suite.run(
-                        this.#sessions,
-                        this.#functions,
-                        this.#apis,
-                        this.variables,
-                        this
-                    );
-
-                    console.log(`Adding videos promises for suite ${i + 1} to main promises`);
-                    promises = promises.concat(suitePromises);
-
-                    mergeVariables(this.#variables, suite.variables);
-
-                    let suiteResult = await suite.report();
-                    suiteResults.push(suiteResult);
-
-                    console.log(`TestRunner::Suite ${i + 1} run complete`);
-                } catch (error) {
-                    console.error('Error running suite:', error);
-                    throw new Error(`error running suite: ${error.message}`);
-                }
+                const suiteRunOutput = await this.runSuite(suite);
+                console.log(`Adding videos promises for suite ${i + 1} to main promises`);
+                promises = promises.concat(suiteRunOutput.promises);
+                console.log(`Adding suite result for suite ${i + 1} to main results`);
+                suiteResults.push(suiteRunOutput.suiteResult);
 
                 try {
                     // closing sessions at end of suite
