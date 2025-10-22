@@ -4,7 +4,7 @@ const { stepFactory } = require('./test-step');
 const VideoRecorder = require('../helpers/video-recorder');
 const AppActivateStep = require('./steps/app-activate-step');
 const TrFunction = require('./function');
-const { checkArrayMaxItems } = require('../helpers/security');
+const { checkArrayMaxItems, MAX_ITEMS } = require('../helpers/security');
 
 class Test {
     #id = '';
@@ -41,7 +41,7 @@ class Test {
         }
 
         if (!checkArrayMaxItems(steps)) {
-            console.error(`Too many test steps in test "${this.#id} - ${this.#name}": Maximum allowed is ${MAX_STEPS}`);
+            console.error(`Too many test steps in test "${this.#id} - ${this.#name}": Maximum allowed is ${MAX_ITEMS}`);
             return;
         }
 

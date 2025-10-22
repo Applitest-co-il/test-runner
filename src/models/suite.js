@@ -1,4 +1,4 @@
-const { checkArrayMaxItems } = require('../helpers/security');
+const { checkArrayMaxItems, MAX_ITEMS } = require('../helpers/security');
 const { mergeVariables } = require('../helpers/utils');
 const Test = require('./test');
 
@@ -25,7 +25,7 @@ class Suite {
 
     #buildTests(tests) {
         if (!checkArrayMaxItems(tests)) {
-            console.error(`Too many tests in suite "${this.#id} - ${this.#name}": Maximum allowed is ${MAX_TESTS}`);
+            console.error(`Too many tests in suite "${this.#id} - ${this.#name}": Maximum allowed is ${MAX_ITEMS}`);
             return;
         }
 
