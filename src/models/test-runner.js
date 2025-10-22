@@ -6,6 +6,9 @@ const { runConfigurationFactory } = require('./test-run-configuration');
 const { mergeVariables, pauseApp } = require('../helpers/utils');
 const SessionPinger = require('../helpers/session-pinger');
 const { downloadFile } = require('../helpers/download-file');
+const { checkArrayMaxItems } = require('../helpers/security');
+
+const MAX_ITEMS = 1000;
 
 class TestRunner {
     static #savedWebDriver = null;
@@ -63,6 +66,11 @@ class TestRunner {
         this.#suites = [];
 
         if (options.suites) {
+            if (!checkArrayMaxItems(options.suites)) {
+                console.error(`Too many suites defined: Maximum allowed is ${MAX_ITEMS}`);
+                throw new TestRunnerError(`Too many suites defined: Maximum allowed is ${MAX_ITEMS}`);
+            }
+
             for (let i = 0; i < options.suites.length; i++) {
                 options.suites[i].index = i;
                 const suite = new Suite(options.suites[i]);
@@ -76,6 +84,11 @@ class TestRunner {
         this.#functions = [];
 
         if (options.functions) {
+            if (!checkArrayMaxItems(options.functions)) {
+                console.error(`Too many functions defined: Maximum allowed is ${MAX_ITEMS}`);
+                throw new TestRunnerError(`Too many functions defined: Maximum allowed is ${MAX_ITEMS}`);
+            }
+
             for (let i = 0; i < options.functions.length; i++) {
                 const func = new TRFunction(options.functions[i]);
                 this.#functions.push(func);
@@ -87,11 +100,14 @@ class TestRunner {
         console.log('Init APIs...');
         this.#apis = [];
 
-        if (options.apis) {
-            for (let i = 0; i < options.apis.length; i++) {
-                const api = new TRApi(options.apis[i]);
-                this.#apis.push(api);
-            }
+        if (!checkArrayMaxItems(options.apis)) {
+            console.error(`Too many APIs defined: Maximum allowed is ${MAX_ITEMS}`);
+            throw new TestRunnerError(`Too many APIs defined: Maximum allowed is ${MAX_ITEMS}`);
+        }
+
+        for (let i = 0; i < options.apis.length; i++) {
+            const api = new TRApi(options.apis[i]);
+            this.#apis.push(api);
         }
     }
 
