@@ -1,6 +1,7 @@
 const { stepFactory } = require('./test-step');
 const FunctionStep = require('./steps/function-step');
 const { TestDefinitionError, TestRunnerError } = require('../helpers/test-errors');
+const { checkArrayMaxItems, MAX_ITEMS } = require('../helpers/security');
 
 class TrFunction {
     #id = '';
@@ -24,7 +25,14 @@ class TrFunction {
     static functionStacks = [];
 
     #buildSteps(steps) {
-        if (!steps || steps.length === 0) {
+        if (!checkArrayMaxItems(steps)) {
+            console.error(
+                `Too many test steps in function "${this.#id} - ${this.#name}": Maximum allowed is ${MAX_ITEMS}`
+            );
+            return;
+        }
+
+        if (steps.length === 0) {
             console.error(`No test steps found in function "${this.#id} - ${this.#name}"`);
             return;
         }

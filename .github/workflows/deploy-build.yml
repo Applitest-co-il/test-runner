@@ -4,15 +4,11 @@ name: Deploy build to S3
 on:
     workflow_dispatch:
 
-    # push:
-    #     branches:
-    #         - 'main'
-    #     paths:
-    #         - 'src/**'
-
 jobs:
     deploy-s3:
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
 
         strategy:
             matrix:

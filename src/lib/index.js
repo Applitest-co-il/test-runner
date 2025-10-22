@@ -8,7 +8,10 @@ const {
 } = require('../helpers/test-errors');
 const { apiCall } = require('../helpers/apicall.js');
 const { replaceVariables } = require('../helpers/utils.js');
+const { v4: uuids4 } = require('uuid');
 const libVersion = require('./version.json');
+
+let trSessionCache = null;
 
 async function runTests(options) {
     console.log(`TestRunnerLib::runTests::${libVersion.version}`);
@@ -72,6 +75,134 @@ async function runTests(options) {
     return output;
 }
 
+async function openSession(options) {
+    console.log(`TestRunnerLib::openSession::${libVersion.version}`);
+
+    if (trSessionCache) {
+        console.log('Closing existing session');
+        trSessionCache.testRunner.terminateAllSessions();
+        trSessionCache = null;
+    }
+
+    const startDate = new Date();
+    const testRunner = new TestRunner(options);
+    await testRunner.initSessions();
+
+    if (!testRunner.sessions || testRunner.sessions.length === 0) {
+        return {
+            success: false,
+            message: 'No sessions defined in configuration'
+        };
+    }
+
+    await testRunner.startSession(testRunner.sessions[0].type);
+
+    trSessionCache = {
+        sessionId: uuids4(),
+        testRunner: testRunner,
+        savedElements: {}
+    };
+
+    const endDate = new Date();
+    const duration = (endDate - startDate) / 1000;
+
+    console.log(`TestRunnerLib::openSession::${libVersion.version}:Ended`);
+    return {
+        success: true,
+        executionTime: duration,
+        sessionId: trSessionCache.sessionId
+    };
+}
+
+async function runSession(sessionId, options) {
+    console.log(`TestRunnerLib::runSession::${libVersion.version}`);
+
+    if (!trSessionCache || trSessionCache.sessionId !== sessionId) {
+        return {
+            success: false,
+            message: 'Invalid session ID or no session open'
+        };
+    }
+
+    const startDate = new Date();
+
+    await trSessionCache.testRunner.initSuites(options);
+    if (trSessionCache.testRunner.suites.length === 0 || trSessionCache.testRunner.suites.length > 1) {
+        console.error('Invalid suites configuration');
+        return {
+            success: false,
+            message: 'Invalid suites configuration'
+        };
+    }
+
+    await trSessionCache.testRunner.initFunctions(options);
+    await trSessionCache.testRunner.initApis(options);
+    await trSessionCache.testRunner.updateConfiguration();
+
+    if (Object.keys(trSessionCache.savedElements).length > 0) {
+        for (const suite of trSessionCache.testRunner.suites) {
+            if (suite.tests) {
+                for (const test of suite.tests) {
+                    if (test.savedElements) {
+                        Object.assign(test.savedElements, trSessionCache.savedElements);
+                    }
+                }
+            }
+        }
+    }
+
+    const suite = trSessionCache.testRunner.suites[0];
+    const result = await trSessionCache.testRunner.runSuite(suite);
+    // Add distinct savedElements to trSessionCache.savedElements
+    if (suite.tests) {
+        for (const test of suite.tests) {
+            if (test.savedElements) {
+                Object.assign(trSessionCache.savedElements, test.savedElements);
+            }
+        }
+    }
+
+    const endDate = new Date();
+    const duration = (endDate - startDate) / 1000;
+
+    console.log(`TestRunnerLib::runSession::${libVersion.version}:Ended`);
+    return {
+        success: result.suiteResult.success,
+        executionTime: duration,
+        suiteResult: result.suiteResult
+    };
+}
+
+async function closeSession(sessionId) {
+    console.log(`TestRunnerLib::closeSession::${libVersion.version}`);
+
+    if (!trSessionCache) {
+        return {
+            success: true
+        };
+    }
+
+    if (trSessionCache.sessionId !== sessionId) {
+        console.error('Invalid session ID or no session open');
+        return {
+            success: false,
+            message: 'Invalid session ID or no session open'
+        };
+    }
+
+    const startDate = new Date();
+    await trSessionCache.testRunner.terminateAllSessions();
+    trSessionCache = null;
+    const endDate = new Date();
+    const duration = (endDate - startDate) / 1000;
+
+    console.log(`TestRunnerLib::closeSession::${libVersion.version}:Ended`);
+    return {
+        success: true,
+        executionTime: duration
+    };
+}
+
 async function testApiCall(method, path, headers, data, schema, variables, outputs) {
     const url = replaceVariables(`${path}`, variables);
 
@@ -110,6 +241,10 @@ async function testApiCall(method, path, headers, data, schema, variables, outpu
 
 module.exports.runTests = runTests;
 module.exports.testApiCall = testApiCall;
+module.exports.openSession = openSession;
+module.exports.runSession = runSession;
+module.exports.closeSession = closeSession;
+
 module.exports.TestRunnerConfigurationError = TestRunnerConfigurationError;
 module.exports.TestRunnerError = TestRunnerError;
 module.exports.TestDefinitionError = TestDefinitionError;
