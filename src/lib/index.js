@@ -75,12 +75,12 @@ async function runTests(options) {
     return output;
 }
 
-async function openDebugSession(options) {
+async function openSession(options) {
     console.log(`TestRunnerLib::openSession::${libVersion.version}`);
 
     if (trSessionCache) {
         console.log('Closing existing session');
-        trSessionCache.testRunner.closeSession();
+        trSessionCache.testRunner.terminateAllSessions();
         trSessionCache = null;
     }
 
@@ -114,8 +114,8 @@ async function openDebugSession(options) {
     };
 }
 
-async function runDebugSteps(sessionId, options) {
-    console.log(`TestRunnerLib::runDebugSteps::${libVersion.version}`);
+async function runSession(sessionId, options) {
+    console.log(`TestRunnerLib::runSession::${libVersion.version}`);
 
     if (!trSessionCache || trSessionCache.sessionId !== sessionId) {
         return {
@@ -165,7 +165,7 @@ async function runDebugSteps(sessionId, options) {
     const endDate = new Date();
     const duration = (endDate - startDate) / 1000;
 
-    console.log(`TestRunnerLib::runDebugSession::${libVersion.version}:Ended`);
+    console.log(`TestRunnerLib::runSession::${libVersion.version}:Ended`);
     return {
         success: result.suiteResult.success,
         executionTime: duration,
@@ -173,8 +173,8 @@ async function runDebugSteps(sessionId, options) {
     };
 }
 
-async function closeDebugSession(sessionId) {
-    console.log(`TestRunnerLib::closeDebugSession::${libVersion.version}`);
+async function closeSession(sessionId) {
+    console.log(`TestRunnerLib::closeSession::${libVersion.version}`);
 
     if (!trSessionCache) {
         return {
@@ -241,9 +241,9 @@ async function testApiCall(method, path, headers, data, schema, variables, outpu
 
 module.exports.runTests = runTests;
 module.exports.testApiCall = testApiCall;
-module.exports.openDebugSession = openDebugSession;
-module.exports.runDebugSteps = runDebugSteps;
-module.exports.closeDebugSession = closeDebugSession;
+module.exports.openSession = openSession;
+module.exports.runSession = runSession;
+module.exports.closeSession = closeSession;
 
 module.exports.TestRunnerConfigurationError = TestRunnerConfigurationError;
 module.exports.TestRunnerError = TestRunnerError;

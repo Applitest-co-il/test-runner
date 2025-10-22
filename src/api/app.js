@@ -5,14 +5,7 @@ const express = require('express');
 const cors = require('cors');
 
 const { downloadFile } = require('../helpers/download-file.js');
-const {
-    runTests,
-    testApiCall,
-    openDebugSession,
-    closeDebugSession,
-    runDebugSteps,
-    libVersion
-} = require('../lib/index.js');
+const { runTests, testApiCall, openSession, closeSession, runSession, libVersion } = require('../lib/index.js');
 
 const app = express();
 app.use(cors());
@@ -63,7 +56,7 @@ async function preProcessOptions(options) {
 
 //#region Browser and App Runner
 
-app.patch('/test-runner', async (req, res) => {
+app.post('/test-runner', async (req, res) => {
     console.log('Test runner started');
 
     if (!req.body) {
@@ -105,7 +98,7 @@ app.patch('/test-runner', async (req, res) => {
     res.status(200).json(output);
 });
 
-app.patch('/test-runner/open-debug-session', async (req, res) => {
+app.post('/test-runner/session', async (req, res) => {
     console.log('Test runner open session started');
 
     if (!req.body) {
@@ -121,7 +114,7 @@ app.patch('/test-runner/open-debug-session', async (req, res) => {
 
     let output = {};
     try {
-        output = await openDebugSession(options);
+        output = await openSession(options);
     } catch (error) {
         console.log(`Error opening debug session: ${error}`);
     }
@@ -129,7 +122,7 @@ app.patch('/test-runner/open-debug-session', async (req, res) => {
     res.status(200).json(output);
 });
 
-app.patch('/test-runner/run-debug-session/:sessionId', async (req, res) => {
+app.patch('/test-runner/session/:sessionId', async (req, res) => {
     console.log('Test runner run debug steps started');
 
     if (!req.body) {
@@ -142,15 +135,15 @@ app.patch('/test-runner/run-debug-session/:sessionId', async (req, res) => {
 
     let output = {};
     try {
-        output = await runDebugSteps(sessionId, options);
+        output = await runSession(sessionId, options);
     } catch (error) {
-        console.log(`Error running debug steps: ${error}`);
+        console.log(`Error running session: ${error}`);
     }
 
     res.status(200).json(output);
 });
 
-app.patch('/test-runner/close-debug-session/:sessionId', async (req, res) => {
+app.delete('/test-runner/session/:sessionId', async (req, res) => {
     console.log('Test runner close session started');
 
     const sessionId = req.params.sessionId;
@@ -161,9 +154,9 @@ app.patch('/test-runner/close-debug-session/:sessionId', async (req, res) => {
 
     let output = {};
     try {
-        output = await closeDebugSession(sessionId);
+        output = await closeSession(sessionId);
     } catch (error) {
-        console.log(`Error closing debug session: ${error}`);
+        console.log(`Error closing session: ${error}`);
     }
 
     res.status(200).json(output);
@@ -173,7 +166,7 @@ app.patch('/test-runner/close-debug-session/:sessionId', async (req, res) => {
 
 //#region API
 
-app.patch('/test-api-call', async (req, res) => {
+app.patch('/test-runner/api', async (req, res) => {
     console.log('Test API call started');
 
     if (!req.body) {
