@@ -5,7 +5,8 @@ const { URL } = require('url'); // For secure URL parsing/validation
 
 // Define an allow-list of trusted hostnames/endpoints (adjust as appropriate)
 // if host start and ends with / it's treated as regex pattern, if not as exact match
-const ALLOWED_HOSTS = ['s3.amazonaws.com', '/.*.s3..*.amazonaws.com$/'];
+// eslint-disable-next-line no-useless-escape
+const ALLOWED_HOSTS = ['s3.amazonaws.com', '/.*\.s3\..*\.amazonaws\.com$/'];
 
 function isAllowedUrl(urlString) {
     try {
