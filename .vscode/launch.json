@@ -1,0 +1,59 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug API (TypeScript)",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/api/app.ts",
+            "runtimeArgs": ["-r", "ts-node/register"],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "console": "integratedTerminal",
+            "skipFiles": ["<node_internals>/**"],
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/**",
+                "!**/node_modules/**"
+            ],
+            "restart": true,
+            "sourceMaps": true
+        },
+        {
+            "name": "Debug CLI (TypeScript)",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/cli/index.ts",
+            "runtimeArgs": ["-r", "ts-node/register"],
+            "args": ["--help"],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "console": "integratedTerminal",
+            "skipFiles": ["<node_internals>/**"],
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/**",
+                "!**/node_modules/**"
+            ],
+            "restart": true,
+            "sourceMaps": true
+        },
+        {
+            "name": "Debug API with Nodemon (TypeScript)",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/node_modules/nodemon/bin/nodemon.js",
+            "args": [
+                "--exec",
+                "ts-node",
+                "${workspaceFolder}/src/api/app.ts"
+            ],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "console": "integratedTerminal",
+            "restart": false,
+            "skipFiles": ["<node_internals>/**"]
+        }
+    ]
+}

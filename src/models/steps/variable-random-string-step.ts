@@ -1,0 +1,53 @@
+import BaseStep = require('./base-step');
+import { replaceVariables } from '../../helpers/utils';
+import { TestRunnerError } from '../../helpers/test-errors';
+import { TestStep, ExtendedBrowser } from '../../types';
+import randomstring from 'randomstring';
+
+export default class VariableRandomStringStep extends BaseStep {
+    constructor(sequence: number, step: TestStep) {
+        super(sequence, step);
+    }
+
+    async execute(_: ExtendedBrowser, __: any): Promise<void> {
+        const value = this.getValue;
+        if (!value) {
+            throw new TestRunnerError('GenerateRandomString::No value provided');
+        }
+
+        const randomParts = value.split('|||');
+        if (randomParts.length !== 4) {
+            throw new TestRunnerError(
+                `GenerateRandomString::Invalid random value format "${value}" - format should be "<var name>|||<prefix>|||<max length>|||<capitalization" `
+            );
+        }
+
+        if (isNaN(Number(randomParts[2]))) {
+            throw new TestRunnerError(
+                `GenerateRandowString::max words "${randomParts[2]}" in "${value}" should be a number`
+            );
+        }
+
+        const varName = randomParts[0];
+        const variables = this.getVariables || {};
+        const prefix = randomParts[1] != 'none' ? replaceVariables(randomParts[1], variables) : '';
+        const maxLen = Number(randomParts[2]) > 0 ? parseInt(randomParts[2]) : 10;
+        const capitalization = randomParts[3] ? randomParts[3].toLowerCase() : 'any';
+
+        const operator = this.getOperator ? this.getOperator : 'alphanumeric';
+        const generateOptions: any = {
+            charset: operator,
+            length: maxLen
+        };
+        if (capitalization !== 'any') {
+            generateOptions.capitalization = capitalization;
+        }
+
+        const randomValue = randomstring.generate(generateOptions);
+        if (prefix) {
+            variables[varName] = `${prefix}-${randomValue}`;
+        } else {
+            variables[varName] = randomValue;
+        }
+    }
+}
