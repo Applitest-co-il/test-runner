@@ -173,6 +173,140 @@ async function runSession(sessionId, options) {
     };
 }
 
+async function getAxTree(sessionId, selector = null) {
+    console.log(`TestRunnerLib::getAxTree::${libVersion.version}`);
+
+    if (!trSessionCache || trSessionCache.sessionId !== sessionId) {
+        return {
+            success: false,
+            message: 'Invalid session ID or no session open'
+        };
+    }
+
+    const driver = trSessionCache.testRunner.sessions[0].driver;
+    const puppeteerBrowser = await driver.getPuppeteer();
+
+    // switch to Puppeteer
+    const axTree = await driver.call(async () => {
+        try {
+            const pages = await puppeteerBrowser.pages();
+            const page = pages[0];
+
+            if (selector) {
+                // Get accessibility snapshot for specific element
+                const element = await page.$(selector);
+                if (!element) {
+                    throw new Error(`Element not found for selector: ${selector}`);
+                }
+                return page.accessibility.snapshot({ root: element });
+            } else {
+                // Get accessibility snapshot for entire page
+                return page.accessibility.snapshot();
+            }
+        } catch (error) {
+            console.error(`Error getting accessibility tree: ${error.message}`);
+            return null;
+        }
+    });
+
+    if (!axTree) {
+        return {
+            success: false,
+            message: 'Failed to retrieve accessibility tree'
+        };
+    }
+
+    return {
+        success: true,
+        tree: axTree
+    };
+}
+
+async function getDomTree(sessionId, selector = null) {
+    console.log(`TestRunnerLib::getDomTree::${libVersion.version}`);
+
+    if (!trSessionCache || trSessionCache.sessionId !== sessionId) {
+        return {
+            success: false,
+            message: 'Invalid session ID or no session open'
+        };
+    }
+
+    const driver = trSessionCache.testRunner.sessions[0].driver;
+    let domTree = null;
+
+    try {
+        if (selector) {
+            // Extract DOM tree for specific element using JavaScript
+            const { extractDom } = require('../helpers/accessibility-utils.js');
+            domTree = await driver.execute(extractDom, selector);
+        } else {
+            // Extract DOM tree for entire page
+            const { extractDom } = require('../helpers/accessibility-utils.js');
+            domTree = await driver.execute(extractDom);
+        }
+    } catch (error) {
+        console.error(`Error getting DOM tree: ${error.message}`);
+    }
+
+    if (!domTree) {
+        return {
+            success: false,
+            message: 'Failed to retrieve DOM tree'
+        };
+    }
+
+    return {
+        success: true,
+        tree: domTree
+    };
+}
+
+async function doStep(sessionId, selector, stepCommand, stepValue) {
+    console.log(`TestRunnerLib::doStep::${libVersion.version}`);
+
+    if (!trSessionCache || trSessionCache.sessionId !== sessionId) {
+        return {
+            success: false,
+            message: 'Invalid session ID or no session open'
+        };
+    }
+
+    const suites = [
+        {
+            name: 'Do Step',
+            type: 'web',
+            tests: [
+                {
+                    name: 'Do Step Test',
+                    type: 'web',
+                    steps: [
+                        {
+                            commandLabel: '',
+                            selectors: [selector],
+                            value: stepValue,
+                            command: stepCommand,
+                            operator: null
+                        }
+                    ]
+                }
+            ]
+        }
+    ];
+
+    const options = {
+        suites: suites,
+        functions: [],
+        apis: []
+    };
+
+    const result = await runSession(sessionId, options);
+
+    return {
+        success: result.suiteResult.success
+    };
+}
+
 async function closeSession(sessionId) {
     console.log(`TestRunnerLib::closeSession::${libVersion.version}`);
 
@@ -243,6 +377,9 @@ module.exports.runTests = runTests;
 module.exports.testApiCall = testApiCall;
 module.exports.openSession = openSession;
 module.exports.runSession = runSession;
+module.exports.getAxTree = getAxTree;
+module.exports.getDomTree = getDomTree;
+module.exports.doStep = doStep;
 module.exports.closeSession = closeSession;
 
 module.exports.TestRunnerConfigurationError = TestRunnerConfigurationError;

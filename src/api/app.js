@@ -5,7 +5,17 @@ const express = require('express');
 const cors = require('cors');
 
 const { downloadFile } = require('../helpers/download-file.js');
-const { runTests, testApiCall, openSession, closeSession, runSession, libVersion } = require('../lib/index.js');
+const {
+    runTests,
+    testApiCall,
+    openSession,
+    closeSession,
+    runSession,
+    libVersion,
+    getAxTree,
+    getDomTree,
+    doStep
+} = require('../lib/index.js');
 
 const app = express();
 app.use(cors());
@@ -122,8 +132,8 @@ app.post('/test-runner/session', async (req, res) => {
     res.status(200).json(output);
 });
 
-app.patch('/test-runner/session/:sessionId', async (req, res) => {
-    console.log('Test runner run debug steps started');
+app.patch('/test-runner/session/:sessionId/run', async (req, res) => {
+    console.log('Test runner run steps started');
 
     if (!req.body) {
         res.status(400).send('No data found');
@@ -138,6 +148,51 @@ app.patch('/test-runner/session/:sessionId', async (req, res) => {
         output = await runSession(sessionId, options);
     } catch (error) {
         console.log(`Error running session: ${error}`);
+        res.status(500).send(`Error running session: ${error.message}`);
+        return;
+    }
+
+    if (!output.success) {
+        res.status(500).send(`Error running session: ${output.message}`);
+        return;
+    }
+
+    res.status(200).json(output);
+});
+
+app.patch('/test-runner/session/:sessionId/do', async (req, res) => {
+    console.log('Test runner do command started');
+    const sessionId = req.params.sessionId;
+
+    const command = req.body.command;
+    if (!command) {
+        res.status(400).send('No command found');
+        return;
+    }
+
+    const selector = req.body.selector || null;
+    const stepCommand = req.body.stepCommand || null;
+    const stepValue = req.body.stepValue || null;
+
+    let output = {};
+    switch (command) {
+        case 'axtree':
+            output = await getAxTree(sessionId, selector);
+            break;
+        case 'domtree':
+            output = await getDomTree(sessionId, selector);
+            break;
+        case 'step':
+            output = await doStep(sessionId, selector, stepCommand, stepValue);
+            break;
+        default:
+            res.status(400).send('Invalid command');
+            return;
+    }
+
+    if (!output.success) {
+        res.status(500).send(`Error running session: ${output.message}`);
+        return;
     }
 
     res.status(200).json(output);

@@ -105,9 +105,11 @@ class TestRunner {
             throw new TestRunnerError(`Too many APIs defined: Maximum allowed is ${MAX_ITEMS}`);
         }
 
-        for (let i = 0; i < options.apis.length; i++) {
-            const api = new TRApi(options.apis[i]);
-            this.#apis.push(api);
+        if (options.apis) {
+            for (let i = 0; i < options.apis.length; i++) {
+                const api = new TRApi(options.apis[i]);
+                this.#apis.push(api);
+            }
         }
     }
 
