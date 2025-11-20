@@ -1,20 +1,21 @@
-import BaseStep = require('./base-step');
-import { TestStep, ExtendedBrowser } from '../../types';
+import BaseStep from './base-step';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 export default class ClickMultipleStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
 
-        this.setHideKeyboard = true;
-        this.setTakeSnapshot = true;
+        this.hideKeyboard = true;
+        this.takeSnapshot = true;
     }
 
-    async execute(driver: ExtendedBrowser, item: any): Promise<void> {
-        const action = await driver.action('pointer', { pointerType: 'mouse' });
+    async execute(driver: Browser, item: any): Promise<void> {
+        const action = await driver.action('pointer', { parameters: { pointerType: 'mouse' } });
 
         await action.move({ origin: item }).pause(1);
 
-        const count = parseInt(this.getValue || '1', 10);
+        const count = parseInt(this.value || '1', 10);
         for (let i = 0; i < count; i++) {
             await action.down().pause(1).up().pause(1);
         }

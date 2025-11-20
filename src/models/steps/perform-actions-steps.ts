@@ -1,11 +1,11 @@
-import BaseStep = require('./base-step');
-import { Key } from 'webdriverio';
+import BaseStep from './base-step';
+import { Browser, Key } from 'webdriverio';
 import { TestRunnerError } from '../../helpers/test-errors';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
 
 interface ActionConfig {
     type: string;
-    pointerType?: string;
+    pointerType?: 'mouse' | 'pen' | 'touch';
     actions: any[];
 }
 
@@ -36,34 +36,28 @@ export default class PerformActionsStep extends BaseStep {
         super(sequence, step);
     }
 
-    async execute(driver: ExtendedBrowser, _?: any): Promise<void> {
+    async execute(driver: Browser, _?: any): Promise<void> {
         try {
-            const value = this.getValue;
+            const value = this.value;
             if (!value) {
                 throw new TestRunnerError('PerformAction::No value provided');
             }
 
             const json: ActionConfig = JSON.parse(value);
-
-            const type = json.type;
-            let typeParams = null;
-            if (type === 'pointer') {
-                typeParams = { pointerType: json.pointerType ?? 'mouse' };
-            }
-
-            const action = typeParams ? await driver.action(type, typeParams) : driver.action(type);
-            const actions = json.actions;
-
-            if (actions && Array.isArray(actions) && actions.length > 0) {
-                switch (type) {
+            let action;
+            if (json.actions && Array.isArray(json.actions) && json.actions.length > 0) {
+                switch (json.type) {
                     case 'pointer':
-                        await this.performPointerAction(driver, action, actions);
+                        action = driver.action('pointer', { parameters: { pointerType: json.pointerType ?? 'mouse' } });
+                        await this.performPointerAction(driver, action, json.actions);
                         break;
                     case 'key':
-                        await this.performKeyAction(action, actions);
+                        action = driver.action('key');
+                        await this.performKeyAction(action, json.actions);
                         break;
                     case 'wheel':
-                        await this.performWheelAction(action, actions);
+                        action = driver.action('wheel');
+                        await this.performWheelAction(action, json.actions);
                         break;
                     default:
                         break;
@@ -103,7 +97,7 @@ export default class PerformActionsStep extends BaseStep {
             await actionObj.perform();
         } catch (error: any) {
             throw new TestRunnerError(
-                `PerformAction::Failed to perform wheel action  "${this.getValue}" - ${error.message}`
+                `PerformAction::Failed to perform wheel action  "${this.value}" - ${error.message}`
             );
         }
     }
@@ -131,16 +125,12 @@ export default class PerformActionsStep extends BaseStep {
             await actionObj.perform();
         } catch (error: any) {
             throw new TestRunnerError(
-                `PerformAction::Failed to perform key action  "${this.getValue}" - ${error.message}`
+                `PerformAction::Failed to perform key action  "${this.value}" - ${error.message}`
             );
         }
     }
 
-    private async performPointerAction(
-        driver: ExtendedBrowser,
-        actionObj: any,
-        actions: PointerAction[]
-    ): Promise<void> {
+    private async performPointerAction(driver: Browser, actionObj: any, actions: PointerAction[]): Promise<void> {
         try {
             let commandsCount = 0;
             for (let i = 0; i < actions.length; i++) {
@@ -195,7 +185,7 @@ export default class PerformActionsStep extends BaseStep {
             }
         } catch (error: any) {
             throw new TestRunnerError(
-                `PerformAction::Failed to perform pointer action  "${this.getValue}" - ${error.message}`
+                `PerformAction::Failed to perform pointer action  "${this.value}" - ${error.message}`
             );
         }
     }

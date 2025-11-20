@@ -1,17 +1,18 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 export default class ClickCoordinatesStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
 
-        this.setHideKeyboard = true;
-        this.setTakeSnapshot = true;
+        this.hideKeyboard = true;
+        this.takeSnapshot = true;
     }
 
-    async execute(driver: ExtendedBrowser, _: any): Promise<void> {
-        const value = this.getValue;
+    async execute(driver: Browser, _: any): Promise<void> {
+        const value = this.value;
         if (!value) {
             throw new TestRunnerError('ClickCoordinates::No value provided');
         }
@@ -45,7 +46,7 @@ export default class ClickCoordinatesStep extends BaseStep {
             y = parseInt(params[1]);
         }
 
-        const session = this.getSession;
+        const session = this.session;
         const pointerType = session?.type == 'mobile' ? 'touch' : 'mouse';
 
         if (isNaN(x) || isNaN(y)) {

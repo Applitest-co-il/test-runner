@@ -1,13 +1,14 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 export default class AssertIsNotDisplayedStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(driver: ExtendedBrowser): Promise<void> {
+    async execute(driver: Browser): Promise<void> {
         const item = await this.selectItem(driver);
         if (!item) {
             return;
@@ -18,7 +19,7 @@ export default class AssertIsNotDisplayedStep extends BaseStep {
             await this.addFrameToVideo();
             await this.revertElement(driver, item);
             throw new TestRunnerError(
-                `AssertIsNotDisplayed::Item with ${this.getNamedElementOrUsedSelectorsComment} is displayed`
+                `AssertIsNotDisplayed::Item with ${this.namedElementOrUsedSelectorsComment} is displayed`
             );
         }
     }

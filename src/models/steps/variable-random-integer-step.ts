@@ -1,14 +1,15 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 class VariableRandomIntegerStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(_: ExtendedBrowser, __?: any): Promise<void> {
-        const value = this.getValue;
+    async execute(_: Browser, __?: any): Promise<void> {
+        const value = this.value;
         if (!value) {
             throw new TestRunnerError('GenerateRandomInteger::No value provided');
         }
@@ -33,9 +34,9 @@ class VariableRandomIntegerStep extends BaseStep {
         }
 
         const randomValue = Math.floor(Math.random() * (maxValue - minValue + 1)) + minValue;
-        const variables = this.getVariables;
+        const variables = this.variables;
         if (variables) {
-            variables[varName] = randomValue;
+            variables[varName] = randomValue.toString();
         }
     }
 }

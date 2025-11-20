@@ -11,8 +11,6 @@ export class StepsCommands {
         //function
         'call-function',
         'call-api',
-        'function',
-        'api',
 
         //settings
         'toggle-location-services',
@@ -30,30 +28,30 @@ export class StepsCommands {
         'item-clear',
 
         //actions
-        'click',
-        'multiple-clicks',
-        'click-coordinates',
-        'right-click',
-        'middle-click',
-        'set-value',
-        'clear-value',
         'add-value',
-        'scroll-up',
-        'scroll-down',
-        'scroll-up-to-element',
-        'scroll-down-to-element',
-        'scroll-up-from-element',
-        'scroll-down-from-element',
-        'scroll-right',
-        'scroll-left',
-        'scroll-right-from-element',
-        'scroll-left-from-element',
-        'press-key',
-        'execute-script',
-        'perform-actions',
+        'clear-value',
+        'click',
+        'click-coordinates',
+        'click-middle',
+        'click-multiple',
+        'click-right',
         'drag-and-drop',
+        'execute-script',
         'mouse-hover',
         'mouse-move',
+        'perform-actions',
+        'press-key',
+        'scroll-down',
+        'scroll-down-from-element',
+        'scroll-down-to-element',
+        'scroll-left',
+        'scroll-left-from-element',
+        'scroll-right',
+        'scroll-right-from-element',
+        'scroll-up',
+        'scroll-up-from-element',
+        'scroll-up-to-element',
+        'set-value',
 
         //waits
         'wait-for-exist',
@@ -64,79 +62,70 @@ export class StepsCommands {
         'assert-is-displayed',
         'assert-is-not-displayed',
         'assert-attribute',
-        'assert-css',
+        'assert-css-property',
         'assert-number',
         'assert-app-installed'
     ];
 
-    static RequiresSelector(command: string): boolean {
-        const noSelectorCommands = [
-            'pause',
-            'navigate',
-            'app-activate',
-            'app-background',
-            'hide-keyboard',
-            'function',
-            'api',
-            'toggle-location-services',
-            'toggle-airplane-mode',
-            'set-geolocation',
-            'set-variable',
-            'generate-random-integer',
-            'generate-random-string',
-            'clear-variable',
-            'click-coordinates',
-            'press-key',
-            'execute-script',
-            'perform-actions'
+    static RequiresItem(command: string): boolean {
+        const requireItemCommands = [
+            'add-value',
+            'assert-attribute',
+            'assert-css-property',
+            'assert-is-displayed',
+            'assert-number',
+            'assert-text',
+            'clear-value',
+            'click',
+            'click-middle',
+            'click-multiple',
+            'click-right',
+            'drag-and-drop',
+            'item-select',
+            'mouse-hover',
+            'scroll-down-from-element',
+            'scroll-left-from-element',
+            'scroll-right-from-element',
+            'scroll-up-from-element',
+            'set-value',
+            'set-variable-from-element',
+            'upload-file'
         ];
-        return !noSelectorCommands.includes(command);
+        return requireItemCommands.includes(command);
+    }
+
+    static RequiresSelector(command: string): boolean {
+        const selectorCommands = [
+            'assert-is-not-displayed',
+            'scroll-down-to-element',
+            'scroll-up-to-element',
+            'switch-frame',
+            'wait-for-exist',
+            'wait-for-not-exist'
+        ];
+        return StepsCommands.RequiresItem(command) || selectorCommands.includes(command);
     }
 
     static RequiresValue(command: string): boolean {
         const requiresValueCommands = [
-            'pause',
-            'navigate',
-            'set-value',
             'add-value',
-            'press-key',
-            'execute-script',
-            'function',
             'api',
-            'set-variable',
-            'generate-random-integer',
-            'generate-random-string',
-            'assert-text',
             'assert-attribute',
             'assert-css',
             'assert-number',
-            'click-coordinates'
-        ];
-        return requiresValueCommands.includes(command);
-    }
-
-    static RequiresItem(command: string): boolean {
-        const noItemCommands = [
-            'pause',
-            'navigate',
-            'app-activate',
-            'app-background',
-            'hide-keyboard',
+            'assert-text',
+            'click-coordinates',
+            'execute-script',
             'function',
-            'api',
-            'toggle-location-services',
-            'toggle-airplane-mode',
-            'set-geolocation',
-            'set-variable',
             'generate-random-integer',
             'generate-random-string',
-            'clear-variable',
-            'click-coordinates',
+            'navigate',
+            'pause',
             'press-key',
-            'execute-script',
-            'perform-actions'
+            'set-value',
+            'set-variable'
         ];
-        return !noItemCommands.includes(command);
+        return requiresValueCommands.includes(command);
     }
 }
 

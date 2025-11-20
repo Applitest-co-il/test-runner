@@ -18,8 +18,12 @@
         "allowJs": true,
         "checkJs": false,
         "incremental": true,
-        "tsBuildInfoFile": "./dist/.tsbuildinfo"
+        "tsBuildInfoFile": "./dist/.tsbuildinfo",
+        "typeRoots": ["./node_modules/@types", "./src/types"],
+        "paths": {
+            "@danielyaghil/vm-helper": ["./src/types/vm-helper"]
+        }
     },
-    "include": ["src/**/*"],
+    "include": ["src/**/*", "src/types/**/*.d.ts"],
     "exclude": ["node_modules", "dist", "tests", "**/*.test.ts", "**/*.spec.ts"]
 }

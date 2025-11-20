@@ -1,15 +1,16 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
 import { replaceVariables } from '../../helpers/utils';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 export default class ApiStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(_: ExtendedBrowser, __: any): Promise<void> {
-        const value = this.getValue;
+    async execute(_: Browser, __: any): Promise<void> {
+        const value = this.value;
         if (!value) {
             throw new TestRunnerError('API::No value provided');
         }
@@ -28,7 +29,7 @@ export default class ApiStep extends BaseStep {
             propertiesValues = valueParts[1].split(',');
         }
         if (propertiesValues.length > 0) {
-            const variables = this.getVariables || {};
+            const variables = this.variables || {};
             propertiesValues = propertiesValues.map((value) => {
                 value = value.trim();
                 return replaceVariables(value, variables);
@@ -46,23 +47,23 @@ export default class ApiStep extends BaseStep {
             if (valueParts[2].length > 0) {
                 expectedStatus = parseInt(valueParts[2], 10);
             }
-            const variables = this.getVariables || {};
+            const variables = this.variables || {};
             expectedOutputs = valueParts[3].split(',').map((output) => {
                 return replaceVariables(output.trim(), variables);
             });
         }
 
-        const apis = this.getApis || {};
+        const apis = this.apis || {};
         const apiList = Array.isArray(apis) ? apis : Object.values(apis);
         const api = apiList.find((a: any) => a.id === apiId);
         if (api) {
             console.log(`API "${apiId}" executed with properties: ${propertiesValues.join(', ')}`);
 
             const apiRun = api.duplicate();
-            const variables = this.getVariables || {};
+            const variables = this.variables || {};
             apiRun.path = replaceVariables(apiRun.path, variables);
 
-            const isApiTesting = this.getOperator === 'validate';
+            const isApiTesting = this.operator === 'validate';
 
             const result = await apiRun.run(propertiesValues, isApiTesting);
 
@@ -113,7 +114,7 @@ export default class ApiStep extends BaseStep {
             }
             if (result.outputs) {
                 const outputsKeys = Object.keys(result.outputs);
-                const variablesObj = this.getVariables || {};
+                const variablesObj = this.variables || {};
                 for (let pos = 0; pos < outputsKeys.length; pos++) {
                     const key = outputsKeys[pos];
                     if (outputVariablesNameOverride.length > pos) {

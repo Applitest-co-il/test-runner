@@ -27,10 +27,10 @@ export function replaceVariables(text: string, variables: Record<string, any>): 
 }
 
 export function mergeVariables(
-    baseVariables: Record<string, any>,
-    newVariables: Record<string, any>
-): Record<string, any> {
-    if (newVariables === null || typeof newVariables !== 'object') return baseVariables;
+    baseVariables: Record<string, string>,
+    newVariables: Record<string, string> | null
+): Record<string, string> {
+    if (newVariables === null) return baseVariables;
     Object.keys(newVariables).forEach((key) => {
         baseVariables[key] = newVariables[key];
     });

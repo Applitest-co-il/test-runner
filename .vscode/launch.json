@@ -12,10 +12,7 @@
             },
             "console": "integratedTerminal",
             "skipFiles": ["<node_internals>/**"],
-            "resolveSourceMapLocations": [
-                "${workspaceFolder}/**",
-                "!**/node_modules/**"
-            ],
+            "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
             "restart": true,
             "sourceMaps": true
         },
@@ -31,10 +28,7 @@
             },
             "console": "integratedTerminal",
             "skipFiles": ["<node_internals>/**"],
-            "resolveSourceMapLocations": [
-                "${workspaceFolder}/**",
-                "!**/node_modules/**"
-            ],
+            "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
             "restart": true,
             "sourceMaps": true
         },
@@ -43,11 +37,7 @@
             "type": "node",
             "request": "launch",
             "program": "${workspaceFolder}/node_modules/nodemon/bin/nodemon.js",
-            "args": [
-                "--exec",
-                "ts-node",
-                "${workspaceFolder}/src/api/app.ts"
-            ],
+            "args": ["--exec", "ts-node", "${workspaceFolder}/src/api/app.ts"],
             "env": {
                 "NODE_ENV": "development"
             },

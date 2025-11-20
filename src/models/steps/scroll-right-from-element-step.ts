@@ -1,12 +1,13 @@
-import BaseHorizontalScrollStep = require('./base-horizontal-scroll-step');
-import { TestStep, ExtendedBrowser } from '../../types';
+import BaseHorizontalScrollStep from './base-horizontal-scroll-step';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 class ScrollRightFromElementStep extends BaseHorizontalScrollStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(driver: ExtendedBrowser, item: any): Promise<void> {
+    async execute(driver: Browser, item: any): Promise<void> {
         await this.horizontalScroll(driver, item, false);
     }
 }

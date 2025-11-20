@@ -1,16 +1,17 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { replaceVariables } from '../../helpers/utils';
 import { TestRunnerError } from '../../helpers/test-errors';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
 import randomstring from 'randomstring';
+import { Browser } from 'webdriverio';
 
 export default class VariableRandomStringStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(_: ExtendedBrowser, __: any): Promise<void> {
-        const value = this.getValue;
+    async execute(_: Browser, __: any): Promise<void> {
+        const value = this.value;
         if (!value) {
             throw new TestRunnerError('GenerateRandomString::No value provided');
         }
@@ -29,12 +30,12 @@ export default class VariableRandomStringStep extends BaseStep {
         }
 
         const varName = randomParts[0];
-        const variables = this.getVariables || {};
+        const variables = this.variables || {};
         const prefix = randomParts[1] != 'none' ? replaceVariables(randomParts[1], variables) : '';
         const maxLen = Number(randomParts[2]) > 0 ? parseInt(randomParts[2]) : 10;
         const capitalization = randomParts[3] ? randomParts[3].toLowerCase() : 'any';
 
-        const operator = this.getOperator ? this.getOperator : 'alphanumeric';
+        const operator = this.operator ? this.operator : 'alphanumeric';
         const generateOptions: any = {
             charset: operator,
             length: maxLen

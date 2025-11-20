@@ -1,5 +1,6 @@
-import BaseStep = require('./base-step');
-import { TestStep, ExtendedBrowser } from '../../types';
+import BaseStep from './base-step';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 export default class UploadFileStep extends BaseStep {
     #valueUrl: string = '';
@@ -10,7 +11,7 @@ export default class UploadFileStep extends BaseStep {
         this.#valueUrl = step.valueUrl || '';
         this.#valueFilename = step.valueFilename || '';
 
-        this.setTakeSnapshot = true;
+        this.takeSnapshot = true;
     }
 
     get valueUrl(): string {
@@ -21,9 +22,9 @@ export default class UploadFileStep extends BaseStep {
         return this.#valueFilename;
     }
 
-    async execute(driver: ExtendedBrowser, item: any): Promise<void> {
-        let actualValue = this.getValue || '';
-        const conf = this.getConf;
+    async execute(driver: Browser, item: any): Promise<void> {
+        let actualValue = this.value || '';
+        const conf = this.conf;
         if (conf?.farm !== 'local') {
             actualValue = await driver.uploadFile(actualValue);
         }

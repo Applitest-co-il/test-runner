@@ -1,13 +1,13 @@
 import { setIntervalAsync, clearIntervalAsync, SetIntervalAsyncTimer } from 'set-interval-async';
-import { SessionConfiguration } from '../types';
+import { RunSession } from '../types';
 
 export class SessionPinger {
-    private sessions: SessionConfiguration[] = [];
+    private sessions: RunSession[] = [];
     private interval: number = 60000; // Default interval of 60 seconds
     private intervalId: SetIntervalAsyncTimer<any> | null = null;
     private running: boolean = false;
 
-    constructor(sessions: SessionConfiguration[], interval?: number) {
+    constructor(sessions: RunSession[], interval?: number) {
         this.sessions = sessions;
         if (interval) {
             this.interval = interval;

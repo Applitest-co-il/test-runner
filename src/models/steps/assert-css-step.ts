@@ -1,16 +1,17 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 export default class AssertCssStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
 
-        this.setTakeSnapshot = true;
+        this.takeSnapshot = true;
     }
 
-    async execute(_: ExtendedBrowser, item: any): Promise<void> {
-        const value = this.getValue;
+    async execute(_: Browser, item: any): Promise<void> {
+        const value = this.value;
         if (!value) {
             throw new TestRunnerError('AssertCssProperty::No value provided');
         }
@@ -35,7 +36,7 @@ export default class AssertCssStep extends BaseStep {
 
         // Compare the expected and actual values
         let result = false;
-        const operator = this.getOperator ? this.getOperator : '==';
+        const operator = this.operator ? this.operator : '==';
         switch (operator) {
             case '==':
                 result = expectedValue == actualFormattedValue;

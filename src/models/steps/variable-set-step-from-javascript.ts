@@ -1,15 +1,16 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
 import { replaceVariables } from '../../helpers/utils';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 class VariableSetFromJavascriptStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(driver: ExtendedBrowser, _?: any): Promise<void> {
-        const value = this.getValue;
+    async execute(driver: Browser, _?: any): Promise<void> {
+        const value = this.value;
         if (!value) {
             throw new TestRunnerError('SetVariableFromScript::No value provided');
         }
@@ -22,10 +23,10 @@ class VariableSetFromJavascriptStep extends BaseStep {
         }
 
         const varName = varParts[0];
-        const script = replaceVariables(varParts[1], this.getVariables || {});
+        const script = replaceVariables(varParts[1], this.variables || {});
 
         const varValue = await this.executeScript(script, driver);
-        const variables = this.getVariables;
+        const variables = this.variables;
         if (variables) {
             variables[varName] = varValue;
         }

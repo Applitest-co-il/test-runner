@@ -9,59 +9,36 @@ import {
 import { apiCall } from '../helpers/apicall';
 import { replaceVariables } from '../helpers/utils';
 import { v4 as uuids4 } from 'uuid';
-import { TestRunConfiguration, SessionCache, OutputVariable } from '../types';
+import { OutputVariable, SessionResult, RunResult, ApiCallResult, TestRunnerOptions } from '../types';
+import { extractDom } from '../helpers/accessibility-utils';
 
-const libVersion = require('./version.json');
+interface SessionCache {
+    sessionId: string;
+    testRunner: TestRunner;
+    savedElements: Record<string, any>;
+}
+
+import libVersion from './version.json';
 
 let trSessionCache: SessionCache | null = null;
 
-interface RunTestsResult {
-    runCompleted: boolean;
-    success: boolean;
-    summary: {
-        suites?: number;
-        passedSuites?: number;
-        total: number;
-        passed: number;
-        failed: number;
-        skipped: number;
-        pending: number;
-    };
-    suiteResults: any[];
-    executionTime: number;
-}
-
-interface SessionResult {
-    success: boolean;
-    message?: string;
-    executionTime?: number;
-    sessionId?: string;
-    suiteResult?: any;
-}
-
-interface TreeResult {
-    success: boolean;
-    message?: string;
-    tree?: any;
-}
-
-export async function runTests(options: TestRunConfiguration): Promise<RunTestsResult> {
+export async function runTests(options: TestRunnerOptions): Promise<RunResult> {
     console.log(`TestRunnerLib::runTests::${libVersion.version}`);
 
     const startDate = new Date();
     const testRunner = new TestRunner(options);
 
-    const suiteResults = await testRunner.run();
+    const result = await testRunner.run();
 
     const endDate = new Date();
     const duration = (endDate.getTime() - startDate.getTime()) / 1000;
 
-    let output: RunTestsResult;
+    let output: RunResult;
 
-    if (suiteResults && suiteResults.suiteResults) {
+    if (result && result.suiteResults) {
         let success = true;
         let summary = {
-            suites: suiteResults.suiteResults.length,
+            suites: result.suiteResults.length,
             passedSuites: 0,
             total: 0,
             passed: 0,
@@ -69,27 +46,28 @@ export async function runTests(options: TestRunConfiguration): Promise<RunTestsR
             skipped: 0,
             pending: 0
         };
-        for (let i = 0; i < suiteResults.suiteResults.length; i++) {
-            success = success && suiteResults.suiteResults[i].success;
-            summary.passedSuites += suiteResults.suiteResults[i].success ? 1 : 0;
-            summary.total += suiteResults.suiteResults[i].summary.total;
-            summary.passed += suiteResults.suiteResults[i].summary.passed;
-            summary.failed += suiteResults.suiteResults[i].summary.failed;
-            summary.skipped += suiteResults.suiteResults[i].summary.skipped;
-            summary.pending += suiteResults.suiteResults[i].summary.pending;
+        for (let i = 0; i < result.suiteResults.length; i++) {
+            success = success && result.suiteResults[i].success;
+            summary.passedSuites += result.suiteResults[i].success ? 1 : 0;
+            summary.total += result.suiteResults[i].summary.total;
+            summary.passed += result.suiteResults[i].summary.passed;
+            summary.failed += result.suiteResults[i].summary.failed;
+            summary.skipped += result.suiteResults[i].summary.skipped;
+            summary.pending += result.suiteResults[i].summary.pending;
         }
 
         output = {
             runCompleted: true,
             success: success,
             summary: summary,
-            suiteResults: suiteResults.suiteResults,
+            suiteResults: result.suiteResults,
             executionTime: duration
         };
     } else {
         output = {
             runCompleted: false,
             success: false,
+            error: result.error || 'Test run failed',
             summary: {
                 suites: 0,
                 passedSuites: 0,
@@ -108,27 +86,27 @@ export async function runTests(options: TestRunConfiguration): Promise<RunTestsR
     return output;
 }
 
-export async function openSession(options: TestRunConfiguration): Promise<SessionResult> {
+export async function openSession(options: TestRunnerOptions): Promise<SessionResult> {
     console.log(`TestRunnerLib::openSession::${libVersion.version}`);
 
     if (trSessionCache) {
         console.log('Closing existing session');
-        (trSessionCache.testRunner as any).terminateAllSessions();
+        await trSessionCache.testRunner.terminateAllSessions();
         trSessionCache = null;
     }
 
     const startDate = new Date();
     const testRunner = new TestRunner(options);
-    // await testRunner.initSessions();
+    testRunner.initSessions();
 
-    if (!testRunner.getSessions || testRunner.getSessions.length === 0) {
+    if (!testRunner.sessions || testRunner.sessions.length === 0) {
         return {
             success: false,
             message: 'No sessions defined in configuration'
         };
     }
 
-    await testRunner.startSession(testRunner.getSessions[0].type, 'session-1');
+    await testRunner.startSession(testRunner.sessions[0].type, 'session-1');
 
     trSessionCache = {
         sessionId: uuids4(),
@@ -147,7 +125,7 @@ export async function openSession(options: TestRunConfiguration): Promise<Sessio
     };
 }
 
-export async function runSession(sessionId: string, options: TestRunConfiguration): Promise<SessionResult> {
+export async function runSession(sessionId: string, options: TestRunnerOptions): Promise<SessionResult> {
     console.log(`TestRunnerLib::runSession::${libVersion.version}`);
 
     if (!trSessionCache || trSessionCache.sessionId !== sessionId) {
@@ -159,28 +137,56 @@ export async function runSession(sessionId: string, options: TestRunConfiguratio
 
     const startDate = new Date();
 
-    // Initialize based on options
-    const testRunner = trSessionCache.testRunner as any;
-
-    if (Object.keys(trSessionCache.savedElements).length > 0) {
-        // Apply saved elements to test runner
-        // Implementation would depend on the actual test runner structure
+    trSessionCache.testRunner.initSuites(options);
+    if (trSessionCache.testRunner.suites.length === 0 || trSessionCache.testRunner.suites.length > 1) {
+        console.error('Invalid suites configuration');
+        throw new TestDefinitionError('Invalid suites configuration - exactly one suite must be defined');
     }
 
-    const result = await testRunner.run();
+    trSessionCache.testRunner.initFunctions(options);
+    trSessionCache.testRunner.initApis(options);
+
+    await trSessionCache.testRunner.updateStepsDefinition();
+
+    if (Object.keys(trSessionCache.savedElements).length > 0) {
+        for (const suite of trSessionCache.testRunner.suites) {
+            if (suite.tests) {
+                for (const test of suite.tests) {
+                    if (test.savedElements) {
+                        Object.assign(test.savedElements, trSessionCache.savedElements);
+                    }
+                }
+            }
+        }
+    }
+
+    const suite = trSessionCache.testRunner.suites[0];
+    const suiteResult = await trSessionCache.testRunner.runSuite(suite);
+    // Add distinct savedElements to trSessionCache.savedElements (only new properties)
+    if (suite.tests) {
+        for (const test of suite.tests) {
+            if (test.savedElements) {
+                for (const [key, value] of Object.entries(test.savedElements)) {
+                    if (!(key in trSessionCache.savedElements)) {
+                        trSessionCache.savedElements[key] = value;
+                    }
+                }
+            }
+        }
+    }
 
     const endDate = new Date();
     const duration = (endDate.getTime() - startDate.getTime()) / 1000;
 
     console.log(`TestRunnerLib::runSession::${libVersion.version}:Ended`);
     return {
-        success: result.success,
+        success: suiteResult?.success || false,
         executionTime: duration,
-        suiteResult: result
+        suiteResult: suiteResult
     };
 }
 
-export async function getAxTree(sessionId: string, selector: string | null = null): Promise<TreeResult> {
+export async function getAxTree(sessionId: string, selector: string | null = null): Promise<SessionResult> {
     console.log(`TestRunnerLib::getAxTree::${libVersion.version}`);
 
     if (!trSessionCache || trSessionCache.sessionId !== sessionId) {
@@ -190,7 +196,7 @@ export async function getAxTree(sessionId: string, selector: string | null = nul
         };
     }
 
-    const driver = (trSessionCache.testRunner as any).getSessions[0].driver;
+    const driver = trSessionCache.testRunner.sessions[0].driver;
     const puppeteerBrowser = await driver.getPuppeteer();
 
     // switch to Puppeteer
@@ -229,7 +235,7 @@ export async function getAxTree(sessionId: string, selector: string | null = nul
     };
 }
 
-export async function getDomTree(sessionId: string, selector: string | null = null): Promise<TreeResult> {
+export async function getDomTree(sessionId: string, selector: string | null = null): Promise<SessionResult> {
     console.log(`TestRunnerLib::getDomTree::${libVersion.version}`);
 
     if (!trSessionCache || trSessionCache.sessionId !== sessionId) {
@@ -239,17 +245,15 @@ export async function getDomTree(sessionId: string, selector: string | null = nu
         };
     }
 
-    const driver = (trSessionCache.testRunner as any).getSessions[0].driver;
+    const driver = trSessionCache.testRunner.sessions[0].driver;
     let domTree: any = null;
 
     try {
         if (selector) {
             // Extract DOM tree for specific element using JavaScript
-            const { extractDom } = require('../helpers/accessibility-utils');
             domTree = await driver.execute(extractDom, selector);
         } else {
             // Extract DOM tree for entire page
-            const { extractDom } = require('../helpers/accessibility-utils');
             domTree = await driver.execute(extractDom);
         }
     } catch (error) {
@@ -337,7 +341,7 @@ export async function closeSession(sessionId: string): Promise<SessionResult> {
     }
 
     const startDate = new Date();
-    await (trSessionCache.testRunner as any).terminateAllSessions();
+    await trSessionCache.testRunner.terminateAllSessions();
     trSessionCache = null;
     const endDate = new Date();
     const duration = (endDate.getTime() - startDate.getTime()) / 1000;
@@ -355,9 +359,9 @@ export async function testApiCall(
     headers: any,
     data: any,
     schema: any,
-    variables: Record<string, any>,
+    variables: Record<string, string>,
     outputs: OutputVariable[]
-): Promise<any> {
+): Promise<ApiCallResult | null> {
     const url = replaceVariables(`${path}`, variables);
 
     let apiHeaders = '';

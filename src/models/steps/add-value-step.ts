@@ -1,14 +1,15 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { replaceVariables } from '../../helpers/utils';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 export default class AddValueStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(_: ExtendedBrowser, item: any): Promise<void> {
-        const actualValue = replaceVariables(this.getValue || '', this.getVariables || {});
+    async execute(_: Browser, item: any): Promise<void> {
+        const actualValue = replaceVariables(this.value || '', this.variables || {});
         await item.addValue(actualValue);
     }
 }

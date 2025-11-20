@@ -5,7 +5,9 @@ import { VideoRecorder } from '../helpers/video-recorder';
 import AppActivateStep from './steps/app-activate-step';
 import { TrFunction } from './function';
 import { checkArrayMaxItems, MAX_ITEMS } from '../helpers/security';
-import { TestConfiguration, SessionConfiguration, TestStep } from '../types';
+import { TestConfiguration, TestStep, RunSession } from '../types';
+import BaseStep from './steps/base-step';
+import { TrApi } from './api';
 
 interface TestConstructorData extends TestConfiguration {
     id?: string;
@@ -15,127 +17,139 @@ interface TestConstructorData extends TestConfiguration {
 }
 
 export class Test {
-    private readonly id: string = '';
-    private readonly name: string = '';
-    private readonly type: string = '';
-    private readonly suiteIndex: number = -1;
-    private readonly index: number = -1;
-    private readonly variables: Record<string, any> = {};
-    private readonly skip: boolean = false;
-    private readonly steps: any[] = []; // Will be typed when step classes are converted
-    private readonly savedElements: Record<string, any> = {};
-    private readonly context: Record<string, any> = {};
-    private status: string = 'pending';
-    private lastStep: number = 0;
-    private videoRecorder: VideoRecorder | null = null;
+    private readonly _id: string = '';
+    private readonly _name: string = '';
+    private readonly _type: string = '';
+    private readonly _suiteIndex: number = -1;
+    private readonly _index: number = -1;
+    private readonly _variables: Record<string, string> = {};
+    private readonly _skip: boolean = false;
+    private readonly _steps: BaseStep[] = [];
+    private readonly _savedElements: Record<string, any> = {};
+    private _status: string = 'pending';
+    private _lastStep: number = 0;
+    private _videoRecorder: VideoRecorder | undefined = undefined;
 
     constructor(test: TestConstructorData) {
-        this.id = test.id || '';
-        this.name = test.name || '';
-        this.type = test.description || ''; // Assuming type maps to description
-        this.suiteIndex = test.suiteIndex ?? -1;
-        this.index = test.index ?? -1;
-        this.skip = test.skip ?? false;
-        this.variables = test.variables ?? {};
+        this._id = test.id || '';
+        this._name = test.name || '';
+        this._type = test.type || '';
+        this._suiteIndex = test.suiteIndex ?? -1;
+        this._index = test.index ?? -1;
+        this._skip = test.skip ?? false;
+        this._variables = test.variables ?? {};
         this.buildSteps(test.steps || []);
     }
 
     private buildSteps(steps: TestStep[]): void {
         if (!steps || steps.length === 0) {
-            console.error(`No test steps found in test "${this.id} - ${this.name}"`);
+            console.error(`No test steps found in test "${this._id} - ${this._name}"`);
             return;
         }
 
         if (!checkArrayMaxItems(steps)) {
-            console.error(`Too many test steps in test "${this.id} - ${this.name}": Maximum allowed is ${MAX_ITEMS}`);
+            console.error(`Too many test steps in test "${this._id} - ${this._name}": Maximum allowed is ${MAX_ITEMS}`);
             return;
         }
 
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
             let testStep = stepFactory(i + 1, step);
-            this.steps.push(testStep);
+            this._steps.push(testStep);
         }
     }
 
-    get getId(): string {
-        return this.id;
+    get id(): string {
+        return this._id;
     }
 
-    get getName(): string {
-        return this.name;
+    get name(): string {
+        return this._name;
     }
 
-    get getType(): string {
-        return this.type;
+    get type(): string {
+        return this._type;
     }
 
-    get getIndex(): number {
-        return this.index;
+    get suiteIndex(): number {
+        return this._suiteIndex;
     }
 
-    get getSkip(): boolean {
-        return this.skip;
+    get index(): number {
+        return this._index;
     }
 
-    get getSteps(): any[] {
-        return this.steps;
+    get variables(): Record<string, string> {
+        return this._variables;
     }
 
-    get getStatus(): string {
-        return this.status;
+    get skip(): boolean {
+        return this._skip;
     }
 
-    get getLastStep(): number {
-        return this.lastStep;
+    get steps(): BaseStep[] {
+        return this._steps;
     }
 
-    get getErrorDetails(): string {
-        if (this.status === 'failed') {
-            return this.steps[this.lastStep].errorDetails;
-        }
-        return '';
+    get savedElements(): Record<string, any> {
+        return this._savedElements;
     }
 
-    get getVariables(): Record<string, any> {
-        return this.variables;
+    get status(): string {
+        return this._status;
     }
 
-    get getSavedElements(): Record<string, any> {
-        return this.savedElements;
+    set status(value: string) {
+        this._status = value;
+    }
+
+    get lastStep(): number {
+        return this._lastStep;
+    }
+
+    set lastStep(value: number) {
+        this._lastStep = value;
+    }
+
+    get videoRecorder(): VideoRecorder | undefined {
+        return this._videoRecorder;
+    }
+
+    set videoRecorder(value: VideoRecorder | undefined) {
+        this._videoRecorder = value;
     }
 
     async run(
-        session: SessionConfiguration,
-        functions: Record<string, TrFunction>,
-        apis: Record<string, any>,
-        variables: Record<string, any>
+        session: RunSession,
+        functions: TrFunction[],
+        apis: TrApi[],
+        variables: Record<string, string>
     ): Promise<Promise<void>[]> {
         const promises: Promise<void>[] = [];
         TrFunction.functionStacks = [];
 
-        const steps = this.steps;
+        const steps = this._steps;
         if (steps.length === 0) {
-            throw new TestDefinitionError(`Test "${this.name}" has no steps`);
+            throw new TestDefinitionError(`Test "${this._name}" has no steps`);
         }
 
-        if ((session as any).runConf?.enableVideo) {
+        if (session.runConf?.enableVideo) {
             const options = {
-                baseName: `${this.suiteIndex}_${this.index}`,
-                outputDir: (session as any).runConf.videosPath,
+                baseName: `${this._suiteIndex}_${this._index}`,
+                outputDir: session.runConf.videosPath,
                 screenShotInterval: 0
             };
-            this.videoRecorder = new VideoRecorder(session.driver, options);
-            await this.videoRecorder.start();
+            this._videoRecorder = new VideoRecorder(session.driver, options);
+            await this._videoRecorder.start();
         }
 
         // TBD: change with test type
-        if (this.type === 'mobile') {
+        if (this._type === 'mobile') {
             const activateAppStep = new AppActivateStep(0, { command: 'app-activate', value: 'current-app' });
-            await activateAppStep.run(session, this.variables, functions, apis, {});
+            await activateAppStep.run(session, functions, apis, this.variables, {});
         }
 
-        mergeVariables(this.variables, variables);
+        mergeVariables(this._variables, variables);
 
         const startFromSteps =
             (session as any).runConf?.startFromStep > 0 && (session as any).runConf.startFromStep < steps.length
@@ -146,14 +160,14 @@ export class Test {
                 ? (session as any).runConf.stopAtStep
                 : steps.length;
 
-        console.log(`Starting test "${this.name}" from step ${startFromSteps + 1} to ${stopAtStep + 1}`);
+        console.log(`Starting test "${this._name}" from step ${startFromSteps + 1} to ${stopAtStep + 1}`);
 
         for (let i = startFromSteps; i < stopAtStep; i++) {
             console.log(`Running step ${i + 1}`);
             const step = steps[i];
 
-            if (this.videoRecorder) {
-                this.videoRecorder.currentStep = step.sequence;
+            if (this._videoRecorder) {
+                this._videoRecorder.currentStep = step.sequence;
             }
 
             try {
@@ -161,35 +175,35 @@ export class Test {
                     session,
                     functions,
                     apis,
-                    this.variables,
-                    this.savedElements,
-                    this.videoRecorder
+                    this._variables,
+                    this._savedElements,
+                    this._videoRecorder
                 );
                 if (!success) {
-                    this.status = 'failed';
-                    this.lastStep = i;
+                    this._status = 'failed';
+                    this._lastStep = i;
                     break;
                 }
-                mergeVariables(this.variables, step.variables);
+                mergeVariables(this._variables, step.variables);
             } catch (err) {
-                this.status = 'failed';
-                this.lastStep = i;
+                this._status = 'failed';
+                this._lastStep = i;
                 steps[i].errorDetails = (err as Error).message;
                 console.error(`Error at step ${i + 1}: ${(err as Error).message}`);
                 break;
             }
             console.log(`Step ${i + 1} completed successfully`);
         }
-        if (this.status === 'pending') {
-            this.status = 'passed';
-            this.lastStep = steps.length - 1;
+        if (this._status === 'pending') {
+            this._status = 'passed';
+            this._lastStep = steps.length - 1;
         }
 
-        if (this.videoRecorder) {
-            await this.videoRecorder.stop();
-            const videoPromise = this.videoRecorder.generateVideo();
+        if (this._videoRecorder) {
+            await this._videoRecorder.stop();
+            const videoPromise = this._videoRecorder.generateVideo();
             if (videoPromise) {
-                console.log(`Video promise OK for test "${this.suiteIndex}_${this.index}"`);
+                console.log(`Video promise OK for test "${this._suiteIndex}_${this._index}"`);
                 promises.push(videoPromise);
             }
         }

@@ -2,23 +2,19 @@ import { stepFactory } from './test-step';
 import FunctionStep from './steps/function-step';
 import { TestDefinitionError, TestRunnerError } from '../helpers/test-errors';
 import { checkArrayMaxItems, MAX_ITEMS } from '../helpers/security';
-import { FunctionConfiguration, SessionConfiguration, TestStep } from '../types';
-
-interface FunctionRunResult {
-    success: boolean;
-    failedStep?: number;
-    error?: string;
-    outputs?: Record<string, any> | null;
-}
+import { FunctionConfiguration, FunctionResult, TestStep, RunSession } from '../types';
+import BaseStep from './steps/base-step';
+import { TrApi } from './api';
+import { VideoRecorder } from '../helpers/video-recorder';
 
 export class TrFunction {
-    private readonly id: string = '';
-    private readonly name: string = '';
-    private readonly type: string = '';
-    private readonly properties: string[] = [];
-    private readonly outputs: string[] = [];
-    private readonly steps: any[] = []; // Will be typed when TestStep is converted
-    private savedElements: Record<string, any> = {};
+    private readonly _id: string = '';
+    private readonly _name: string = '';
+    private readonly _type: string = '';
+    private readonly _properties: string[] = [];
+    private readonly _outputs: string[] = [];
+    private readonly _steps: BaseStep[] = []; // Will be typed when TestStep is converted
+    private _savedElements: Record<string, any> = {};
 
     static functionStacks: string[] = [];
 
@@ -30,102 +26,136 @@ export class TrFunction {
             outputs?: string[];
         }
     ) {
-        this.id = func.id ?? '';
-        this.name = func.name ?? '';
-        this.type = func.type ?? '';
-        this.properties = func.properties ?? [];
-        this.outputs = func.outputs ?? [];
+        this._id = func.id ?? '';
+        this._name = func.name ?? '';
+        this._type = func.type ?? '';
+        this._properties = func.properties ?? [];
+        this._outputs = func.outputs ?? [];
         this.buildSteps(func.steps || []);
     }
+
+    //#region Getters and Setters
+    get id(): string {
+        return this._id;
+    }
+
+    get name(): string {
+        return this._name;
+    }
+
+    get type(): string {
+        return this._type;
+    }
+
+    get properties(): string[] {
+        return this._properties;
+    }
+
+    get outputs(): string[] {
+        return this._outputs;
+    }
+
+    get steps(): BaseStep[] {
+        return this._steps;
+    }
+
+    get savedElements(): Record<string, any> {
+        return this._savedElements;
+    }
+
+    set savedElements(value: Record<string, any>) {
+        this._savedElements = value;
+    }
+
+    get getId(): string {
+        return this._id;
+    }
+
+    get getName(): string {
+        return this._name;
+    }
+
+    get getType(): string {
+        return this._type;
+    }
+
+    get getSavedElements(): Record<string, any> {
+        return this._savedElements;
+    }
+
+    get getProperties(): string[] {
+        return this._properties;
+    }
+    //#endregion
 
     private buildSteps(steps: TestStep[]): void {
         if (!checkArrayMaxItems(steps)) {
             console.error(
-                `Too many test steps in function "${this.id} - ${this.name}": Maximum allowed is ${MAX_ITEMS}`
+                `Too many test steps in function "${this._id} - ${this._name}": Maximum allowed is ${MAX_ITEMS}`
             );
             return;
         }
 
         if (steps.length === 0) {
-            console.error(`No test steps found in function "${this.id} - ${this.name}"`);
+            console.error(`No test steps found in function "${this._id} - ${this._name}"`);
             return;
         }
 
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
             let testStep = stepFactory(i + 1, step);
-            this.steps.push(testStep);
+            this._steps.push(testStep);
         }
-    }
-
-    get getId(): string {
-        return this.id;
-    }
-
-    get getName(): string {
-        return this.name;
-    }
-
-    get getType(): string {
-        return this.type;
-    }
-
-    get getSavedElements(): Record<string, any> {
-        return this.savedElements;
-    }
-
-    get getProperties(): string[] {
-        return this.properties;
     }
 
     duplicate(): TrFunction {
         // Create new function with basic properties
-        const steps = this.steps.map((step) => {
+        const steps = this._steps.map((step) => {
             // Create a deep copy of the step's raw data
             return JSON.parse(JSON.stringify(step.rawData));
         });
         const newFunction = new TrFunction({
-            id: this.id,
-            name: this.name,
-            type: this.type,
-            properties: [...this.properties],
-            outputs: [...this.outputs],
+            id: this._id,
+            name: this._name,
+            type: this._type,
+            properties: [...this._properties],
+            outputs: [...this._outputs],
             steps: steps
         });
 
-        newFunction.savedElements = { ...this.savedElements };
+        newFunction._savedElements = { ...this._savedElements };
         return newFunction;
     }
 
     async run(
-        session: SessionConfiguration,
+        session: RunSession,
         propertiesValues: string[],
-        functions: Record<string, TrFunction>,
-        apis: Record<string, any>,
-        videoRecorder?: any,
+        functions: TrFunction[],
+        apis: TrApi[],
+        videoRecorder?: VideoRecorder,
         videoBaseStep?: string
-    ): Promise<FunctionRunResult> {
-        TrFunction.functionStacks.push(this.id);
+    ): Promise<FunctionResult> {
+        TrFunction.functionStacks.push(this._id);
 
-        const steps = this.steps;
+        const steps = this._steps;
 
         if (steps.length === 0) {
-            throw new TestDefinitionError(`Function "${this.name}" has no steps`);
+            throw new TestDefinitionError(`Function "${this._name}" has no steps`);
         }
 
         let actualProperties: Record<string, string> = {};
         if (
             propertiesValues === undefined ||
-            (propertiesValues && propertiesValues.length !== this.properties.length)
+            (propertiesValues && propertiesValues.length !== this._properties.length)
         ) {
             const inputProperties = propertiesValues ? propertiesValues.join(',') : [];
             throw new TestDefinitionError(
-                `Missing properties values for function "${this.name}": expecting "${this.properties.join(',')}" and received "${inputProperties}"`
+                `Missing properties values for function "${this._name}": expecting "${this._properties.join(',')}" and received "${inputProperties}"`
             );
         }
 
-        for (let i = 0; i < this.properties.length; i++) {
-            const prop = this.properties[i];
+        for (let i = 0; i < this._properties.length; i++) {
+            const prop = this._properties[i];
             const value = propertiesValues[i].trim();
             if (value === undefined) {
                 throw new TestDefinitionError(`Missing property value for "${prop}"`);
@@ -178,10 +208,10 @@ export class TrFunction {
         }
 
         let outputs: Record<string, any> | null = null;
-        if (this.outputs.length > 0) {
+        if (this._outputs.length > 0) {
             outputs = {};
-            for (let i = 0; i < this.outputs.length; i++) {
-                const prop = this.outputs[i];
+            for (let i = 0; i < this._outputs.length; i++) {
+                const prop = this._outputs[i];
                 outputs[prop] = actualProperties[prop];
             }
         }

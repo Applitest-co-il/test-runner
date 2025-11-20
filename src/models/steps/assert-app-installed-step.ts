@@ -1,16 +1,17 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
 import { replaceVariables } from '../../helpers/utils';
 import { checkAppIsInstalled } from '../../helpers/mobile-utils';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 class AssertAppInstalledStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(driver: ExtendedBrowser, _?: any): Promise<void> {
-        const app = replaceVariables(this.getValue || '', this.getVariables || {});
+    async execute(driver: Browser, _?: any): Promise<void> {
+        const app = replaceVariables(this.value || '', this.variables || {});
         try {
             const isInstalled = await checkAppIsInstalled(driver, app);
             if (!isInstalled) {

@@ -1,20 +1,21 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { replaceVariables } from '../../helpers/utils';
 import { TestRunnerError } from '../../helpers/test-errors';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 class SetLocationStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(driver: ExtendedBrowser, _?: any): Promise<void> {
+    async execute(driver: Browser, _?: any): Promise<void> {
         try {
-            const value = replaceVariables(this.getValue || '', this.getVariables || {});
+            const value = replaceVariables(this.value || '', this.variables || {});
             const locationParts = value.split('|||');
             if (locationParts.length < 2) {
                 throw new TestRunnerError(
-                    `SetGeoLocation::Latitude and longitude are required to set geo location - ${this.getValue}`
+                    `SetGeoLocation::Latitude and longitude are required to set geo location - ${this.value}`
                 );
             }
             const latitude = locationParts[0];
@@ -23,11 +24,11 @@ class SetLocationStep extends BaseStep {
 
             if (isNaN(Number(latitude)) || isNaN(Number(longitude)) || (altitude && isNaN(Number(altitude)))) {
                 throw new TestRunnerError(
-                    `SetGeoLocation::Latitude, longitude and altitude should be numbers - ${this.getValue}`
+                    `SetGeoLocation::Latitude, longitude and altitude should be numbers - ${this.value}`
                 );
             }
 
-            const conf = this.getConf;
+            const conf = this.conf;
             if (conf?.runType === 'web') {
                 await driver.emulate('geolocation', {
                     latitude: Number(latitude),

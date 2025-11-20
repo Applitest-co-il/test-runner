@@ -1,194 +1,249 @@
 import { TestDefinitionError, TestItemNotFoundError, TestRunnerError } from '../../helpers/test-errors';
 import { replaceVariables, prepareLocalScript } from '../../helpers/utils';
 import TestCondition from './test-condition';
-import { SessionConfiguration, TestStep, ExtendedBrowser } from '../../types';
+import { TestStep, RunSession } from '../../types';
 import { VideoRecorder } from '../../helpers/video-recorder';
 import StepsCommands from './abc-steps-commands';
+import { Browser } from 'webdriverio';
 
-const vmRun = require('@danielyaghil/vm-helper');
+import vmRun from '@danielyaghil/vm-helper';
+import { TrApi } from '../api';
+import { TrFunction } from '../function';
 
 abstract class BaseStep {
-    private session: SessionConfiguration | null = null;
-    private readonly sequence: number = 0;
-    private readonly command: string = '';
-    private readonly selectors: string[] = [];
-    private readonly namedElement: string = '';
-    private readonly position: number = -1;
-    private value: string | null = null;
-    private readonly operator: string | null = null;
-    private variables: Record<string, any> | null = null;
-    private savedElements: Record<string, any> | null = null;
-    private videoRecorder: VideoRecorder | null = null;
-    private videoBaseStep: string = '';
-    private functions: Record<string, any> | null = null;
-    private apis: Record<string, any> | null = null;
-    private status: string = 'pending';
-    private usedSelectors: string = '';
-    private errorDetails: string = '';
-    private condition: TestCondition | null = null;
-    private originalBorderCSS: any = '';
-    private hideKeyboard: boolean = false;
-    private takeSnapshot: boolean = false;
-    private readonly rawData: TestStep;
+    private _session: RunSession | null = null;
+    private readonly _sequence: number = 0;
+    private readonly _command: string = '';
+    private readonly _selectors: string[] = [];
+    private readonly _namedElement: string = '';
+    private readonly _position: number = -1;
+    private _value: string | null = null;
+    private readonly _operator: string | null = null;
+    private _variables: Record<string, string> | null = null;
+    private _savedElements: Record<string, any> | null = null;
+    private _videoRecorder: VideoRecorder | null = null;
+    private _videoBaseStep: string = '';
+    private _functions: TrFunction[] | null = null;
+    private _apis: TrApi[] | null = null;
+    private _status: string = 'pending';
+    private _usedSelectors: string = '';
+    private _errorDetails: string = '';
+    private _condition: TestCondition | null = null;
+    private _originalBorderCSS: any = null;
+    private _hideKeyboard: boolean = false;
+    private _takeSnapshot: boolean = false;
+    private readonly _rawData: TestStep;
 
     constructor(sequence: number, step: TestStep) {
-        this.sequence = sequence;
-        this.command = step.command;
-        this.selectors = step.selectors || [];
-        this.namedElement = step.namedElement || '';
-        this.position = step.position ?? -1;
-        this.value = step.value || null;
-        this.operator = step.operator || null;
-        this.condition = step.conditions && step.conditions.length > 0 ? new TestCondition(step.conditions[0]) : null;
+        this._sequence = sequence;
+        this._command = step.command;
+        this._selectors = step.selectors || [];
+        this._namedElement = step.namedElement || '';
+        this._position = step.position ?? -1;
+        this._value = step.value || null;
+        this._operator = step.operator || null;
+        this._condition = step.condition ? new TestCondition(step.condition) : null;
 
         // Store the original step configuration
-        this.rawData = { ...step };
+        this._rawData = { ...step };
 
         this.cleanSelectors();
         this.isValid();
     }
 
-    get getRawData(): TestStep {
-        return this.rawData;
+    get session(): RunSession | null {
+        return this._session;
     }
 
-    get getSequence(): number {
-        return this.sequence;
+    set session(value: RunSession | null) {
+        this._session = value;
     }
 
-    get getCommand(): string {
-        return this.command;
+    get conf() {
+        return this._session?.runConf;
     }
 
-    get getSelectors(): string[] {
-        return this.selectors;
+    get sequence(): number {
+        return this._sequence;
     }
 
-    get getNamedElement(): string {
-        return this.namedElement;
+    get command(): string {
+        return this._command;
     }
 
-    get getValue(): string | null {
-        return this.value;
+    get selectors(): string[] {
+        return this._selectors;
     }
 
-    set setValue(value: string | null) {
-        this.value = value;
+    get namedElement(): string {
+        return this._namedElement;
     }
 
-    get getStatus(): string {
-        return this.status;
+    get position(): number {
+        return this._position;
     }
 
-    get getOperator(): string | null {
-        return this.operator;
+    get value(): string | null {
+        return this._value;
     }
 
-    get getUsedSelectors(): string {
-        return this.usedSelectors;
+    set value(value: string | null) {
+        this._value = value;
     }
 
-    get getErrorDetails(): string {
-        return this.errorDetails;
+    get operator(): string | null {
+        return this._operator;
     }
 
-    get getVariables(): Record<string, any> | null {
-        return this.variables;
+    get variables(): Record<string, string> | null {
+        return this._variables;
     }
 
-    set setVariables(value: Record<string, any> | null) {
-        this.variables = value;
+    set variables(value: Record<string, string> | null) {
+        this._variables = value;
     }
 
-    get getSavedElements(): Record<string, any> | null {
-        return this.savedElements;
+    get savedElements(): Record<string, any> | null {
+        return this._savedElements;
     }
 
-    protected set setSavedElements(value: Record<string, any> | null) {
-        this.savedElements = value;
+    set savedElements(value: Record<string, any> | null) {
+        this._savedElements = value;
     }
 
-    get getFunctions(): Record<string, any> | null {
-        return this.functions;
+    get videoRecorder(): VideoRecorder | null {
+        return this._videoRecorder;
     }
 
-    get getApis(): Record<string, any> | null {
-        return this.apis;
+    set videoRecorder(value: VideoRecorder | null) {
+        this._videoRecorder = value;
     }
 
-    get getConf(): any {
-        return (this.session as any)?.runConf;
+    get videoBaseStep(): string {
+        return this._videoBaseStep;
     }
 
-    get getSession(): SessionConfiguration | null {
-        return this.session;
+    set videoBaseStep(value: string) {
+        this._videoBaseStep = value;
     }
 
-    get getHideKeyboard(): boolean {
-        return this.hideKeyboard;
+    get functions(): TrFunction[] | null {
+        return this._functions;
     }
 
-    set setHideKeyboard(value: boolean) {
-        this.hideKeyboard = value;
+    set functions(value: TrFunction[] | null) {
+        this._functions = value;
     }
 
-    get getTakeSnapshot(): boolean {
-        return this.takeSnapshot;
+    get apis(): TrApi[] | null {
+        return this._apis;
     }
 
-    set setTakeSnapshot(value: boolean) {
-        this.takeSnapshot = value;
+    set apis(value: TrApi[] | null) {
+        this._apis = value;
     }
 
-    get getNamedElementOrUsedSelectorsComment(): string {
-        return `${this.namedElement ? 'named element [' + this.namedElement + ']' : 'selectors [' + this.usedSelectors + ']'}`;
+    get status(): string {
+        return this._status;
     }
 
-    get getVideoRecorder(): VideoRecorder | null {
-        return this.videoRecorder;
+    set status(value: string) {
+        this._status = value;
     }
 
-    get getVideoBaseStep(): string {
-        return this.videoBaseStep;
+    get usedSelectors(): string {
+        return this._usedSelectors;
+    }
+
+    set usedSelectors(value: string) {
+        this._usedSelectors = value;
+    }
+
+    get errorDetails(): string {
+        return this._errorDetails;
+    }
+
+    set errorDetails(value: string) {
+        this._errorDetails = value;
+    }
+
+    get condition(): TestCondition | null {
+        return this._condition;
+    }
+
+    get originalBorderCSS(): any {
+        return this._originalBorderCSS;
+    }
+
+    set originalBorderCSS(value: any) {
+        this._originalBorderCSS = value;
+    }
+
+    get hideKeyboard(): boolean {
+        return this._hideKeyboard;
+    }
+
+    set hideKeyboard(value: boolean) {
+        this._hideKeyboard = value;
+    }
+
+    get takeSnapshot(): boolean {
+        return this._takeSnapshot;
+    }
+
+    set takeSnapshot(value: boolean) {
+        this._takeSnapshot = value;
+    }
+
+    get rawData(): TestStep {
+        return this._rawData;
+    }
+
+    get namedElementOrUsedSelectorsComment(): string {
+        return `${this._namedElement ? 'named element [' + this._namedElement + ']' : 'selectors [' + this._usedSelectors + ']'}`;
     }
 
     private isValid(): boolean {
-        if (!this.command) {
-            throw new TestDefinitionError(`Command is required for step ${this.sequence}`);
+        if (!this._command) {
+            throw new TestDefinitionError(`Command is required for step ${this._sequence}`);
         }
 
-        if (!StepsCommands.commands.includes(this.command)) {
-            throw new TestDefinitionError(`Command ${this.command} is not a valid one - step ${this.sequence}`);
+        if (!StepsCommands.commands.includes(this._command)) {
+            throw new TestDefinitionError(`Command ${this._command} is not a valid one - step ${this._sequence}`);
         }
 
-        if (StepsCommands.RequiresSelector(this.command) && (!this.selectors || this.selectors.length === 0)) {
-            throw new TestDefinitionError(`Selector is required for step ${this.sequence}`);
+        if (
+            StepsCommands.RequiresSelector(this._command) &&
+            (!this._selectors || this._selectors.length === 0) &&
+            !this._namedElement
+        ) {
+            throw new TestDefinitionError(`Selector is required for step ${this._sequence}`);
         }
 
-        if (StepsCommands.RequiresValue(this.command) && !this.value) {
-            throw new TestDefinitionError(`Value is required for step ${this.sequence}`);
+        if (StepsCommands.RequiresValue(this._command) && !this._value) {
+            throw new TestDefinitionError(`Value is required for step ${this._sequence}`);
         }
 
-        if (this.command === 'execute-script') {
-            if (!this.operator || this.operator === 'sync') {
-                if (!this.value?.includes('return')) {
+        if (this._command === 'execute-script') {
+            if (!this._operator || this._operator === 'sync') {
+                if (!this._value?.includes('return')) {
                     throw new TestDefinitionError(
-                        `ExecuteScript::Script for step ${this.sequence} should contain "return" to indicate to the system the script has completed and with what output`
+                        `ExecuteScript::Script for step ${this._sequence} should contain "return" to indicate to the system the script has completed and with what output`
                     );
                 }
-            } else if (this.operator !== 'local') {
+            } else if (this._operator !== 'local') {
                 throw new TestDefinitionError(
-                    `ExecuteScript::Script for step ${this.sequence} has invalid operator "${this.operator}" (should be only 'sync', 'async' or 'local')`
+                    `ExecuteScript::Script for step ${this._sequence} has invalid operator "${this._operator}" (should be only 'sync', 'async' or 'local')`
                 );
             }
         }
 
-        if (this.condition) {
+        if (this._condition) {
             try {
-                this.condition.isValid();
+                this._condition.isValid();
             } catch (error) {
                 throw new TestDefinitionError(
-                    `Condition for step ${this.sequence} is not valid due to condition ${(error as Error).message}`
+                    `Condition for step ${this._sequence} is not valid due to condition ${(error as Error).message}`
                 );
             }
         }
@@ -198,25 +253,25 @@ abstract class BaseStep {
 
     private cleanSelectors(): void {
         // clean selectors - backward compatibility
-        if (this.selectors) {
-            for (let i = 0; i < this.selectors.length; i++) {
-                let selector = this.selectors[i];
+        if (this._selectors) {
+            for (let i = 0; i < this._selectors.length; i++) {
+                let selector = this._selectors[i];
                 let selectorParts = selector.split('|||');
                 if (selectorParts.length > 1) {
-                    this.selectors[i] = selectorParts[1].trim();
+                    this._selectors[i] = selectorParts[1].trim();
                 }
             }
         }
     }
 
     async addFrameToVideo(forced?: boolean): Promise<void> {
-        if (this.videoRecorder && (this.takeSnapshot || forced)) {
-            await this.videoRecorder.addFrame();
+        if (this._videoRecorder && (this._takeSnapshot || forced)) {
+            await this._videoRecorder.addFrame();
         }
     }
 
-    async highlightElement(driver: ExtendedBrowser, item: any): Promise<void> {
-        if (!item || item === 'noItem' || (this.session as any)?.type !== 'web') {
+    async highlightElement(driver: Browser, item: any): Promise<void> {
+        if (!item || item === 'noItem' || (this._session as any)?.type !== 'web') {
             return;
         }
 
@@ -225,7 +280,7 @@ abstract class BaseStep {
         }
 
         try {
-            this.originalBorderCSS = await item.getCSSProperty('border');
+            this._originalBorderCSS = await item.getCSSProperty('border');
             await driver.execute((el: any) => {
                 let elt = el;
                 while (elt.parentNode && elt.parentNode.children.length === 1) {
@@ -238,8 +293,8 @@ abstract class BaseStep {
         }
     }
 
-    async revertElement(driver: ExtendedBrowser, item: any): Promise<void> {
-        if (!item || item === 'noItem' || !this.originalBorderCSS || (this.session as any)?.type !== 'web') {
+    async revertElement(driver: Browser, item: any): Promise<void> {
+        if (!item || item === 'noItem' || !this._originalBorderCSS || (this._session as any)?.type !== 'web') {
             return;
         }
 
@@ -249,7 +304,7 @@ abstract class BaseStep {
             }
 
             await driver.execute(
-                (el: any, css: string) => {
+                (el: any, css: any) => {
                     let elt = el;
                     while (elt.parentNode && elt.parentNode.children.length === 1) {
                         elt = elt.parentNode;
@@ -257,53 +312,53 @@ abstract class BaseStep {
                     elt.style.border = css;
                 },
                 item,
-                this.originalBorderCSS.value
+                this._originalBorderCSS.value
             );
         } catch {
             console.log(`Could not revert highlight: ${JSON.stringify(item)}`);
         } finally {
-            this.originalBorderCSS = '';
+            this._originalBorderCSS = '';
         }
     }
 
     async run(
-        session: SessionConfiguration,
-        functions: Record<string, any>,
-        apis: Record<string, any>,
-        variables: Record<string, any>,
+        session: RunSession,
+        functions: TrFunction[],
+        apis: TrApi[],
+        variables: Record<string, string>,
         savedElements: Record<string, any>,
         videoRecorder?: VideoRecorder,
         videoBaseStep: string = ''
     ): Promise<boolean> {
-        this.session = session;
-        this.functions = functions;
-        this.apis = apis;
-        this.variables = variables;
-        this.savedElements = savedElements;
-        this.videoRecorder = videoRecorder || null;
-        this.videoBaseStep = videoBaseStep;
+        this._session = session;
+        this._functions = functions;
+        this._apis = apis;
+        this._variables = variables;
+        this._savedElements = savedElements;
+        this._videoRecorder = videoRecorder || null;
+        this._videoBaseStep = videoBaseStep;
 
         try {
-            if (this.condition) {
-                let conditionResult = await this.condition.evaluate(
+            if (this._condition) {
+                let conditionResult = await this._condition.evaluate(
                     session.driver,
                     variables,
                     (session as any).runConf
                 );
                 if (!conditionResult) {
-                    this.status = 'skipped';
+                    this._status = 'skipped';
                     return true;
                 }
             }
 
-            const item = StepsCommands.RequiresItem(this.command) ? await this.selectItem(session.driver) : 'noItem';
+            const item = StepsCommands.RequiresItem(this._command) ? await this.selectItem(session.driver) : 'noItem';
             if (!item) {
-                if (this.namedElement) {
+                if (this._namedElement) {
                     throw new TestItemNotFoundError(
-                        `Item with named element [${this.namedElement}] not found - check previous steps`
+                        `Item with named element [${this._namedElement}] not found - check previous steps`
                     );
                 } else {
-                    throw new TestItemNotFoundError(`Item with selectors [${this.usedSelectors}] not found`);
+                    throw new TestItemNotFoundError(`Item with selectors [${this._usedSelectors}] not found`);
                 }
             }
 
@@ -315,8 +370,8 @@ abstract class BaseStep {
 
             await this.revertElement(session.driver, item);
         } catch (error) {
-            this.status = 'failed';
-            this.errorDetails = `${(error as Error).message}`;
+            this._status = 'failed';
+            this._errorDetails = `${(error as Error).message}`;
 
             await this.addFrameToVideo();
 
@@ -326,11 +381,11 @@ abstract class BaseStep {
         return true;
     }
 
-    async selectItem(driver: ExtendedBrowser): Promise<any> {
-        if (this.namedElement) {
-            if (this.savedElements && this.savedElements[this.namedElement]) {
-                const saved = this.savedElements[this.namedElement];
-                if (saved && saved.isDisplayed()) {
+    async selectItem(driver: Browser): Promise<any | null> {
+        if (this._namedElement) {
+            if (this._savedElements && this._savedElements[this._namedElement]) {
+                const saved = this._savedElements[this._namedElement];
+                if (saved && (await saved.isDisplayed())) {
                     return saved;
                 } else {
                     this.doHideKeyboard(driver);
@@ -342,21 +397,21 @@ abstract class BaseStep {
         }
 
         // Implement item selection logic
-        let selectors = this.selectors;
+        let selectors = this._selectors;
         if (!selectors || selectors.length === 0) {
             return null;
         }
 
-        let item: any = null;
-        this.usedSelectors = '';
+        let item: any | null = null;
+        this._usedSelectors = '';
         for (let i = 0; i < selectors.length; i++) {
-            const selector = replaceVariables(selectors[i], this.variables || {});
-            if (this.usedSelectors.length > 0) {
-                this.usedSelectors += ',';
+            const selector = replaceVariables(selectors[i], this._variables || {});
+            if (this._usedSelectors.length > 0) {
+                this._usedSelectors += ',';
             }
-            this.usedSelectors += `"${selector}"`;
+            this._usedSelectors += `"${selector}"`;
 
-            if (this.position === -1) {
+            if (this._position === -1) {
                 item = await driver.$(selector);
                 if (!item || item.error) {
                     const keyboardHidden = await this.doHideKeyboard(driver);
@@ -372,43 +427,43 @@ abstract class BaseStep {
                         item = await driver.$$(selector);
                     }
                 }
-                if (items && !(items as any).error && items.length > this.position) {
-                    item = items[this.position];
+                if (items && !(items as any).error && (items as any).length > this._position) {
+                    item = items[this._position];
                 }
             }
             if (item && !item.error) {
                 break;
             }
         }
-        if (!item || item.error) {
+        if (!item || (item as any).error) {
             return null;
         }
         return item;
     }
 
-    abstract execute(driver: ExtendedBrowser, item: any): Promise<void>;
+    abstract execute(driver: Browser, item: any): Promise<void>;
 
-    async executeScript(script: string, driver: ExtendedBrowser): Promise<any> {
+    async executeScript(script: string, driver: Browser): Promise<any> {
         try {
-            if (this.operator === 'sync') {
+            if (this._operator === 'sync') {
                 const result = await driver.execute(script);
                 if (!result) {
-                    throw new TestRunnerError(`ExecuteScript::Script: script for step ${this.sequence} failed`);
+                    throw new TestRunnerError(`ExecuteScript::Script: script for step ${this._sequence} failed`);
                 }
                 console.log(
-                    `ExecuteScript::Script: driver script for step ${this.sequence} succeeded: ${JSON.stringify(result)}`
+                    `ExecuteScript::Script: driver script for step ${this._sequence} succeeded: ${JSON.stringify(result)}`
                 );
                 return result;
             } else {
                 const localScript = prepareLocalScript(script);
-                const result = await vmRun(localScript, this.variables);
+                const result = await vmRun(localScript, this._variables ?? undefined);
                 if (!result || !result.success) {
                     throw new TestRunnerError(
-                        `ExecuteScript::Script: local script for step ${this.sequence} failed ${result.error}`
+                        `ExecuteScript::Script: local script for step ${this._sequence} failed ${result.error}`
                     );
                 }
                 console.log(
-                    `ExecuteScript::Script: local script for step ${this.sequence} succeeded: ${JSON.stringify(result)}`
+                    `ExecuteScript::Script: local script for step ${this._sequence} succeeded: ${JSON.stringify(result)}`
                 );
                 return result.output;
             }
@@ -417,14 +472,14 @@ abstract class BaseStep {
                 throw error;
             } else {
                 throw new TestRunnerError(
-                    `ExecuteScript::Script: script for step ${this.sequence} failed with error ${error}`
+                    `ExecuteScript::Script: script for step ${this._sequence} failed with error ${error}`
                 );
             }
         }
     }
 
-    async doHideKeyboard(driver: ExtendedBrowser): Promise<boolean> {
-        if ((this.session as any)?.type === 'mobile' && this.hideKeyboard) {
+    async doHideKeyboard(driver: Browser): Promise<boolean> {
+        if ((this._session as any)?.type === 'mobile' && this._hideKeyboard) {
             const isKeyBoaordShown = await (driver as any).isKeyboardShown();
             if (isKeyBoaordShown) {
                 await (driver as any).hideKeyboard();

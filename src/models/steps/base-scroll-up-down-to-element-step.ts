@@ -1,17 +1,18 @@
-import BaseVerticalScrollStep = require('./base-vertical-scroll-step');
+import BaseVerticalScrollStep from './base-vertical-scroll-step';
 import { TestRunnerError } from '../../helpers/test-errors';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 class BaseScrollUpDownToElementStep extends BaseVerticalScrollStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(driver: ExtendedBrowser, item?: any): Promise<void> {
+    async execute(driver: Browser, item?: any): Promise<void> {
         throw new TestRunnerError(`Execute method is not implemented - ${driver} - ${item}`);
     }
 
-    async scrollUpOrDownToElement(driver: ExtendedBrowser, down: boolean = true): Promise<void> {
+    async scrollUpOrDownToElement(driver: Browser, down: boolean = true): Promise<void> {
         const scrollOptions = this.parseScrollValue();
 
         const startPercentage = down ? scrollOptions.bottomPercentage : scrollOptions.topPercentage;
@@ -34,7 +35,7 @@ class BaseScrollUpDownToElementStep extends BaseVerticalScrollStep {
             } else {
                 const isDisplayed = await item.isDisplayed();
                 if (isDisplayed) {
-                    const session = this.getSession;
+                    const session = this.session;
                     if (session?.type === 'web') {
                         const isClickable = await item.isClickable();
                         if (isClickable) {
@@ -49,7 +50,7 @@ class BaseScrollUpDownToElementStep extends BaseVerticalScrollStep {
         }
         if (!item) {
             throw new TestRunnerError(
-                `ScrollToElement::Item with ${this.getNamedElementOrUsedSelectorsComment} was not found after scrolling ${scrollOptions.count} times`
+                `ScrollToElement::Item with ${this.namedElementOrUsedSelectorsComment} was not found after scrolling ${scrollOptions.count} times`
             );
         }
     }

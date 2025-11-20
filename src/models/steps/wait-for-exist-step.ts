@@ -1,29 +1,29 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 export default class WaitForExistStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
 
-        this.setTakeSnapshot = true;
+        this.takeSnapshot = true;
     }
 
-    async execute(driver: ExtendedBrowser, _: any): Promise<void> {
-        const value = this.getValue;
+    async execute(driver: Browser, _: any): Promise<void> {
+        const value = this.value;
         let timeout = value ? parseInt(value) : 5000;
         try {
-            let that = this;
             await driver.waitUntil(
                 async () => {
-                    let item = await that.selectItem(driver);
+                    let item = await this.selectItem(driver);
                     if (!item) {
-                        await that.addFrameToVideo(true);
+                        await this.addFrameToVideo(true);
                         return false;
                     } else {
-                        await that.highlightElement(driver, item);
+                        await this.highlightElement(driver, item);
                         await driver.pause(500);
-                        await that.revertElement(driver, item);
+                        await this.revertElement(driver, item);
                         return true;
                     }
                 },
@@ -31,7 +31,7 @@ export default class WaitForExistStep extends BaseStep {
             );
         } catch {
             throw new TestRunnerError(
-                `Element with ${this.getNamedElementOrUsedSelectorsComment} did not appear on screen up to ${timeout}ms`
+                `Element with ${this.namedElementOrUsedSelectorsComment} did not appear on screen up to ${timeout}ms`
             );
         }
     }

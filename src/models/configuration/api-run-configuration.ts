@@ -1,13 +1,13 @@
-import RunConfiguration = require('./base-run-configuration');
-import { ExtendedBrowser } from '../../types';
+import DriverConfiguration from './base-driver-configuration';
+import { Browser } from 'webdriverio';
 
-class ApiRunConfiguration extends RunConfiguration {
+class ApiRunConfiguration extends DriverConfiguration {
     constructor(options: any) {
         super(options);
     }
 
-    async startSession(_: string): Promise<ExtendedBrowser> {
-        return null as any; // No session management for API runs
+    async startSession(_: string): Promise<Browser | null> {
+        return null;
     }
 }
 

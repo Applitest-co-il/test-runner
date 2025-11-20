@@ -1,6 +1,7 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 interface ScrollOptions {
     topPercentage: number;
@@ -14,11 +15,11 @@ abstract class BaseVerticalScrollStep extends BaseStep {
         super(sequence, step);
     }
 
-    async execute(driver: ExtendedBrowser, item: any): Promise<void> {
+    async execute(driver: Browser, item: any): Promise<void> {
         throw new TestRunnerError(`Execute method is not implemented - ${driver} - ${item}`);
     }
 
-    async verticalScroll(driver: ExtendedBrowser, originItem: any, down: boolean = true): Promise<void> {
+    async verticalScroll(driver: Browser, originItem: any, down: boolean = true): Promise<void> {
         const scrollOptions = this.parseScrollValue();
 
         const startPercentage = originItem ? 0 : down ? scrollOptions.bottomPercentage : scrollOptions.topPercentage;
@@ -41,14 +42,14 @@ abstract class BaseVerticalScrollStep extends BaseStep {
     }
 
     async doVerticalScroll(
-        driver: ExtendedBrowser,
+        driver: Browser,
         scrollDuration: number,
         origin: any,
         startY: number,
         scrollY: number,
         anchorX: number
     ): Promise<void> {
-        if (this.getSession?.type == 'web') {
+        if (this.session?.type == 'web') {
             const actualScrollY = -scrollY;
 
             await driver
@@ -81,7 +82,7 @@ abstract class BaseVerticalScrollStep extends BaseStep {
             count: 1
         };
 
-        const value = this.getValue;
+        const value = this.value;
         if (value && value.indexOf('|||') !== -1) {
             const valueParts = value.split('|||');
 

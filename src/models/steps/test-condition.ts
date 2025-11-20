@@ -1,8 +1,9 @@
 import { TestDefinitionError, TestRunnerError } from '../../helpers/test-errors';
 import { replaceVariables, prepareLocalScript } from '../../helpers/utils';
-import { TestCondition as ITestCondition, ExtendedBrowser } from '../../types';
+import { TestCondition as ITestCondition } from '../../types';
+import { Browser } from 'webdriverio';
 
-const vmRun = require('@danielyaghil/vm-helper');
+import vmRun from '@danielyaghil/vm-helper';
 
 export default class TestCondition {
     private readonly type: string = '';
@@ -58,7 +59,7 @@ export default class TestCondition {
         return true;
     }
 
-    async evaluate(driver: ExtendedBrowser, variables: Record<string, any>, conf: any): Promise<boolean> {
+    async evaluate(driver: Browser, variables: Record<string, any>, conf: any): Promise<boolean> {
         switch (this.type) {
             case 'exist':
                 return await this.existCheck(driver, variables);
@@ -75,13 +76,13 @@ export default class TestCondition {
         }
     }
 
-    private async existCheck(driver: ExtendedBrowser, variables: Record<string, any>): Promise<boolean> {
+    private async existCheck(driver: Browser, variables: Record<string, any>): Promise<boolean> {
         let selector = replaceVariables(this.selector, variables);
         let item = await driver.$(selector);
         return item && !(item as any).error;
     }
 
-    private async scriptCheck(driver: ExtendedBrowser, variables: Record<string, any>, conf: any): Promise<boolean> {
+    private async scriptCheck(driver: Browser, variables: Record<string, any>, conf: any): Promise<boolean> {
         let script = replaceVariables(this.script, variables);
         let result: any = null;
         if (conf.runType === 'web') {
@@ -98,7 +99,7 @@ export default class TestCondition {
         return result;
     }
 
-    private async valueCheck(driver: ExtendedBrowser, variables: Record<string, any>): Promise<boolean> {
+    private async valueCheck(driver: Browser, variables: Record<string, any>): Promise<boolean> {
         let selector = replaceVariables(this.selector, variables);
         let item = await driver.$(selector);
         if (!item || (item as any).error) {
@@ -109,7 +110,7 @@ export default class TestCondition {
         return text === value;
     }
 
-    private async browserCheck(driver: ExtendedBrowser, variables: Record<string, any>, conf: any): Promise<boolean> {
+    private async browserCheck(driver: Browser, variables: Record<string, any>, conf: any): Promise<boolean> {
         let browserName = replaceVariables(this.value, variables);
         if (conf.runType === 'web') {
             const actualBrowserName = driver.capabilities.browserName?.toLowerCase() || '';

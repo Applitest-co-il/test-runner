@@ -1,16 +1,11 @@
-import RunConfigurationWeb from './configuration/web-run-configuration';
-import RunConfigurationMobile from './configuration/mobile-run-configuration';
+import WebDriverConfiguration from './configuration/web-driver-configuration';
+import MobileDriverConfiguration from './configuration/mobile-driver-configuration';
+import DriverConfiguration from './configuration/base-driver-configuration';
 import RunConfigurationApi from './configuration/api-run-configuration';
 import { TestRunnerConfigurationError } from '../helpers/test-errors';
-import { TestRunConfiguration, SessionConfiguration } from '../types';
+import { RunConfiguration, RunSession } from '../types';
 
-interface RunSession {
-    type: string;
-    runConf: any; // Will be typed when all configuration classes are converted
-    driver: any;
-}
-
-export function runConfigurationFactory(options: TestRunConfiguration): RunSession[] {
+export function runConfigurationFactory(options: RunConfiguration): RunSession[] {
     if (!options) {
         throw new TestRunnerConfigurationError('No options provided');
     }
@@ -23,13 +18,13 @@ export function runConfigurationFactory(options: TestRunConfiguration): RunSessi
     for (let i = 0; i < options.sessions.length; i++) {
         let session = options.sessions[i];
 
-        let runConf: any = null;
-        switch (session.runType) {
+        let runConf: DriverConfiguration | undefined = undefined;
+        switch (session.type) {
             case 'mobile':
-                runConf = new RunConfigurationMobile(options, session);
+                runConf = new MobileDriverConfiguration(options, session);
                 break;
             case 'web':
-                runConf = new RunConfigurationWeb(options, session);
+                runConf = new WebDriverConfiguration(options, session);
                 break;
             case 'api':
                 runConf = new RunConfigurationApi(options);
@@ -37,7 +32,7 @@ export function runConfigurationFactory(options: TestRunConfiguration): RunSessi
             default:
                 throw new TestRunnerConfigurationError('Invalid session type provided');
         }
-        runSessions.push({ type: session.runType, runConf: runConf, driver: null });
+        runSessions.push({ type: session.type, runConf, driver: null });
     }
     return runSessions;
 }

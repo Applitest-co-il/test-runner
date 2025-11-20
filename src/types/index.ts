@@ -1,31 +1,51 @@
-// Core type definitions for Applitest Test Runner
+// Core type definitions for Applitest Test
 
-export interface TestRunConfiguration {
-    name: string;
-    description?: string;
-    sessions: SessionConfiguration[];
-    variables?: Record<string, any>;
+import DriverConfiguration from '../models/configuration/base-driver-configuration';
+import { TrFunction } from '../models/function';
+
+//#region Configuration
+
+export interface TestRunnerOptions {
+    runConfiguration?: RunConfiguration;
+    variables?: Record<string, string>;
+    suites?: SuiteConfiguration[];
     functions?: FunctionConfiguration[];
     apis?: ApiConfiguration[];
 }
 
+export interface RunConfiguration {
+    name: string;
+    description?: string;
+    sessions: SessionConfiguration[];
+    startFromStep?: number;
+    stopAtStep?: number;
+    keepSession?: boolean;
+    videosPath?: string;
+}
+
 export interface SessionConfiguration {
     runType: 'web' | 'mobile' | 'api';
-    browser?: string;
-    capabilities?: WebDriverCapabilities;
-    tests: TestConfiguration[];
-    currentAxTree?: AccessibilityTree | null;
     type?: string;
+    browser?: any;
+    appium?: any;
+    capabilities?: WebDriverCapabilities;
     driver?: any;
+}
+
+export interface SuiteConfiguration {
+    name: string;
+    description?: string;
+    tests: TestConfiguration[];
 }
 
 export interface TestConfiguration {
     name: string;
     description?: string;
+    type: string;
     steps: TestStep[];
     savedElements?: Record<string, any>;
-    variables?: Record<string, any>;
-    functions?: Record<string, any>;
+    variables?: Record<string, string>;
+    functions?: Record<string, TrFunction>;
 }
 
 export interface TestStep {
@@ -33,7 +53,7 @@ export interface TestStep {
     value?: string;
     operator?: string;
     description?: string;
-    conditions?: TestCondition[];
+    condition?: TestCondition;
     outputs?: OutputVariable[];
     sequence?: number;
     takeSnapshot?: boolean;
@@ -83,6 +103,16 @@ export interface WebDriverCapabilities {
     [key: string]: any;
 }
 
+export interface RunSession {
+    type: string;
+    runConf: DriverConfiguration;
+    driver: any;
+}
+
+//#endregion
+
+//#region Web Page description
+
 export interface AccessibilityTree {
     timestamp: string;
     url: string;
@@ -100,76 +130,6 @@ export interface AccessibilityMetadata {
     selector?: string;
     startElement?: string;
     extractionMethod?: string;
-}
-
-export interface TestResult {
-    runCompleted: boolean;
-    success: boolean;
-    executionTime: number;
-    summary: TestSummary;
-    suiteResults: SuiteResult[];
-}
-
-export interface SuiteResult {
-    success: boolean;
-    summary: TestSummary;
-    tests: TestExecutionResult[];
-    suiteResult?: SuiteResult;
-}
-
-export interface TestExecutionResult {
-    name: string;
-    success: boolean;
-    error?: string;
-    executionTime: number;
-    steps: StepResult[];
-}
-
-export interface StepResult {
-    command: string;
-    success: boolean;
-    error?: string;
-    executionTime: number;
-    snapshot?: string;
-}
-
-export interface TestSummary {
-    suites?: number;
-    passedSuites?: number;
-    total: number;
-    passed: number;
-    failed: number;
-    skipped: number;
-    pending: number;
-}
-
-export interface SessionCache {
-    sessionId: string;
-    testRunner: any; // Will be typed when TestRunner is converted
-    savedElements: Record<string, any>;
-}
-
-export interface ApiCallOptions {
-    outputs?: OutputVariable[];
-    url: string;
-    method: string;
-    headers?: string;
-    data?: string;
-    schema?: any;
-}
-
-export interface ExtendedBrowser {
-    capabilities: WebDriverCapabilities;
-    getPuppeteer(): Promise<any>;
-    call<T>(callback: () => Promise<T>): Promise<T>;
-    execute<T>(script: string | ((...args: any[]) => T), ...args: any[]): Promise<T>;
-    executeAsync<T>(script: string | ((...args: any[]) => T), ...args: any[]): Promise<T>;
-    url(url: string): Promise<void>;
-    newWindow(url: string): Promise<void>;
-    getTitle(): Promise<string>;
-    $(selector: string): Promise<any>;
-    $$(selector: string): Promise<any[]>;
-    [key: string]: any;
 }
 
 export interface ElementInfo {
@@ -215,7 +175,137 @@ export interface DomTreeResult {
     error?: string;
 }
 
-// Error types
+//#endregion
+
+//#region Results
+
+//result if full run
+export interface RunSummary {
+    suites?: number;
+    passedSuites?: number;
+    total: number;
+    passed: number;
+    failed: number;
+    skipped: number;
+    pending: number;
+}
+
+export interface TestExecutionResult {
+    name: string;
+    success: boolean;
+    error?: string;
+    executionTime: number;
+    steps: StepResult[];
+}
+
+export interface StepResult {
+    command: string;
+    success: boolean;
+    error?: string;
+    executionTime: number;
+    snapshot?: string;
+}
+
+export interface RunResult {
+    runCompleted: boolean;
+    success: boolean;
+    executionTime: number;
+    summary?: RunSummary;
+    suiteResults?: SuiteResult[];
+    error?: string;
+}
+
+export interface SessionResult {
+    success: boolean;
+    message?: string;
+    executionTime?: number;
+    sessionId?: string;
+    suiteResult?: SuiteResult;
+    tree?: any;
+}
+
+export interface SuiteResult {
+    id: string;
+    name: string;
+    index: number;
+    success: boolean;
+    summary: {
+        total: number;
+        passed: number;
+        failed: number;
+        skipped: number;
+        pending: number;
+    };
+    details: TestDetail[];
+}
+
+export interface TestDetail {
+    id: string;
+    suiteId: string;
+    suiteIdx: number;
+    suiteName: string;
+    index: number;
+    type: string;
+    name: string;
+    status: string;
+    failedStep: FailedStepDetail;
+    error: string;
+}
+
+export interface FailedStepDetail {
+    sequence?: number;
+    command?: string;
+    target?: string;
+    error?: string;
+    url?: string;
+}
+
+//#region API Call Result
+
+export interface ApiCallResult {
+    success: boolean;
+    statusCode?: number;
+    statusText?: string;
+    headers?: any;
+    responseBody?: any;
+    schemaValidation: boolean;
+    schemaValidationErrors: SchemaValidationError[];
+    outputs?: Record<string, any>;
+    error?: string;
+}
+
+export interface SchemaValidationError {
+    message?: string;
+    dataPath?: string;
+    schemaPath?: string;
+}
+
+//#endregion
+
+//#region Functions
+
+export interface FunctionResult {
+    success: boolean;
+    failedStep?: number;
+    error?: string;
+    outputs?: Record<string, any> | null;
+}
+
+//#endregion
+
+//#endregion
+
+export interface ApiCallOptions {
+    outputs?: OutputVariable[];
+    url: string;
+    method: string;
+    headers?: string;
+    data?: string;
+    schema?: any;
+}
+
+//#region Error types
+
 export class TestRunnerConfigurationError extends Error {
     constructor(message: string) {
         super(message);
@@ -250,3 +340,5 @@ export class TestAbuseError extends Error {
         this.name = 'TestAbuseError';
     }
 }
+
+//#endregion

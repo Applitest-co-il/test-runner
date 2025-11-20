@@ -10,7 +10,7 @@ import { ElementInfo, DomTreeResult } from '../types';
  * @param selectorOrElement - CSS selector string or DOM element to start from (optional)
  * @returns DOM tree structure
  */
-function extractDom(selectorOrElement: string | Element | null = null): DomTreeResult {
+export function extractDom(selectorOrElement: string | Element | null = null): DomTreeResult {
     /* eslint-disable no-undef */
 
     // Determine the root element to start extraction from
@@ -283,8 +283,3 @@ function extractDom(selectorOrElement: string | Element | null = null): DomTreeR
 
     /* eslint-enable no-undef */
 }
-
-export {
-    extractDom,
-    extractDom as extractAccessibilityTree // Keep backward compatibility
-};

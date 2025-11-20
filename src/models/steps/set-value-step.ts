@@ -1,16 +1,17 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { replaceVariables } from '../../helpers/utils';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 export default class SetValueStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
 
-        this.setTakeSnapshot = true;
+        this.takeSnapshot = true;
     }
 
-    async execute(driver: ExtendedBrowser, item: any): Promise<void> {
-        const actualValue = replaceVariables(this.getValue || '', this.getVariables || {});
+    async execute(driver: Browser, item: any): Promise<void> {
+        const actualValue = replaceVariables(this.value || '', this.variables || {});
         try {
             await item.setValue(actualValue);
         } catch (error) {

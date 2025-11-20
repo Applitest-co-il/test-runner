@@ -1,15 +1,16 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { replaceVariables } from '../../helpers/utils';
 import { TestRunnerError } from '../../helpers/test-errors';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 class ToggleLocationServicesStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(driver: ExtendedBrowser, _?: any): Promise<void> {
-        const value = replaceVariables(this.getValue || '', this.getVariables || {});
+    async execute(driver: Browser, _?: any): Promise<void> {
+        const value = replaceVariables(this.value || '', this.variables || {});
         try {
             const capabilities = (driver as any).capabilities;
             if (capabilities.platformName.toLowerCase() === 'android') {

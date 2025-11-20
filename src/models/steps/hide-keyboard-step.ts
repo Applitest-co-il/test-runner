@@ -1,14 +1,15 @@
-import BaseStep = require('./base-step');
-import { TestStep, ExtendedBrowser } from '../../types';
+import BaseStep from './base-step';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 export default class HideKeyboardStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
 
-        this.setHideKeyboard = true;
+        this.hideKeyboard = true;
     }
 
-    async execute(driver: ExtendedBrowser, _: any): Promise<void> {
+    async execute(driver: Browser, _: any): Promise<void> {
         await this.doHideKeyboard(driver);
     }
 }

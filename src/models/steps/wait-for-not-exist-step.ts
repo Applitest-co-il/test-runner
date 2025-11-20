@@ -1,16 +1,17 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 class WaitForNotExistStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
 
-        this.setTakeSnapshot = true;
+        this.takeSnapshot = true;
     }
 
-    async execute(driver: ExtendedBrowser, _?: any): Promise<void> {
-        const timeout = this.getValue ? parseInt(this.getValue, 10) : 5000;
+    async execute(driver: Browser, _?: any): Promise<void> {
+        const timeout = this.value ? parseInt(this.value, 10) : 5000;
         try {
             await driver.waitUntil(
                 async () => {
@@ -26,7 +27,7 @@ class WaitForNotExistStep extends BaseStep {
             );
         } catch {
             throw new TestRunnerError(
-                `Element with ${this.getNamedElementOrUsedSelectorsComment} did not disappear off screen up to ${timeout}ms`
+                `Element with ${this.namedElementOrUsedSelectorsComment} did not disappear off screen up to ${timeout}ms`
             );
         }
     }

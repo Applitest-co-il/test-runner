@@ -1,18 +1,19 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 abstract class BaseHorizontalScrollStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(driver: ExtendedBrowser, item: any): Promise<void> {
+    async execute(driver: Browser, item: any): Promise<void> {
         throw new TestRunnerError(`Execute method is not implemented - ${driver} - ${item}`);
     }
 
-    async horizontalScroll(driver: ExtendedBrowser, originItem: any, left: boolean = true): Promise<void> {
-        const value = this.getValue;
+    async horizontalScroll(driver: Browser, originItem: any, left: boolean = true): Promise<void> {
+        const value = this.value;
         const count = value ? parseInt(value) : 1;
 
         const startPercentage = originItem ? 0 : left ? 0.1 : 0.9;
@@ -27,7 +28,7 @@ abstract class BaseHorizontalScrollStep extends BaseStep {
         const endX = Math.floor(width * endPercentage);
         const fixedScroll = left ? -endX : endX;
         const scrollX = originItem ? fixedScroll : endX - startX;
-        const session = this.getSession;
+        const session = this.session;
         const pointerType = session?.type == 'mobile' ? 'touch' : 'mouse';
 
         const scrollEvt = count > 1 ? count : 1;

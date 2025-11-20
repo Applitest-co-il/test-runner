@@ -1,18 +1,19 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
 import { replaceVariables } from '../../helpers/utils';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 export default class FunctionStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(_: ExtendedBrowser, __: any): Promise<void> {
-        const valueParts = (this.getValue || '').split('|||');
+    async execute(_: Browser, __: any): Promise<void> {
+        const valueParts = (this.value || '').split('|||');
         if (valueParts.length < 1) {
             throw new TestRunnerError(
-                `Function::Invalid value "${this.getValue}" - format should be "<functionId>[|||<prop1>,<prop2>...]"`
+                `Function::Invalid value "${this.value}" - format should be "<functionId>[|||<prop1>,<prop2>...]"`
             );
         }
 
@@ -24,11 +25,11 @@ export default class FunctionStep extends BaseStep {
         if (propertiesValues.length > 0) {
             propertiesValues = propertiesValues.map((value) => {
                 value = value.trim();
-                return replaceVariables(value, this.getVariables || {});
+                return replaceVariables(value, this.variables || {});
             });
         }
 
-        const functions = this.getFunctions;
+        const functions = this.functions;
         if (!functions) {
             throw new TestRunnerError('Functions are not available in this context');
         }
@@ -39,19 +40,19 @@ export default class FunctionStep extends BaseStep {
 
             const duplicatedFunc = (func as any).duplicate();
 
-            const variables = this.getVariables || {};
+            const variables = this.variables || {};
             if (variables && variables.apiBaseUrl) {
                 duplicatedFunc.getProperties.push('apiBaseUrl');
                 propertiesValues.push(variables.apiBaseUrl);
             }
 
             const result = await duplicatedFunc.run(
-                this.getSession,
+                this.session,
                 propertiesValues,
-                this.getFunctions,
-                this.getApis,
-                this.getVideoRecorder,
-                `${this.getVideoBaseStep}${this.getSequence}`
+                this.functions,
+                this.apis,
+                this.videoRecorder,
+                `${this.videoBaseStep}${this.sequence}`
             );
 
             console.log(`Function "${functionId}" executed with result: ${JSON.stringify(result)}`);
@@ -62,7 +63,7 @@ export default class FunctionStep extends BaseStep {
                 );
             }
             if (result.outputs) {
-                this.setVariables = { ...this.getVariables, ...result.outputs };
+                this.variables = { ...this.variables, ...result.outputs };
             }
         } else {
             throw new TestRunnerError(`Function::Not found "${functionId}"`);

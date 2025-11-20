@@ -2,7 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { spawn, ChildProcess } from 'child_process';
 import { Jimp } from 'jimp';
-import { ExtendedBrowser } from '../types';
+import { Browser } from 'webdriverio';
+import ffmpeg from '@ffmpeg-installer/ffmpeg';
 
 interface VideoRecorderOptions {
     outputDir?: string;
@@ -12,12 +13,12 @@ interface VideoRecorderOptions {
 export class VideoRecorder {
     private outputDir: string = '';
     private baseName: string = 'video';
-    private driver: ExtendedBrowser | null = null;
+    private driver: Browser | null = null;
     private frameCount: number = 0;
     private currentStepValue: number | string = 0;
     private recordingPath: string = '';
 
-    constructor(driver: ExtendedBrowser, options: VideoRecorderOptions = {}) {
+    constructor(driver: Browser, options: VideoRecorderOptions = {}) {
         if (!driver) {
             throw new Error('VideoRecorder:Driver is required');
         }
@@ -72,7 +73,6 @@ export class VideoRecorder {
 
             let command = process.env.FFMPEG_PATH;
             if (!command) {
-                const ffmpeg = require('@ffmpeg-installer/ffmpeg');
                 command = ffmpeg.path;
             }
 

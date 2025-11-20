@@ -1,19 +1,20 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
 import { replaceVariables } from '../../helpers/utils';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 export default class AssertTextStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
 
-        this.setTakeSnapshot = true;
+        this.takeSnapshot = true;
     }
 
-    async execute(_: ExtendedBrowser, item: any): Promise<void> {
+    async execute(_: Browser, item: any): Promise<void> {
         const text = await item.getText();
-        const actualValue = replaceVariables(this.getValue || '', this.getVariables || {});
-        const operator = this.getOperator ? this.getOperator : '==';
+        const actualValue = replaceVariables(this.value || '', this.variables || {});
+        const operator = this.operator ? this.operator : '==';
         let result = false;
         switch (operator) {
             case '==':
@@ -37,7 +38,7 @@ export default class AssertTextStep extends BaseStep {
         }
         if (!result) {
             throw new TestRunnerError(
-                `AssertText::Text "${text}" does not match expected value "${actualValue}" using operator "${operator}" on element with ${this.getNamedElementOrUsedSelectorsComment}`
+                `AssertText::Text "${text}" does not match expected value "${actualValue}" using operator "${operator}" on element with ${this.namedElementOrUsedSelectorsComment}`
             );
         }
     }

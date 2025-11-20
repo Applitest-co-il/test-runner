@@ -1,15 +1,16 @@
-import BaseStep = require('./base-step');
-import { TestStep, ExtendedBrowser } from '../../types';
+import BaseStep from './base-step';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 export default class ClickStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
 
-        this.setHideKeyboard = true;
-        this.setTakeSnapshot = true;
+        this.hideKeyboard = true;
+        this.takeSnapshot = true;
     }
 
-    async execute(_: ExtendedBrowser, item: any): Promise<void> {
+    async execute(_: Browser, item: any): Promise<void> {
         await item.click();
     }
 }

@@ -1,19 +1,7 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
-import Ajv, { ValidateFunction, ErrorObject } from 'ajv';
+import Ajv, { ValidateFunction } from 'ajv';
 import * as jmesPath from 'jmespath';
-import { OutputVariable } from '../types';
-
-interface ApiCallResult {
-    success: boolean;
-    statusCode?: number;
-    statusText?: string;
-    headers?: any;
-    responseBody?: any;
-    schemaValidation: boolean;
-    schemaValidationErrors: (ErrorObject | string)[];
-    outputs?: Record<string, any>;
-    error?: string;
-}
+import { OutputVariable, ApiCallResult, SchemaValidationError } from '../types';
 
 export async function apiCall(
     outputs: OutputVariable[] | string[] = [],
@@ -41,7 +29,7 @@ export async function apiCall(
 
         const extractedOutputs: Record<string, any> = {};
         if (outputs && outputs.length > 0 && response.data) {
-            outputs.forEach((output) => {
+            for (const output of outputs) {
                 let outputKey: string;
                 let outputQuery: string;
 
@@ -64,11 +52,11 @@ export async function apiCall(
                         extractedOutputs[outputKey] = extractedValue;
                     }
                 }
-            });
+            }
         }
 
         let schemaValidation = false;
-        let schemaValidationErrors: (ErrorObject | string)[] = [];
+        let schemaValidationErrors: SchemaValidationError[] = [];
         if (schema && Object.keys(schema).length > 0) {
             try {
                 schema.additionalProperties = false;
@@ -76,11 +64,18 @@ export async function apiCall(
                 const validate: ValidateFunction = ajv.compile(schema);
                 schemaValidation = validate(response.data);
                 if (!schemaValidation) {
-                    schemaValidationErrors = validate.errors || [];
+                    schemaValidationErrors =
+                        validate.errors?.map((error) => {
+                            return {
+                                message: error.message,
+                                dataPath: error.instancePath,
+                                schemaPath: error.schemaPath
+                            };
+                        }) || [];
                 }
             } catch (error) {
                 console.error('Schema validation error:', error);
-                schemaValidationErrors = [(error as Error).message];
+                schemaValidationErrors = [{ message: (error as Error).message }];
             }
         }
 
@@ -99,7 +94,8 @@ export async function apiCall(
     } catch (error) {
         const axiosError = error as AxiosError;
         console.error(`API call error: ${axiosError.message}`);
-        return {
+
+        const result: ApiCallResult = {
             success: false,
             error: axiosError.message,
             statusCode: axiosError.response ? axiosError.response.status : undefined,
@@ -109,5 +105,7 @@ export async function apiCall(
             schemaValidation: false,
             schemaValidationErrors: []
         };
+
+        return result;
     }
 }

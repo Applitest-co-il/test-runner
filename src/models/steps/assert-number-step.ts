@@ -1,33 +1,34 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
 import { replaceVariables } from '../../helpers/utils';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 export default class AssertNumberStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
 
-        this.setTakeSnapshot = true;
+        this.takeSnapshot = true;
     }
 
-    async execute(_: ExtendedBrowser, item: any): Promise<void> {
+    async execute(_: Browser, item: any): Promise<void> {
         const text = await item.getText();
         const number = +text;
         if (isNaN(number)) {
             throw new TestRunnerError(
-                `AssertNumber::Text "${text}" is not a valid number on element with ${this.getNamedElementOrUsedSelectorsComment}`
+                `AssertNumber::Text "${text}" is not a valid number on element with ${this.namedElementOrUsedSelectorsComment}`
             );
         }
 
-        const value = this.getValue || '';
-        const actualValue = replaceVariables(value, this.getVariables || {});
+        const value = this.value || '';
+        const actualValue = replaceVariables(value, this.variables || {});
         const actualNumber = +actualValue;
         if (isNaN(actualNumber)) {
             throw new TestRunnerError(`AssertNumber::Provided value "${value}" is not a valid number`);
         }
 
         let result = false;
-        const operator = this.getOperator ? this.getOperator : '==';
+        const operator = this.operator ? this.operator : '==';
         switch (operator) {
             case '==':
                 result = number == actualNumber;
@@ -51,7 +52,7 @@ export default class AssertNumberStep extends BaseStep {
 
         if (!result) {
             throw new TestRunnerError(
-                `AssertNumber::Text "${text}" does not match expected value "${actualValue}" using operator "${operator}" on element with ${this.getNamedElementOrUsedSelectorsComment}`
+                `AssertNumber::Text "${text}" does not match expected value "${actualValue}" using operator "${operator}" on element with ${this.namedElementOrUsedSelectorsComment}`
             );
         }
     }

@@ -1,14 +1,15 @@
-import BaseStep = require('./base-step');
+import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
-import { TestStep, ExtendedBrowser } from '../../types';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
 
 export default class MouseMoveStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(driver: ExtendedBrowser, _?: any): Promise<void> {
-        const value = this.getValue;
+    async execute(driver: Browser, _?: any): Promise<void> {
+        const value = this.value;
         if (!value) {
             throw new TestRunnerError('MouseMove::No value provided');
         }
@@ -30,7 +31,7 @@ export default class MouseMoveStep extends BaseStep {
         const x = parseInt(params[1], 10);
         const y = parseInt(params[2], 10);
 
-        const action = await driver.action('pointer', { pointerType: 'mouse' });
+        const action = await driver.action('pointer', { parameters: { pointerType: 'mouse' } });
         await action.move({ origin: origin as 'pointer' | 'viewport', x: x, y: y, duration: 100 });
         await action.pause(100);
         await action.perform();

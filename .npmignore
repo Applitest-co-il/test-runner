@@ -6,6 +6,8 @@
 /.npmignore
 /.prettierignore
 /eslint.config.mjs
+/nodemon.json
+/tsconfig.json
 /src/api
 /src/cli
 /cmd/
