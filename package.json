@@ -6,8 +6,9 @@
     "types": "dist/lib/index.d.ts",
     "scripts": {
         "test": "echo \"Error: no test specified\"",
-        "build": "npm run prebuild && tsc && npm run copy-assets",
-        "copy-assets": "xcopy src\\lib\\version.json dist\\lib\\ /Y",
+        "build:dev": "npm run prebuild && tsc && npm run copy-assets",
+        "build:prod": "tsc",
+        "copy-assets": "copy src\\lib\\version.json dist\\lib\\ /Y",
         "clean": "rimraf dist",
         "prebuild": "npm run clean",
         "cli": "npm run build && node ./dist/cli/index.js",
