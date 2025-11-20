@@ -1,0 +1,133 @@
+import BaseStep from './base-step';
+import { TestRunnerError } from '../../helpers/test-errors';
+import { TestStep } from '../../types';
+import { Browser } from 'webdriverio';
+
+interface ScrollOptions {
+    topPercentage: number;
+    bottomPercentage: number;
+    anchorPercentage: number;
+    count: number;
+}
+
+abstract class BaseVerticalScrollStep extends BaseStep {
+    constructor(sequence: number, step: TestStep) {
+        super(sequence, step);
+    }
+
+    async execute(driver: Browser, item: any): Promise<void> {
+        throw new TestRunnerError(`Execute method is not implemented - ${driver} - ${item}`);
+    }
+
+    async verticalScroll(driver: Browser, originItem: any, down: boolean = true): Promise<void> {
+        const scrollOptions = this.parseScrollValue();
+
+        const startPercentage = originItem ? 0 : down ? scrollOptions.bottomPercentage : scrollOptions.topPercentage;
+        const endPercentage = originItem ? 0.3 : down ? scrollOptions.topPercentage : scrollOptions.bottomPercentage;
+        const scrollDuration = 300;
+
+        const { width, height } = await driver.getWindowSize();
+        const origin = originItem ? originItem : 'viewport';
+        const anchorX = originItem ? 0 : Math.floor(width * scrollOptions.anchorPercentage);
+        const startY = originItem ? 0 : Math.floor(height * startPercentage);
+        const endY = Math.floor(height * endPercentage);
+        const fixedScroll = down ? -endY : endY;
+        const scrollY = originItem ? fixedScroll : endY - startY;
+        const scrollEvt = scrollOptions.count > 1 ? scrollOptions.count : 1;
+
+        for (let i = 0; i < scrollEvt; i++) {
+            await this.doVerticalScroll(driver, scrollDuration, origin, startY, scrollY, anchorX);
+        }
+        return;
+    }
+
+    async doVerticalScroll(
+        driver: Browser,
+        scrollDuration: number,
+        origin: any,
+        startY: number,
+        scrollY: number,
+        anchorX: number
+    ): Promise<void> {
+        if (this.session?.type == 'web') {
+            const actualScrollY = -scrollY;
+
+            await driver
+                .action('wheel')
+                .scroll({ origin: origin, deltaX: anchorX, deltaY: actualScrollY })
+                .pause(10)
+                .perform();
+        } else {
+            await driver
+                .action('pointer', {
+                    parameters: { pointerType: 'touch' }
+                })
+                .move({ origin: origin, x: anchorX, y: startY })
+                .down()
+                .pause(10)
+                .move({ origin: 'pointer', duration: scrollDuration, x: 0, y: scrollY })
+                .pause(10)
+                .up()
+                .pause(10)
+                .perform();
+        }
+        await this.addFrameToVideo(true);
+    }
+
+    parseScrollValue(): ScrollOptions {
+        let scrollOptions: ScrollOptions = {
+            topPercentage: 0.2,
+            bottomPercentage: 0.85,
+            anchorPercentage: 0.5,
+            count: 1
+        };
+
+        const value = this.value;
+        if (value && value.indexOf('|||') !== -1) {
+            const valueParts = value.split('|||');
+
+            if (valueParts.length >= 2) {
+                scrollOptions.topPercentage = parseFloat(valueParts[1]);
+                if (
+                    isNaN(scrollOptions.topPercentage) ||
+                    scrollOptions.topPercentage < 0 ||
+                    scrollOptions.topPercentage > 1
+                ) {
+                    scrollOptions.topPercentage = 0.2;
+                }
+            }
+
+            if (valueParts.length >= 3) {
+                scrollOptions.bottomPercentage = parseFloat(valueParts[2]);
+                if (scrollOptions.bottomPercentage < 0 || scrollOptions.bottomPercentage > 1) {
+                    scrollOptions.bottomPercentage = 0.85;
+                }
+            }
+
+            if (valueParts.length >= 4) {
+                scrollOptions.anchorPercentage = parseFloat(valueParts[3]);
+                if (
+                    isNaN(scrollOptions.anchorPercentage) ||
+                    scrollOptions.anchorPercentage < 0 ||
+                    scrollOptions.anchorPercentage > 1
+                ) {
+                    scrollOptions.anchorPercentage = 0.5;
+                }
+            }
+
+            scrollOptions.count = parseInt(valueParts[0]);
+            if (isNaN(scrollOptions.count) || scrollOptions.count < 1) {
+                scrollOptions.count = 1;
+            }
+        } else if (value && value.length > 0) {
+            scrollOptions.count = parseInt(value);
+            if (isNaN(scrollOptions.count) || scrollOptions.count < 1) {
+                scrollOptions.count = 1;
+            }
+        }
+
+        return scrollOptions;
+    }
+}
+
+export = BaseVerticalScrollStep;
