@@ -4,6 +4,7 @@ import cors from 'cors';
 import { downloadFile } from '../helpers/download-file';
 import { runTests, testApiCall, openSession, closeSession, runSession, libVersion } from './index';
 import { TestRunnerOptions } from '../types';
+import { Server } from 'http';
 
 // Helpers
 async function preProcessOptions(options: TestRunnerOptions): Promise<boolean> {
@@ -38,7 +39,7 @@ async function preProcessOptions(options: TestRunnerOptions): Promise<boolean> {
     return true;
 }
 
-export function createServer(port: number): void {
+export function createLocalTestRunner(port: number): Server {
     const app = express();
     app.use(cors());
     app.use(express.json({ limit: '500KB' }));
@@ -240,4 +241,6 @@ export function createServer(port: number): void {
             process.exit(0);
         });
     });
+
+    return server;
 }

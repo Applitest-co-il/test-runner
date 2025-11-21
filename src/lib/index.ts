@@ -11,6 +11,7 @@ import { replaceVariables } from '../helpers/utils';
 import { v4 as uuids4 } from 'uuid';
 import { OutputVariable, SessionResult, RunResult, ApiCallResult, TestRunnerOptions } from '../types';
 import { extractDom } from '../helpers/accessibility-utils';
+import { createLocalTestRunner } from './server';
 
 interface SessionCache {
     sessionId: string;
@@ -397,12 +398,13 @@ export async function testApiCall(
     }
 }
 
-// Export error classes and version
+// Export error classes, version, and server function
 export {
     TestRunnerConfigurationError,
     TestRunnerError,
     TestDefinitionError,
     TestItemNotFoundError,
     TestAbuseError,
-    libVersion
+    libVersion,
+    createLocalTestRunner
 };
