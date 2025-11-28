@@ -1,9 +1,12 @@
 {
     "name": "@applitest/test-runner",
-    "version": "0.10.3",
+    "version": "0.10.4",
     "description": "Applitest Test Runner Library: Extends webdirver.io (web and mobile) allowing to provide a json base tests configuration and activate tests locally or via cloud services",
     "main": "dist/lib/index.js",
     "types": "dist/lib/index.d.ts",
+    "bin": {
+        "trserver": "./dist/api/index.js"
+    },
     "scripts": {
         "test": "echo \"Error: no test specified\"",
         "build:dev": "npm run prebuild && tsc && npm run copy-assets",
@@ -11,9 +14,7 @@
         "copy-assets": "copy src\\lib\\version.json dist\\lib\\ /Y",
         "clean": "rimraf dist",
         "prebuild": "npm run clean",
-        "cli": "npm run build && node ./dist/cli/index.js",
-        "cli:debug": "node --inspect -r ts-node/register ./src/cli/index.ts",
-        "api": "npm run build && node ./dist/api/app.js",
+        "api": "npm run build:dev && node ./dist/api/index.js",
         "api:debug": "nodemon",
         "format:check": "prettier --check .",
         "format:write": "prettier --write .",
@@ -72,5 +73,8 @@
         "serverless": "^3.40.0",
         "ts-node": "^10.9.2",
         "typescript": "^5.9.3"
+    },
+    "applitest": {
+        "min-compatible-version": "0.10.3"
     }
 }

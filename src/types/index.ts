@@ -15,6 +15,7 @@ export interface TestRunnerOptions {
 
 export interface RunConfiguration {
     name: string;
+    runType?: 'web' | 'mobile' | 'api' | 'mixed';
     description?: string;
     sessions: SessionConfiguration[];
     startFromStep?: number;
@@ -24,8 +25,7 @@ export interface RunConfiguration {
 }
 
 export interface SessionConfiguration {
-    runType: 'web' | 'mobile' | 'api';
-    type?: string;
+    type: 'web' | 'mobile' | 'api';
     browser?: any;
     appium?: any;
     capabilities?: WebDriverCapabilities;

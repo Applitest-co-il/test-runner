@@ -14,11 +14,17 @@ async function preProcessOptions(options: TestRunnerOptions): Promise<boolean> {
 
     // Additional checks can be added here
     const sessionTypes = options.runConfiguration.sessions.map((s) => s.type);
-    const runType = sessionTypes.includes('mixed') ? 'mixed' : sessionTypes.includes('mobile') ? 'mobile' : 'web';
+    let runType: string = sessionTypes[0];
+    for (const type of sessionTypes) {
+        if (type !== runType) {
+            runType = 'mixed';
+            break;
+        }
+    }
 
     if (['mobile', 'mixed'].includes(runType)) {
         console.log('Received mobile run configuration');
-        const session = options.runConfiguration.sessions.find((session: any) => session.type === 'mobile');
+        const session = options.runConfiguration.sessions.find((session) => session.type === 'mobile');
         if (session?.appium?.app?.startsWith('s3:')) {
             const appName = session.appium.appName;
             const url = session.appium.app.replace('s3:', '');
@@ -221,6 +227,10 @@ export function createLocalTestRunner(port: number): Server {
     });
 
     const server = app.listen(port, () => {
+        if (!server.address()) {
+            server.close();
+            throw new Error(`Could not start server on port ${port}`);
+        }
         console.log(`TestRunner API server is running on port ${port}`);
         console.log(`Version: ${libVersion.version}`);
     });

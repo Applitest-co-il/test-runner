@@ -340,11 +340,7 @@ abstract class BaseStep {
 
         try {
             if (this._condition) {
-                let conditionResult = await this._condition.evaluate(
-                    session.driver,
-                    variables,
-                    (session as any).runConf
-                );
+                let conditionResult = await this._condition.evaluate(session.driver, variables, session.runConf);
                 if (!conditionResult) {
                     this._status = 'skipped';
                     return true;

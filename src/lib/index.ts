@@ -9,7 +9,16 @@ import {
 import { apiCall } from '../helpers/apicall';
 import { replaceVariables } from '../helpers/utils';
 import { v4 as uuids4 } from 'uuid';
-import { OutputVariable, SessionResult, RunResult, ApiCallResult, TestRunnerOptions } from '../types';
+import {
+    OutputVariable,
+    SessionResult,
+    RunResult,
+    ApiCallResult,
+    TestRunnerOptions,
+    SuiteConfiguration,
+    TestConfiguration,
+    TestStep
+} from '../types';
 import { extractDom } from '../helpers/accessibility-utils';
 import { createLocalTestRunner } from './server';
 
@@ -289,21 +298,19 @@ export async function doStep(
         };
     }
 
-    const suites = [
+    const suites: SuiteConfiguration[] = [
         {
             name: 'Do Step',
-            type: 'web',
             tests: [
                 {
                     name: 'Do Step Test',
                     type: 'web',
                     steps: [
                         {
-                            commandLabel: '',
                             selectors: [selector],
                             value: stepValue,
                             command: stepCommand,
-                            operator: null
+                            operator: undefined
                         }
                     ]
                 }
@@ -311,7 +318,7 @@ export async function doStep(
         }
     ];
 
-    const options: any = {
+    const options: TestRunnerOptions = {
         suites: suites,
         functions: [],
         apis: []
@@ -398,13 +405,18 @@ export async function testApiCall(
     }
 }
 
-// Export error classes, version, and server function
+// Export error classes, types, version, and server function
 export {
     TestRunnerConfigurationError,
     TestRunnerError,
     TestDefinitionError,
     TestItemNotFoundError,
     TestAbuseError,
+    SessionResult,
+    SuiteConfiguration,
+    TestConfiguration,
+    TestRunnerOptions,
+    TestStep,
     libVersion,
     createLocalTestRunner
 };
