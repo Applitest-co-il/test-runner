@@ -12,51 +12,68 @@ if (process.stderr.isTTY) {
 }
 
 import { createLocalTestRunner } from '../lib/server';
+import { logger, LogLevel } from '../helpers/log-service';
+
+// Initialize log level based on environment variables
+const logLevel = process.env.LOG_LEVEL?.toLowerCase();
+switch (logLevel) {
+    case 'debug':
+        logger.setLogLevel(LogLevel.DEBUG);
+        break;
+    case 'info':
+        logger.setLogLevel(LogLevel.INFO);
+        break;
+    case 'error':
+        logger.setLogLevel(LogLevel.ERROR);
+        break;
+    case 'none':
+        logger.setLogLevel(LogLevel.NONE);
+        break;
+    default:
+        // Default to INFO if not specified or invalid
+        logger.setLogLevel(
+            process.env.DEBUG === 'true' || process.env.VERBOSE === 'true' ? LogLevel.DEBUG : LogLevel.INFO
+        );
+}
 
 const PORT = process.env.TR_PORT ? parseInt(process.env.TR_PORT, 10) : 8282;
 
-// Force output to be visible
-const isVerbose = process.env.VERBOSE === 'true' || process.env.DEBUG === 'true';
-
-process.stdout.write('🚀 Starting TestRunner API server...\n');
-process.stdout.write(`📍 Port: ${PORT}\n`);
-process.stdout.write(`🌍 Environment: ${process.env.NODE_ENV || 'development'}\n`);
-
-if (isVerbose) {
-    process.stdout.write(`📂 Working directory: ${process.cwd()}\n`);
-    process.stdout.write(`🔧 Node version: ${process.version}\n`);
-    process.stdout.write(`💾 Platform: ${process.platform}\n`);
-}
+logger.info('🚀 Starting TestRunner API server...');
+logger.info(`📍 Port: ${PORT}`);
+logger.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+logger.debug(`📂 Working directory: ${process.cwd()}`);
+logger.debug(`🔧 Node version: ${process.version}`);
+logger.debug(`💾 Platform: ${process.platform}`);
 
 const server = createLocalTestRunner(PORT);
 
-// Add error handling with forced output
+// Add error handling with logger
 server.on('error', (error: any) => {
     if (error.code === 'EADDRINUSE') {
-        process.stderr.write(`❌ ERROR: Port ${PORT} is already in use\n`);
-        process.stderr.write(`Please stop the existing server or use a different port\n`);
+        logger.error(`❌ ERROR: Port ${PORT} is already in use`);
+        logger.error(`Please stop the existing server or use a different port`);
         process.exit(1);
     } else {
-        process.stderr.write(`❌ Server error: ${error.message}\n`);
+        logger.error(`❌ Server error: ${error.message}`);
         process.exit(1);
     }
 });
 
 // Ensure we show startup completion
 server.on('listening', () => {
-    process.stdout.write(`✅ TestRunner API server successfully started on port ${PORT}\n`);
-    process.stdout.write(`🔗 Health check: http://localhost:${PORT}/health\n`);
-    process.stdout.write(`📊 Version info: http://localhost:${PORT}/version\n`);
-    process.stdout.write(`\nServer is ready to accept connections...\n`);
+    logger.info(`✅ TestRunner API server successfully started on port ${PORT}`);
+    logger.info(`🔗 Health check: http://localhost:${PORT}/health`);
+    logger.info(`📊 Version info: http://localhost:${PORT}/version`);
+    logger.info(`Server is ready to accept connections...`);
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
-    process.stderr.write(`❌ Uncaught Exception: ${error.message}\n`);
+    logger.error(`❌ Uncaught Exception: ${error.message}`);
     process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-    process.stderr.write(`❌ Unhandled Rejection at: ${promise}, reason: ${reason}\n`);
+    logger.error(`❌ Unhandled Rejection at: ${promise}, reason: ${reason}`);
     process.exit(1);
 });
