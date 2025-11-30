@@ -1,4 +1,5 @@
 import { pauseApp } from '../../helpers/utils';
+import { RunConfiguration, SessionConfiguration } from '../../types';
 import DriverConfiguration from './base-driver-configuration';
 
 class MobileDriverConfiguration extends DriverConfiguration {
@@ -15,7 +16,7 @@ class MobileDriverConfiguration extends DriverConfiguration {
     private _orientation: string = 'PORTRAIT';
     private _cacheId: string = '0';
 
-    constructor(options: any, session: any) {
+    constructor(options: RunConfiguration, session: SessionConfiguration) {
         super(options);
 
         if (session.appium.farm) {

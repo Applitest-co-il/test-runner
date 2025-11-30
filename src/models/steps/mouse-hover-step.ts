@@ -1,6 +1,6 @@
 import BaseStep from './base-step';
-import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { TestRunnerError, TestStep } from '../../types';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 export default class MouseHoverStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
@@ -9,7 +9,11 @@ export default class MouseHoverStep extends BaseStep {
         this.takeSnapshot = true;
     }
 
-    async execute(driver: Browser, item: any): Promise<void> {
+    async execute(driver: Browser, item: ChainablePromiseElement | null): Promise<void> {
+        if (!item) {
+            throw new TestRunnerError('MouseHoverStep: No element provided for mouse hover action');
+        }
+
         const value = this.value;
         const duration = parseInt(value || '100') || 100;
 

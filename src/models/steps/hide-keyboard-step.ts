@@ -1,6 +1,6 @@
 import BaseStep from './base-step';
 import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 export default class HideKeyboardStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
@@ -9,7 +9,7 @@ export default class HideKeyboardStep extends BaseStep {
         this.hideKeyboard = true;
     }
 
-    async execute(driver: Browser, _: any): Promise<void> {
+    async execute(driver: Browser, _: ChainablePromiseElement | null): Promise<void> {
         await this.doHideKeyboard(driver);
     }
 }

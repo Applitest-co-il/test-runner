@@ -1,6 +1,6 @@
 import BaseStep from './base-step';
-import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { TestRunnerError, TestStep } from '../../types';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 export default class UploadFileStep extends BaseStep {
     #valueUrl: string = '';
@@ -22,7 +22,11 @@ export default class UploadFileStep extends BaseStep {
         return this.#valueFilename;
     }
 
-    async execute(driver: Browser, item: any): Promise<void> {
+    async execute(driver: Browser, item: ChainablePromiseElement | null): Promise<void> {
+        if (!item) {
+            throw new TestRunnerError('UploadFileStep: No element provided for upload file action');
+        }
+
         let actualValue = this.value || '';
         const conf = this.conf;
         if (conf?.farm !== 'local') {

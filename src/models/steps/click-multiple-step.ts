@@ -1,6 +1,6 @@
 import BaseStep from './base-step';
-import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { TestRunnerError, TestStep } from '../../types';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 export default class ClickMultipleStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
@@ -10,7 +10,11 @@ export default class ClickMultipleStep extends BaseStep {
         this.takeSnapshot = true;
     }
 
-    async execute(driver: Browser, item: any): Promise<void> {
+    async execute(driver: Browser, item: ChainablePromiseElement | null): Promise<void> {
+        if (!item) {
+            throw new TestRunnerError('ClickMultipleStep: No element provided for click multiple action');
+        }
+
         const action = await driver.action('pointer', { parameters: { pointerType: 'mouse' } });
 
         await action.move({ origin: item }).pause(1);

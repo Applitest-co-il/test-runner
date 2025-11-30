@@ -2,6 +2,7 @@ import { stepFactory } from './test-step';
 import FunctionStep from './steps/function-step';
 import { TestDefinitionError, TestRunnerError } from '../helpers/test-errors';
 import { checkArrayMaxItems, MAX_ITEMS } from '../helpers/security';
+import { logger } from '../helpers/log-service';
 import { FunctionConfiguration, FunctionResult, TestStep, RunSession } from '../types';
 import BaseStep from './steps/base-step';
 import { TrApi } from './api';
@@ -90,14 +91,14 @@ export class TrFunction {
 
     private buildSteps(steps: TestStep[]): void {
         if (!checkArrayMaxItems(steps)) {
-            console.error(
+            logger.error(
                 `Too many test steps in function "${this._id} - ${this._name}": Maximum allowed is ${MAX_ITEMS}`
             );
             return;
         }
 
         if (steps.length === 0) {
-            console.error(`No test steps found in function "${this._id} - ${this._name}"`);
+            logger.error(`No test steps found in function "${this._id} - ${this._name}"`);
             return;
         }
 
@@ -132,8 +133,8 @@ export class TrFunction {
         propertiesValues: string[],
         functions: TrFunction[],
         apis: TrApi[],
-        videoRecorder?: VideoRecorder,
-        videoBaseStep?: string
+        videoRecorder: VideoRecorder | null,
+        videoBaseStep: string | null
     ): Promise<FunctionResult> {
         TrFunction.functionStacks.push(this._id);
 
@@ -167,7 +168,7 @@ export class TrFunction {
             const step = steps[i];
             try {
                 if (step instanceof FunctionStep) {
-                    const functionValue = (step as any).value;
+                    const functionValue = step.value;
                     if (typeof functionValue === 'string') {
                         const functionId = functionValue.split('|||')[0];
                         if (functionId && TrFunction.functionStacks.includes(functionId)) {

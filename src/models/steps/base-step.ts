@@ -1,10 +1,11 @@
 import { TestDefinitionError, TestItemNotFoundError, TestRunnerError } from '../../helpers/test-errors';
 import { replaceVariables, prepareLocalScript } from '../../helpers/utils';
+import { logger } from '../../helpers/log-service';
 import TestCondition from './test-condition';
 import { TestStep, RunSession } from '../../types';
 import { VideoRecorder } from '../../helpers/video-recorder';
 import StepsCommands from './abc-steps-commands';
-import { Browser } from 'webdriverio';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 import vmRun from '@danielyaghil/vm-helper';
 import { TrApi } from '../api';
@@ -20,7 +21,7 @@ abstract class BaseStep {
     private _value: string | null = null;
     private readonly _operator: string | null = null;
     private _variables: Record<string, string> | null = null;
-    private _savedElements: Record<string, any> | null = null;
+    private _savedElements: Record<string, ChainablePromiseElement> | null = null;
     private _videoRecorder: VideoRecorder | null = null;
     private _videoBaseStep: string = '';
     private _functions: TrFunction[] | null = null;
@@ -103,11 +104,11 @@ abstract class BaseStep {
         this._variables = value;
     }
 
-    get savedElements(): Record<string, any> | null {
+    get savedElements(): Record<string, ChainablePromiseElement> | null {
         return this._savedElements;
     }
 
-    set savedElements(value: Record<string, any> | null) {
+    set savedElements(value: Record<string, ChainablePromiseElement> | null) {
         this._savedElements = value;
     }
 
@@ -270,8 +271,8 @@ abstract class BaseStep {
         }
     }
 
-    async highlightElement(driver: Browser, item: any): Promise<void> {
-        if (!item || item === 'noItem' || (this._session as any)?.type !== 'web') {
+    async highlightElement(driver: Browser, item: ChainablePromiseElement | null): Promise<void> {
+        if (!item || this._session?.type !== 'web') {
             return;
         }
 
@@ -289,12 +290,12 @@ abstract class BaseStep {
                 elt.style.border = '3px solid orangered';
             }, item);
         } catch {
-            console.log(`Could not be highlighted: ${JSON.stringify(item)}`);
+            logger.info(`Could not be highlighted: ${JSON.stringify(item)}`);
         }
     }
 
-    async revertElement(driver: Browser, item: any): Promise<void> {
-        if (!item || item === 'noItem' || !this._originalBorderCSS || (this._session as any)?.type !== 'web') {
+    async revertElement(driver: Browser, item: ChainablePromiseElement | null): Promise<void> {
+        if (!item || !this._originalBorderCSS || this._session?.type !== 'web') {
             return;
         }
 
@@ -315,7 +316,7 @@ abstract class BaseStep {
                 this._originalBorderCSS.value
             );
         } catch {
-            console.log(`Could not revert highlight: ${JSON.stringify(item)}`);
+            logger.info(`Could not revert highlight: ${JSON.stringify(item)}`);
         } finally {
             this._originalBorderCSS = '';
         }
@@ -326,8 +327,8 @@ abstract class BaseStep {
         functions: TrFunction[],
         apis: TrApi[],
         variables: Record<string, string>,
-        savedElements: Record<string, any>,
-        videoRecorder?: VideoRecorder,
+        savedElements: Record<string, ChainablePromiseElement>,
+        videoRecorder: VideoRecorder | null = null,
         videoBaseStep: string = ''
     ): Promise<boolean> {
         this._session = session;
@@ -338,27 +339,30 @@ abstract class BaseStep {
         this._videoRecorder = videoRecorder || null;
         this._videoBaseStep = videoBaseStep;
 
+        if (!session.driver) {
+            throw new TestRunnerError('Step::No driver available to execute step');
+        }
+
         try {
             if (this._condition) {
-                let conditionResult = await this._condition.evaluate(
-                    session.driver,
-                    variables,
-                    (session as any).runConf
-                );
+                let conditionResult = await this._condition.evaluate(session.driver, variables, session.runConf);
                 if (!conditionResult) {
                     this._status = 'skipped';
                     return true;
                 }
             }
 
-            const item = StepsCommands.RequiresItem(this._command) ? await this.selectItem(session.driver) : 'noItem';
-            if (!item) {
-                if (this._namedElement) {
-                    throw new TestItemNotFoundError(
-                        `Item with named element [${this._namedElement}] not found - check previous steps`
-                    );
-                } else {
-                    throw new TestItemNotFoundError(`Item with selectors [${this._usedSelectors}] not found`);
+            let item: ChainablePromiseElement | null = null;
+            if (StepsCommands.RequiresItem(this._command)) {
+                item = await this.selectItem(session.driver);
+                if (!item) {
+                    if (this._namedElement) {
+                        throw new TestItemNotFoundError(
+                            `Item with named element [${this._namedElement}] not found - check previous steps`
+                        );
+                    } else {
+                        throw new TestItemNotFoundError(`Item with selectors [${this._usedSelectors}] not found`);
+                    }
                 }
             }
 
@@ -381,7 +385,7 @@ abstract class BaseStep {
         return true;
     }
 
-    async selectItem(driver: Browser): Promise<any | null> {
+    async selectItem(driver: Browser): Promise<ChainablePromiseElement | null> {
         if (this._namedElement) {
             if (this._savedElements && this._savedElements[this._namedElement]) {
                 const saved = this._savedElements[this._namedElement];
@@ -402,7 +406,7 @@ abstract class BaseStep {
             return null;
         }
 
-        let item: any | null = null;
+        let item: ChainablePromiseElement | null = null;
         this._usedSelectors = '';
         for (let i = 0; i < selectors.length; i++) {
             const selector = replaceVariables(selectors[i], this._variables || {});
@@ -420,14 +424,14 @@ abstract class BaseStep {
                     }
                 }
             } else {
-                const items = await driver.$$(selector);
-                if (!items || (items as any).error) {
+                let items = await driver.$$(selector);
+                if (!items || !(await items.length)) {
                     const keyboardHidden = await this.doHideKeyboard(driver);
                     if (keyboardHidden) {
-                        item = await driver.$$(selector);
+                        items = await driver.$$(selector);
                     }
                 }
-                if (items && !(items as any).error && (items as any).length > this._position) {
+                if (items && (await items.length) > this._position) {
                     item = items[this._position];
                 }
             }
@@ -435,13 +439,13 @@ abstract class BaseStep {
                 break;
             }
         }
-        if (!item || (item as any).error) {
+        if (!item || item.error) {
             return null;
         }
         return item;
     }
 
-    abstract execute(driver: Browser, item: any): Promise<void>;
+    abstract execute(driver: Browser, item: ChainablePromiseElement | null): Promise<void>;
 
     async executeScript(script: string, driver: Browser): Promise<any> {
         try {
@@ -450,7 +454,7 @@ abstract class BaseStep {
                 if (!result) {
                     throw new TestRunnerError(`ExecuteScript::Script: script for step ${this._sequence} failed`);
                 }
-                console.log(
+                logger.info(
                     `ExecuteScript::Script: driver script for step ${this._sequence} succeeded: ${JSON.stringify(result)}`
                 );
                 return result;
@@ -462,7 +466,7 @@ abstract class BaseStep {
                         `ExecuteScript::Script: local script for step ${this._sequence} failed ${result.error}`
                     );
                 }
-                console.log(
+                logger.info(
                     `ExecuteScript::Script: local script for step ${this._sequence} succeeded: ${JSON.stringify(result)}`
                 );
                 return result.output;
@@ -479,10 +483,10 @@ abstract class BaseStep {
     }
 
     async doHideKeyboard(driver: Browser): Promise<boolean> {
-        if ((this._session as any)?.type === 'mobile' && this._hideKeyboard) {
-            const isKeyBoaordShown = await (driver as any).isKeyboardShown();
+        if (this._session?.type === 'mobile' && this._hideKeyboard) {
+            const isKeyBoaordShown = await driver.isKeyboardShown();
             if (isKeyBoaordShown) {
-                await (driver as any).hideKeyboard();
+                await driver.hideKeyboard();
                 return true;
             }
         }

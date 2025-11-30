@@ -3,7 +3,9 @@ import cors from 'cors';
 
 import { downloadFile } from '../helpers/download-file';
 import { runTests, testApiCall, openSession, closeSession, runSession, libVersion } from './index';
+import { logger } from '../helpers/log-service';
 import { TestRunnerOptions } from '../types';
+import { Server } from 'http';
 
 // Helpers
 async function preProcessOptions(options: TestRunnerOptions): Promise<boolean> {
@@ -13,22 +15,28 @@ async function preProcessOptions(options: TestRunnerOptions): Promise<boolean> {
 
     // Additional checks can be added here
     const sessionTypes = options.runConfiguration.sessions.map((s) => s.type);
-    const runType = sessionTypes.includes('mixed') ? 'mixed' : sessionTypes.includes('mobile') ? 'mobile' : 'web';
+    let runType: string = sessionTypes[0];
+    for (const type of sessionTypes) {
+        if (type !== runType) {
+            runType = 'mixed';
+            break;
+        }
+    }
 
     if (['mobile', 'mixed'].includes(runType)) {
-        console.log('Received mobile run configuration');
-        const session = options.runConfiguration.sessions.find((session: any) => session.type === 'mobile');
+        logger.info('Received mobile run configuration');
+        const session = options.runConfiguration.sessions.find((session) => session.type === 'mobile');
         if (session?.appium?.app?.startsWith('s3:')) {
             const appName = session.appium.appName;
             const url = session.appium.app.replace('s3:', '');
 
             const appLocalPath = await downloadFile(url, appName);
             if (!appLocalPath) {
-                console.error('App download failed');
+                logger.error('App download failed');
                 return false;
             }
 
-            console.log(`App downloaded to: ${appLocalPath}`);
+            logger.info(`App downloaded to: ${appLocalPath}`);
             session.appium.app = appLocalPath;
         }
     }
@@ -38,7 +46,7 @@ async function preProcessOptions(options: TestRunnerOptions): Promise<boolean> {
     return true;
 }
 
-export function createServer(port: number): void {
+export function createLocalTestRunner(port: number): Server {
     const app = express();
     app.use(cors());
     app.use(express.json({ limit: '500KB' }));
@@ -62,7 +70,7 @@ export function createServer(port: number): void {
                 logMessage += ` - ${data.message}`;
             }
 
-            console.log(logMessage);
+            logger.info(logMessage);
 
             // Call original json method
             return originalJson.call(this, data);
@@ -101,7 +109,7 @@ export function createServer(port: number): void {
             const result = await runTests(options);
             res.status(200).json(result);
         } catch (error) {
-            console.error('Error running tests:', error);
+            logger.error('Error running tests:', error);
             res.status(500).json({
                 success: false,
                 message: (error as Error).message
@@ -120,7 +128,7 @@ export function createServer(port: number): void {
             const result = await testApiCall(method, path, headers, data, schema, variables || {}, outputs || []);
             res.status(200).json(result);
         } catch (error) {
-            console.error('Error testing API call:', error);
+            logger.error('Error testing API call:', error);
             res.status(500).json({
                 success: false,
                 message: (error as Error).message
@@ -147,7 +155,7 @@ export function createServer(port: number): void {
             const result = await openSession(options);
             res.status(200).json(result);
         } catch (error) {
-            console.error('Error opening session:', error);
+            logger.error('Error opening session:', error);
             res.status(500).json({
                 success: false,
                 message: (error as Error).message
@@ -170,7 +178,7 @@ export function createServer(port: number): void {
             const result = await runSession(sessionId, options);
             res.status(200).json(result);
         } catch (error) {
-            console.error('Error running session:', error);
+            logger.error('Error running session:', error);
             res.status(500).json({
                 success: false,
                 message: (error as Error).message
@@ -192,7 +200,7 @@ export function createServer(port: number): void {
             const result = await closeSession(sessionId);
             res.status(200).json(result);
         } catch (error) {
-            console.error('Error closing session:', error);
+            logger.error('Error closing session:', error);
             res.status(500).json({
                 success: false,
                 message: (error as Error).message
@@ -204,7 +212,7 @@ export function createServer(port: number): void {
 
     // Error handling middleware
     app.use((error: Error, req: Request, res: Response, _: NextFunction) => {
-        console.error('Unhandled error:', error);
+        logger.error('Unhandled error:', error);
         res.status(500).json({
             success: false,
             message: 'Internal server error'
@@ -220,24 +228,30 @@ export function createServer(port: number): void {
     });
 
     const server = app.listen(port, () => {
-        console.log(`TestRunner API server is running on port ${port}`);
-        console.log(`Version: ${libVersion.version}`);
+        if (!server.address()) {
+            server.close();
+            throw new Error(`Could not start server on port ${port}`);
+        }
+        logger.info(`TestRunner API server is running on port ${port}`);
+        logger.info(`Version: ${libVersion.version}`);
     });
 
     // Graceful shutdown
     process.on('SIGTERM', () => {
-        console.log('SIGTERM received, shutting down gracefully');
-        server.close(() => {
-            console.log('Server closed');
+        logger.info('SIGTERM received, shutting down gracefully');
+        server?.close(() => {
+            logger.info('Server closed');
             process.exit(0);
         });
     });
 
     process.on('SIGINT', () => {
-        console.log('SIGINT received, shutting down gracefully');
-        server.close(() => {
-            console.log('Server closed');
+        logger.info('SIGINT received, shutting down gracefully');
+        server?.close(() => {
+            logger.info('Server closed');
             process.exit(0);
         });
     });
+
+    return server;
 }

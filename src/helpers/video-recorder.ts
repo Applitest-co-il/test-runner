@@ -4,6 +4,7 @@ import { spawn, ChildProcess } from 'child_process';
 import { Jimp } from 'jimp';
 import { Browser } from 'webdriverio';
 import ffmpeg from '@ffmpeg-installer/ffmpeg';
+import { logger } from './log-service';
 
 interface VideoRecorderOptions {
     outputDir?: string;
@@ -37,7 +38,7 @@ export class VideoRecorder {
     }
 
     async start(): Promise<void> {
-        console.log(`Starting video recording ${this.baseName}...`);
+        logger.info(`Starting video recording ${this.baseName}...`);
 
         try {
             if (!fs.existsSync(this.outputDir)) {
@@ -49,7 +50,7 @@ export class VideoRecorder {
             }
             fs.mkdirSync(this.recordingPath, { recursive: true });
         } catch (err) {
-            console.error(`Video Recorder: Error creating recording directory for ${this.recordingPath}: ${err}`);
+            logger.error(`Video Recorder: Error creating recording directory for ${this.recordingPath}: ${err}`);
             this.recordingPath = '';
             return;
         }
@@ -60,11 +61,11 @@ export class VideoRecorder {
     }
 
     async stop(): Promise<void> {
-        console.log('Stopping video recording...');
+        logger.info('Stopping video recording...');
     }
 
     generateVideo(): Promise<void> | null {
-        console.log(`Generating video for ${this.baseName}...`);
+        logger.info(`Generating video for ${this.baseName}...`);
 
         try {
             const fileExtension = 'mp4';
@@ -85,7 +86,7 @@ export class VideoRecorder {
                 '-r 25',
                 `"${videoPath}"`
             ];
-            console.log(`Video generation for ${this.baseName} ffmpeg command: ${command} ${args.join(' ')}`);
+            logger.info(`Video generation for ${this.baseName} ffmpeg command: ${command} ${args.join(' ')}`);
 
             const start = Date.now();
             const videoPromise = new Promise<void>((resolve) => {
@@ -102,7 +103,7 @@ export class VideoRecorder {
 
                     cp.on('close', () => {
                         try {
-                            console.log(
+                            logger.info(
                                 `Generated video for ${this.baseName} complete: "${videoPath}" (${Date.now() - start}ms)`
                             );
                             if (fs.existsSync(this.recordingPath)) {
@@ -110,18 +111,18 @@ export class VideoRecorder {
                             }
                             return resolve();
                         } catch (error) {
-                            console.error(`Error closing generating video for ${this.baseName}: ${error}`);
+                            logger.error(`Error closing generating video for ${this.baseName}: ${error}`);
                             return resolve();
                         }
                     });
                 } catch (error) {
-                    console.error(`Error generating video for ${this.baseName}: ${error}`);
+                    logger.error(`Error generating video for ${this.baseName}: ${error}`);
                     return resolve();
                 }
             });
             return videoPromise;
         } catch (error) {
-            console.error(`Error generating video for ${this.baseName}: ${error}`);
+            logger.error(`Error generating video for ${this.baseName}: ${error}`);
             return null;
         }
     }
@@ -134,12 +135,12 @@ export class VideoRecorder {
 
         try {
             if (!this.driver) {
-                console.error('Video Recorder: Driver is not set');
+                logger.error('Video Recorder: Driver is not set');
                 return;
             }
 
             if (!this.recordingPath) {
-                console.error('Video Recorder: Recording path is not set');
+                logger.error('Video Recorder: Recording path is not set');
                 return;
             }
 
@@ -148,7 +149,7 @@ export class VideoRecorder {
             await this.addStepToFrame(filePath, step, frame);
             //console.log(`Screenshot (frame: ${frame}) to ${filePath} completed`);
         } catch (error) {
-            console.log(`Screenshot not available (frame: ${frame}). Error: ${error}..`);
+            logger.info(`Screenshot not available (frame: ${frame}). Error: ${error}..`);
         }
     }
 
@@ -181,7 +182,7 @@ export class VideoRecorder {
             await image.blit(txtImage, 10, 10);
             await image.write(filePath);
         } catch (error) {
-            console.error(`Error adding step to frame ${frame}: ${error}`);
+            logger.error(`Error adding step to frame ${frame}: ${error}`);
         }
     }
 }

@@ -2,7 +2,7 @@ import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
 import { replaceVariables } from '../../helpers/utils';
 import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 export default class AssertNumberStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
@@ -11,7 +11,11 @@ export default class AssertNumberStep extends BaseStep {
         this.takeSnapshot = true;
     }
 
-    async execute(_: Browser, item: any): Promise<void> {
+    async execute(_: Browser, item: ChainablePromiseElement | null): Promise<void> {
+        if (!item) {
+            throw new TestRunnerError('AssertNumber: No element provided for assert number action');
+        }
+
         const text = await item.getText();
         const number = +text;
         if (isNaN(number)) {
