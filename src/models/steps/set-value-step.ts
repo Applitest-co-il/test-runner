@@ -1,7 +1,7 @@
 import BaseStep from './base-step';
 import { replaceVariables } from '../../helpers/utils';
-import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { TestRunnerError, TestStep } from '../../types';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 export default class SetValueStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
@@ -10,7 +10,11 @@ export default class SetValueStep extends BaseStep {
         this.takeSnapshot = true;
     }
 
-    async execute(driver: Browser, item: any): Promise<void> {
+    async execute(driver: Browser, item: ChainablePromiseElement | null): Promise<void> {
+        if (!item) {
+            throw new TestRunnerError('SetValueStep: No element provided for set value action');
+        }
+
         const actualValue = replaceVariables(this.value || '', this.variables || {});
         try {
             await item.setValue(actualValue);

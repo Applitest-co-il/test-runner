@@ -1,3 +1,5 @@
+import { logger } from './log-service';
+
 export function pauseApp(milliseconds: number = 250): Promise<string> {
     return new Promise((resolve) => {
         setTimeout(() => {
@@ -6,7 +8,7 @@ export function pauseApp(milliseconds: number = 250): Promise<string> {
     });
 }
 
-export function replaceVariables(text: string, variables: Record<string, any>): string {
+export function replaceVariables(text: string, variables: Record<string, string>): string {
     if (!text) return text;
     if (!variables) return text;
     if (typeof variables !== 'object') return text;
@@ -20,7 +22,7 @@ export function replaceVariables(text: string, variables: Record<string, any>): 
     });
 
     if (newText.includes('{{') && newText.includes('}}')) {
-        console.log(`Some variables were not replaced: ${newText}`);
+        logger.info(`Some variables were not replaced: ${newText}`);
     }
 
     return newText;

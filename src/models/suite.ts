@@ -1,5 +1,6 @@
 import { checkArrayMaxItems, MAX_ITEMS } from '../helpers/security';
 import { mergeVariables } from '../helpers/utils';
+import { logger } from '../helpers/log-service';
 import { Test } from './test';
 import { TestConfiguration, SuiteResult, RunSession, TestDetail } from '../types';
 import { TrFunction } from './function';
@@ -13,7 +14,7 @@ interface SuiteConstructorData {
     type?: string;
     waitBetweenTests?: number;
     stopOnFailure?: boolean;
-    variables?: Record<string, any>;
+    variables?: Record<string, string>;
     tests?: TestConfiguration[];
 }
 
@@ -24,7 +25,7 @@ export class Suite {
     private readonly _type: string = '';
     private readonly _waitBetweenTests: number = 0;
     private readonly _stopOnFailure: boolean = false;
-    private readonly _variables: Record<string, any> = {};
+    private readonly _variables: Record<string, string> = {};
     private readonly _tests: Test[] = [];
 
     constructor(suite: SuiteConstructorData, index: number) {
@@ -40,12 +41,12 @@ export class Suite {
 
     private buildTests(tests: TestConfiguration[]): void {
         if (!checkArrayMaxItems(tests)) {
-            console.error(`Too many tests in suite "${this._id} - ${this._name}": Maximum allowed is ${MAX_ITEMS}`);
+            logger.error(`Too many tests in suite "${this._id} - ${this._name}": Maximum allowed is ${MAX_ITEMS}`);
             return;
         }
 
         if (tests.length === 0) {
-            console.error(`No tests found in suite "${this._id} - ${this._name}"`);
+            logger.error(`No tests found in suite "${this._id} - ${this._name}"`);
             return;
         }
 
@@ -87,7 +88,7 @@ export class Suite {
         return this._stopOnFailure;
     }
 
-    get variables(): Record<string, any> {
+    get variables(): Record<string, string> {
         return this._variables;
     }
 
@@ -111,7 +112,7 @@ export class Suite {
         mergeVariables(this._variables, variables);
 
         for (let i = 0; i < tests.length; i++) {
-            console.log(`TestSuite::Running test #${i + 1} ${tests[i].name} in suite ${this._name}`);
+            logger.info(`TestSuite::Running test #${i + 1} ${tests[i].name} in suite ${this._name}`);
             const test = tests[i];
             if (test.skip) {
                 continue;
@@ -121,15 +122,15 @@ export class Suite {
             const runSession = sessions.find((session) => session.type === runType);
             const sessionName = `Session suite # ${this._index + 1} - ${runType}`;
             if (!runSession || !runSession.driver) {
-                console.log(`Starting session: ${sessionName}`);
+                logger.info(`Starting session: ${sessionName}`);
                 if (runType === 'web') {
                     await testRunner.startSession('web', sessionName);
                 } else if (runType.startsWith('mobile')) {
                     await testRunner.startSession('mobile', sessionName);
                 }
-                console.log(`Session ${sessionName} started successfully`);
+                logger.info(`Session ${sessionName} started successfully`);
             } else {
-                console.log(`Session ${sessionName} is already running`);
+                logger.info(`Session ${sessionName} is already running`);
             }
 
             // Get the session after potentially starting it
@@ -140,7 +141,7 @@ export class Suite {
 
             const testPromises = await test.run(currentSession, functions, apis, this._variables);
 
-            console.log(`Adding video promise "${this._index}_${i}" to suite promises`);
+            logger.info(`Adding video promise "${this._index}_${i}" to suite promises`);
             promises = promises.concat(testPromises);
 
             if (this._stopOnFailure && test.status === 'failed') {
@@ -152,15 +153,15 @@ export class Suite {
             if (this._waitBetweenTests > 0 && runSession?.driver) {
                 await runSession.driver.pause(this._waitBetweenTests);
             }
-            console.log(`TestSuite::Finished test #${i + 1}`);
+            logger.info(`TestSuite::Finished test #${i + 1}`);
         }
 
         return promises;
     }
 
     report(): SuiteResult {
-        console.log('\n===============');
-        console.log(`Test suite: ${this._name}`);
+        logger.info('\n===============');
+        logger.info(`Test suite: ${this._name}`);
         let passed = 0;
         let failed = 0;
         let skipped = 0;
@@ -169,7 +170,7 @@ export class Suite {
         let testDetails: TestDetail[] = [];
 
         for (let i = 0; i < this._tests.length; i++) {
-            const test = this._tests[i] as any;
+            const test = this._tests[i];
 
             let testDetail: TestDetail = {
                 id: test.id,
@@ -206,13 +207,13 @@ export class Suite {
             }
             testDetails.push(testDetail);
         }
-        console.log('===============\n\n');
-        console.log(`Passed: ${passed}\nFailed: ${failed}\nSkipped: ${skipped}\nPending: ${pending}`);
-        console.log(`Errors: ${errors.length === 0 ? 'None' : ''}`);
+        logger.info('===============\n\n');
+        logger.info(`Passed: ${passed}\nFailed: ${failed}\nSkipped: ${skipped}\nPending: ${pending}`);
+        logger.info(`Errors: ${errors.length === 0 ? 'None' : ''}`);
         for (let i = 0; i < errors.length; i++) {
-            console.error(`- ${errors[i]}`);
+            logger.error(`- ${errors[i]}`);
         }
-        console.log('===============\n');
+        logger.info('===============\n');
 
         const output: SuiteResult = {
             id: this._id,

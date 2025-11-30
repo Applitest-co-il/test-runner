@@ -1,13 +1,13 @@
 import BaseHorizontalScrollStep from './base-horizontal-scroll-step';
 import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 class ScrollRightStep extends BaseHorizontalScrollStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(driver: Browser, _?: any): Promise<void> {
+    async execute(driver: Browser, _: ChainablePromiseElement | null): Promise<void> {
         await this.horizontalScroll(driver, null, false);
     }
 }

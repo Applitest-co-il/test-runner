@@ -1,7 +1,7 @@
 import WebDriverConfiguration from './configuration/web-driver-configuration';
 import MobileDriverConfiguration from './configuration/mobile-driver-configuration';
 import DriverConfiguration from './configuration/base-driver-configuration';
-import RunConfigurationApi from './configuration/api-run-configuration';
+import ApiRunConfiguration from './configuration/api-run-configuration';
 import { TestRunnerConfigurationError } from '../helpers/test-errors';
 import { RunConfiguration, RunSession } from '../types';
 
@@ -27,12 +27,12 @@ export function runConfigurationFactory(options: RunConfiguration): RunSession[]
                 runConf = new WebDriverConfiguration(options, session);
                 break;
             case 'api':
-                runConf = new RunConfigurationApi(options);
+                runConf = new ApiRunConfiguration(options);
                 break;
             default:
                 throw new TestRunnerConfigurationError('Invalid session type provided');
         }
-        runSessions.push({ type: session.type, runConf, driver: null });
+        runSessions.push({ type: session.type, runConf });
     }
     return runSessions;
 }

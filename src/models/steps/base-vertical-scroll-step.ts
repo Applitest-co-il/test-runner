@@ -1,7 +1,7 @@
 import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
 import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 interface ScrollOptions {
     topPercentage: number;
@@ -15,11 +15,15 @@ abstract class BaseVerticalScrollStep extends BaseStep {
         super(sequence, step);
     }
 
-    async execute(driver: Browser, item: any): Promise<void> {
+    async execute(driver: Browser, item: ChainablePromiseElement | null): Promise<void> {
         throw new TestRunnerError(`Execute method is not implemented - ${driver} - ${item}`);
     }
 
-    async verticalScroll(driver: Browser, originItem: any, down: boolean = true): Promise<void> {
+    async verticalScroll(
+        driver: Browser,
+        originItem: ChainablePromiseElement | null,
+        down: boolean = true
+    ): Promise<void> {
         const scrollOptions = this.parseScrollValue();
 
         const startPercentage = originItem ? 0 : down ? scrollOptions.bottomPercentage : scrollOptions.topPercentage;

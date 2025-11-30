@@ -1,7 +1,7 @@
 import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
 import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 export default class AssertCssStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
@@ -10,7 +10,11 @@ export default class AssertCssStep extends BaseStep {
         this.takeSnapshot = true;
     }
 
-    async execute(_: Browser, item: any): Promise<void> {
+    async execute(_: Browser, item: ChainablePromiseElement | null): Promise<void> {
+        if (!item) {
+            throw new TestRunnerError('AssertCssProperty: No element provided for assert CSS property action');
+        }
+
         const value = this.value;
         if (!value) {
             throw new TestRunnerError('AssertCssProperty::No value provided');
@@ -32,7 +36,7 @@ export default class AssertCssStep extends BaseStep {
 
         // Fetch the actual value of the CSS property
         const actualValue = await item.getCSSProperty(property);
-        const actualFormattedValue = actualValue.value.replace(/\s+/g, '').toLowerCase();
+        const actualFormattedValue = actualValue.value?.replace(/\s+/g, '').toLowerCase();
 
         // Compare the expected and actual values
         let result = false;

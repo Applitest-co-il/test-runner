@@ -3,6 +3,7 @@ import cors from 'cors';
 
 import { downloadFile } from '../helpers/download-file';
 import { runTests, testApiCall, openSession, closeSession, runSession, libVersion } from './index';
+import { logger } from '../helpers/log-service';
 import { TestRunnerOptions } from '../types';
 import { Server } from 'http';
 
@@ -23,7 +24,7 @@ async function preProcessOptions(options: TestRunnerOptions): Promise<boolean> {
     }
 
     if (['mobile', 'mixed'].includes(runType)) {
-        console.log('Received mobile run configuration');
+        logger.info('Received mobile run configuration');
         const session = options.runConfiguration.sessions.find((session) => session.type === 'mobile');
         if (session?.appium?.app?.startsWith('s3:')) {
             const appName = session.appium.appName;
@@ -31,11 +32,11 @@ async function preProcessOptions(options: TestRunnerOptions): Promise<boolean> {
 
             const appLocalPath = await downloadFile(url, appName);
             if (!appLocalPath) {
-                console.error('App download failed');
+                logger.error('App download failed');
                 return false;
             }
 
-            console.log(`App downloaded to: ${appLocalPath}`);
+            logger.info(`App downloaded to: ${appLocalPath}`);
             session.appium.app = appLocalPath;
         }
     }
@@ -69,7 +70,7 @@ export function createLocalTestRunner(port: number): Server {
                 logMessage += ` - ${data.message}`;
             }
 
-            console.log(logMessage);
+            logger.info(logMessage);
 
             // Call original json method
             return originalJson.call(this, data);
@@ -108,7 +109,7 @@ export function createLocalTestRunner(port: number): Server {
             const result = await runTests(options);
             res.status(200).json(result);
         } catch (error) {
-            console.error('Error running tests:', error);
+            logger.error('Error running tests:', error);
             res.status(500).json({
                 success: false,
                 message: (error as Error).message
@@ -127,7 +128,7 @@ export function createLocalTestRunner(port: number): Server {
             const result = await testApiCall(method, path, headers, data, schema, variables || {}, outputs || []);
             res.status(200).json(result);
         } catch (error) {
-            console.error('Error testing API call:', error);
+            logger.error('Error testing API call:', error);
             res.status(500).json({
                 success: false,
                 message: (error as Error).message
@@ -154,7 +155,7 @@ export function createLocalTestRunner(port: number): Server {
             const result = await openSession(options);
             res.status(200).json(result);
         } catch (error) {
-            console.error('Error opening session:', error);
+            logger.error('Error opening session:', error);
             res.status(500).json({
                 success: false,
                 message: (error as Error).message
@@ -177,7 +178,7 @@ export function createLocalTestRunner(port: number): Server {
             const result = await runSession(sessionId, options);
             res.status(200).json(result);
         } catch (error) {
-            console.error('Error running session:', error);
+            logger.error('Error running session:', error);
             res.status(500).json({
                 success: false,
                 message: (error as Error).message
@@ -199,7 +200,7 @@ export function createLocalTestRunner(port: number): Server {
             const result = await closeSession(sessionId);
             res.status(200).json(result);
         } catch (error) {
-            console.error('Error closing session:', error);
+            logger.error('Error closing session:', error);
             res.status(500).json({
                 success: false,
                 message: (error as Error).message
@@ -211,7 +212,7 @@ export function createLocalTestRunner(port: number): Server {
 
     // Error handling middleware
     app.use((error: Error, req: Request, res: Response, _: NextFunction) => {
-        console.error('Unhandled error:', error);
+        logger.error('Unhandled error:', error);
         res.status(500).json({
             success: false,
             message: 'Internal server error'
@@ -231,23 +232,23 @@ export function createLocalTestRunner(port: number): Server {
             server.close();
             throw new Error(`Could not start server on port ${port}`);
         }
-        console.log(`TestRunner API server is running on port ${port}`);
-        console.log(`Version: ${libVersion.version}`);
+        logger.info(`TestRunner API server is running on port ${port}`);
+        logger.info(`Version: ${libVersion.version}`);
     });
 
     // Graceful shutdown
     process.on('SIGTERM', () => {
-        console.log('SIGTERM received, shutting down gracefully');
-        server.close(() => {
-            console.log('Server closed');
+        logger.info('SIGTERM received, shutting down gracefully');
+        server?.close(() => {
+            logger.info('Server closed');
             process.exit(0);
         });
     });
 
     process.on('SIGINT', () => {
-        console.log('SIGINT received, shutting down gracefully');
-        server.close(() => {
-            console.log('Server closed');
+        logger.info('SIGINT received, shutting down gracefully');
+        server?.close(() => {
+            logger.info('Server closed');
             process.exit(0);
         });
     });

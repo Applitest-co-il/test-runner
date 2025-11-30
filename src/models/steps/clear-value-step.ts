@@ -1,6 +1,6 @@
 import BaseStep from './base-step';
 import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 export default class ClearValueStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
@@ -9,7 +9,7 @@ export default class ClearValueStep extends BaseStep {
         this.takeSnapshot = true;
     }
 
-    async execute(_: Browser, item: any): Promise<void> {
+    async execute(_: Browser, item: ChainablePromiseElement): Promise<void> {
         await item.clearValue();
     }
 }

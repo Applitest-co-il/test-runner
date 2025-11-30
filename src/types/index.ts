@@ -1,5 +1,6 @@
 // Core type definitions for Applitest Test
 
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 import DriverConfiguration from '../models/configuration/base-driver-configuration';
 import { TrFunction } from '../models/function';
 
@@ -14,14 +15,23 @@ export interface TestRunnerOptions {
 }
 
 export interface RunConfiguration {
-    name: string;
+    runName: string;
     runType?: 'web' | 'mobile' | 'api' | 'mixed';
+    organization?: string;
     description?: string;
     sessions: SessionConfiguration[];
     startFromStep?: number;
     stopAtStep?: number;
     keepSession?: boolean;
+    enableVideo?: boolean;
     videosPath?: string;
+    noFollowReset?: boolean;
+    farm?: string;
+    user?: string;
+    user_key?: string;
+    host?: string;
+    port?: number;
+    logLevel?: string;
 }
 
 export interface SessionConfiguration {
@@ -29,7 +39,6 @@ export interface SessionConfiguration {
     browser?: any;
     appium?: any;
     capabilities?: WebDriverCapabilities;
-    driver?: any;
 }
 
 export interface SuiteConfiguration {
@@ -43,7 +52,7 @@ export interface TestConfiguration {
     description?: string;
     type: string;
     steps: TestStep[];
-    savedElements?: Record<string, any>;
+    savedElements?: Record<string, ChainablePromiseElement>;
     variables?: Record<string, string>;
     functions?: Record<string, TrFunction>;
 }
@@ -85,12 +94,15 @@ export interface FunctionConfiguration {
 }
 
 export interface ApiConfiguration {
+    id: string;
     name: string;
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-    url: string;
+    path: string;
     headers?: Record<string, string>;
-    data?: any;
+    body?: any;
     schema?: any;
+    properties?: string[];
+    outputs?: OutputVariable[];
 }
 
 export interface WebDriverCapabilities {
@@ -106,7 +118,7 @@ export interface WebDriverCapabilities {
 export interface RunSession {
     type: string;
     runConf: DriverConfiguration;
-    driver: any;
+    driver?: Browser;
 }
 
 //#endregion
@@ -270,7 +282,7 @@ export interface ApiCallResult {
     responseBody?: any;
     schemaValidation: boolean;
     schemaValidationErrors: SchemaValidationError[];
-    outputs?: Record<string, any>;
+    outputs?: Record<string, string>;
     error?: string;
 }
 
@@ -288,7 +300,7 @@ export interface FunctionResult {
     success: boolean;
     failedStep?: number;
     error?: string;
-    outputs?: Record<string, any> | null;
+    outputs?: Record<string, string> | null;
 }
 
 //#endregion

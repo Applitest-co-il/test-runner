@@ -1,18 +1,22 @@
 import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
 import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 abstract class BaseHorizontalScrollStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(driver: Browser, item: any): Promise<void> {
+    async execute(driver: Browser, item: ChainablePromiseElement | null): Promise<void> {
         throw new TestRunnerError(`Execute method is not implemented - ${driver} - ${item}`);
     }
 
-    async horizontalScroll(driver: Browser, originItem: any, left: boolean = true): Promise<void> {
+    async horizontalScroll(
+        driver: Browser,
+        originItem: ChainablePromiseElement | null,
+        left: boolean = true
+    ): Promise<void> {
         const value = this.value;
         const count = value ? parseInt(value) : 1;
 

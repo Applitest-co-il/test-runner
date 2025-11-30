@@ -1,5 +1,7 @@
 import DriverConfiguration from './base-driver-configuration';
 import { TestRunnerConfigurationError } from '../../helpers/test-errors';
+import { logger } from '../../helpers/log-service';
+import { RunConfiguration, SessionConfiguration } from '../../types';
 
 class WebDriverConfiguration extends DriverConfiguration {
     private _browserName: string = '';
@@ -12,7 +14,7 @@ class WebDriverConfiguration extends DriverConfiguration {
 
     private _restoreEmulateFunc: (() => void) | null = null;
 
-    constructor(options: any, session: any) {
+    constructor(options: RunConfiguration, session: SessionConfiguration) {
         super(options);
 
         if (session.browser.farm) {
@@ -125,7 +127,7 @@ class WebDriverConfiguration extends DriverConfiguration {
             }
         }
 
-        console.log(`Web configuration FINAL: ${JSON.stringify(wdio)}`);
+        logger.info(`Web configuration FINAL: ${JSON.stringify(wdio)}`);
 
         return wdio;
     }
