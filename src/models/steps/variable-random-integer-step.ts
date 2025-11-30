@@ -1,14 +1,14 @@
 import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
 import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 class VariableRandomIntegerStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(_: Browser, __?: any): Promise<void> {
+    async execute(_: Browser, __: ChainablePromiseElement | null): Promise<void> {
         const value = this.value;
         if (!value) {
             throw new TestRunnerError('GenerateRandomInteger::No value provided');

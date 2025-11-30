@@ -9,21 +9,32 @@ import {
 import { apiCall } from '../helpers/apicall';
 import { replaceVariables } from '../helpers/utils';
 import { v4 as uuids4 } from 'uuid';
-import { OutputVariable, SessionResult, RunResult, ApiCallResult, TestRunnerOptions } from '../types';
+import {
+    OutputVariable,
+    SessionResult,
+    RunResult,
+    ApiCallResult,
+    TestRunnerOptions,
+    SuiteConfiguration,
+    TestConfiguration,
+    TestStep
+} from '../types';
 import { extractDom } from '../helpers/accessibility-utils';
+import { createLocalTestRunner } from './server';
+import { logger, LogLevel } from '../helpers/log-service';
+import libVersion from './version.json';
+import { ChainablePromiseElement } from 'webdriverio';
 
 interface SessionCache {
     sessionId: string;
     testRunner: TestRunner;
-    savedElements: Record<string, any>;
+    savedElements: Record<string, ChainablePromiseElement>;
 }
-
-import libVersion from './version.json';
 
 let trSessionCache: SessionCache | null = null;
 
 export async function runTests(options: TestRunnerOptions): Promise<RunResult> {
-    console.log(`TestRunnerLib::runTests::${libVersion.version}`);
+    logger.info(`TestRunnerLib::runTests::${libVersion.version}`);
 
     const startDate = new Date();
     const testRunner = new TestRunner(options);
@@ -82,15 +93,15 @@ export async function runTests(options: TestRunnerOptions): Promise<RunResult> {
         };
     }
 
-    console.log(`TestRunnerLib::runTests::${libVersion.version}:Ended`);
+    logger.info(`TestRunnerLib::runTests::${libVersion.version}:Ended`);
     return output;
 }
 
 export async function openSession(options: TestRunnerOptions): Promise<SessionResult> {
-    console.log(`TestRunnerLib::openSession::${libVersion.version}`);
+    logger.info(`TestRunnerLib::openSession::${libVersion.version}`);
 
     if (trSessionCache) {
-        console.log('Closing existing session');
+        logger.info('Closing existing session');
         await trSessionCache.testRunner.terminateAllSessions();
         trSessionCache = null;
     }
@@ -117,7 +128,7 @@ export async function openSession(options: TestRunnerOptions): Promise<SessionRe
     const endDate = new Date();
     const duration = (endDate.getTime() - startDate.getTime()) / 1000;
 
-    console.log(`TestRunnerLib::openSession::${libVersion.version}:Ended`);
+    logger.info(`TestRunnerLib::openSession::${libVersion.version}:Ended`);
     return {
         success: true,
         executionTime: duration,
@@ -126,7 +137,7 @@ export async function openSession(options: TestRunnerOptions): Promise<SessionRe
 }
 
 export async function runSession(sessionId: string, options: TestRunnerOptions): Promise<SessionResult> {
-    console.log(`TestRunnerLib::runSession::${libVersion.version}`);
+    logger.info(`TestRunnerLib::runSession::${libVersion.version}`);
 
     if (!trSessionCache || trSessionCache.sessionId !== sessionId) {
         return {
@@ -139,7 +150,7 @@ export async function runSession(sessionId: string, options: TestRunnerOptions):
 
     trSessionCache.testRunner.initSuites(options);
     if (trSessionCache.testRunner.suites.length === 0 || trSessionCache.testRunner.suites.length > 1) {
-        console.error('Invalid suites configuration');
+        logger.error('Invalid suites configuration');
         throw new TestDefinitionError('Invalid suites configuration - exactly one suite must be defined');
     }
 
@@ -178,7 +189,7 @@ export async function runSession(sessionId: string, options: TestRunnerOptions):
     const endDate = new Date();
     const duration = (endDate.getTime() - startDate.getTime()) / 1000;
 
-    console.log(`TestRunnerLib::runSession::${libVersion.version}:Ended`);
+    logger.info(`TestRunnerLib::runSession::${libVersion.version}:Ended`);
     return {
         success: suiteResult?.success || false,
         executionTime: duration,
@@ -187,7 +198,7 @@ export async function runSession(sessionId: string, options: TestRunnerOptions):
 }
 
 export async function getAxTree(sessionId: string, selector: string | null = null): Promise<SessionResult> {
-    console.log(`TestRunnerLib::getAxTree::${libVersion.version}`);
+    logger.info(`TestRunnerLib::getAxTree::${libVersion.version}`);
 
     if (!trSessionCache || trSessionCache.sessionId !== sessionId) {
         return {
@@ -197,6 +208,10 @@ export async function getAxTree(sessionId: string, selector: string | null = nul
     }
 
     const driver = trSessionCache.testRunner.sessions[0].driver;
+    if (!driver) {
+        throw new TestRunnerError('GetAxTree::No driver found for the session');
+    }
+
     const puppeteerBrowser = await driver.getPuppeteer();
 
     // switch to Puppeteer
@@ -217,7 +232,7 @@ export async function getAxTree(sessionId: string, selector: string | null = nul
                 return page.accessibility.snapshot();
             }
         } catch (error) {
-            console.error(`Error getting accessibility tree: ${(error as Error).message}`);
+            logger.error(`Error getting accessibility tree: ${(error as Error).message}`);
             return null;
         }
     });
@@ -236,7 +251,7 @@ export async function getAxTree(sessionId: string, selector: string | null = nul
 }
 
 export async function getDomTree(sessionId: string, selector: string | null = null): Promise<SessionResult> {
-    console.log(`TestRunnerLib::getDomTree::${libVersion.version}`);
+    logger.info(`TestRunnerLib::getDomTree::${libVersion.version}`);
 
     if (!trSessionCache || trSessionCache.sessionId !== sessionId) {
         return {
@@ -246,8 +261,11 @@ export async function getDomTree(sessionId: string, selector: string | null = nu
     }
 
     const driver = trSessionCache.testRunner.sessions[0].driver;
-    let domTree: any = null;
+    if (!driver) {
+        throw new TestRunnerError('GetDomTree::No driver found for the session');
+    }
 
+    let domTree: any = null;
     try {
         if (selector) {
             // Extract DOM tree for specific element using JavaScript
@@ -257,7 +275,7 @@ export async function getDomTree(sessionId: string, selector: string | null = nu
             domTree = await driver.execute(extractDom);
         }
     } catch (error) {
-        console.error(`Error getting DOM tree: ${(error as Error).message}`);
+        logger.error(`Error getting DOM tree: ${(error as Error).message}`);
     }
 
     if (!domTree) {
@@ -279,7 +297,7 @@ export async function doStep(
     stepCommand: string,
     stepValue: string
 ): Promise<SessionResult> {
-    console.log(`TestRunnerLib::doStep::${libVersion.version}`);
+    logger.info(`TestRunnerLib::doStep::${libVersion.version}`);
 
     if (!trSessionCache || trSessionCache.sessionId !== sessionId) {
         return {
@@ -288,21 +306,19 @@ export async function doStep(
         };
     }
 
-    const suites = [
+    const suites: SuiteConfiguration[] = [
         {
             name: 'Do Step',
-            type: 'web',
             tests: [
                 {
                     name: 'Do Step Test',
                     type: 'web',
                     steps: [
                         {
-                            commandLabel: '',
                             selectors: [selector],
                             value: stepValue,
                             command: stepCommand,
-                            operator: null
+                            operator: undefined
                         }
                     ]
                 }
@@ -310,7 +326,7 @@ export async function doStep(
         }
     ];
 
-    const options: any = {
+    const options: TestRunnerOptions = {
         suites: suites,
         functions: [],
         apis: []
@@ -324,7 +340,7 @@ export async function doStep(
 }
 
 export async function closeSession(sessionId: string): Promise<SessionResult> {
-    console.log(`TestRunnerLib::closeSession::${libVersion.version}`);
+    logger.info(`TestRunnerLib::closeSession::${libVersion.version}`);
 
     if (!trSessionCache) {
         return {
@@ -333,7 +349,7 @@ export async function closeSession(sessionId: string): Promise<SessionResult> {
     }
 
     if (trSessionCache.sessionId !== sessionId) {
-        console.error('Invalid session ID or no session open');
+        logger.error('Invalid session ID or no session open');
         return {
             success: false,
             message: 'Invalid session ID or no session open'
@@ -346,7 +362,7 @@ export async function closeSession(sessionId: string): Promise<SessionResult> {
     const endDate = new Date();
     const duration = (endDate.getTime() - startDate.getTime()) / 1000;
 
-    console.log(`TestRunnerLib::closeSession::${libVersion.version}:Ended`);
+    logger.info(`TestRunnerLib::closeSession::${libVersion.version}:Ended`);
     return {
         success: true,
         executionTime: duration
@@ -392,17 +408,25 @@ export async function testApiCall(
         const result = await apiCall(outputs, url, method, apiHeaders, apiData, schema);
         return result;
     } catch (error) {
-        console.error(`API call error: ${(error as Error).message}`);
+        logger.error(`API call error: ${(error as Error).message}`);
         return null;
     }
 }
 
-// Export error classes and version
+// Export error classes, types, version, and server function
 export {
     TestRunnerConfigurationError,
     TestRunnerError,
     TestDefinitionError,
     TestItemNotFoundError,
     TestAbuseError,
-    libVersion
+    SessionResult,
+    SuiteConfiguration,
+    TestConfiguration,
+    TestRunnerOptions,
+    TestStep,
+    libVersion,
+    createLocalTestRunner,
+    logger,
+    LogLevel
 };

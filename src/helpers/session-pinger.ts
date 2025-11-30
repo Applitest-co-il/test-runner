@@ -1,10 +1,11 @@
 import { setIntervalAsync, clearIntervalAsync, SetIntervalAsyncTimer } from 'set-interval-async';
 import { RunSession } from '../types';
+import { logger } from './log-service';
 
 export class SessionPinger {
     private sessions: RunSession[] = [];
     private interval: number = 60000; // Default interval of 60 seconds
-    private intervalId: SetIntervalAsyncTimer<any> | null = null;
+    private intervalId: SetIntervalAsyncTimer<[]> | null = null;
     private running: boolean = false;
 
     constructor(sessions: RunSession[], interval?: number) {
@@ -30,12 +31,12 @@ export class SessionPinger {
                         pingData = await session.driver.getDeviceTime(); // Simple command to keep the session alive
                     }
                     if (pingData) {
-                        console.log(`PingSession::Success for session type ${session.type}`);
+                        logger.info(`PingSession::Success for session type ${session.type}`);
                     } else {
-                        console.warn(`PingSession::No valid response for session type ${session.type}`);
+                        logger.error(`PingSession::No valid response for session type ${session.type}`);
                     }
                 } catch (error) {
-                    console.error(`PingSession::Error for session type ${session.type}:`, error);
+                    logger.error(`PingSession::Error for session type ${session.type}:`, error);
                 }
             } else {
                 console.warn(`PingSession::Session driver is not available for type ${session.type}`);
@@ -54,14 +55,14 @@ export class SessionPinger {
         }, this.interval);
 
         this.running = true;
-        console.log(`Session pinger started with interval ${this.interval}ms`);
+        logger.info(`Session pinger started with interval ${this.interval}ms`);
     }
 
     async stop(): Promise<void> {
         this.running = false;
         if (this.intervalId) {
             await clearIntervalAsync(this.intervalId);
-            console.log('Session pinger stopped');
+            logger.info('Session pinger stopped');
         }
     }
 }

@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import * as fs from 'fs';
 import { URL } from 'url';
+import { logger } from './log-service';
 
 // Define an allow-list of trusted hostnames/endpoints (adjust as appropriate)
 // if host start and ends with / it's treated as regex pattern, if not as exact match
@@ -41,7 +42,7 @@ function isAllowedUrl(urlString: string): boolean {
 
         return true;
     } catch (e) {
-        console.error(`Invalid URL: ${urlString} - ${(e as Error).message}`);
+        logger.error(`Invalid URL: ${urlString} - ${(e as Error).message}`);
         return false;
     }
 }
@@ -53,18 +54,18 @@ export async function downloadFile(url: string, fileName: string, override: bool
     if (!override) {
         const existLocalApp = fs.existsSync(fileLocalPath);
         if (existLocalApp) {
-            console.log(`App ${fileLocalPath} already downloaded`);
+            logger.info(`App ${fileLocalPath} already downloaded`);
             return fileLocalPath;
         }
     }
 
     // SSRF protection: Only allow URLs from trusted hosts
     if (!isAllowedUrl(url)) {
-        console.error(`Blocked attempt to download from disallowed URL: ${url}`);
+        logger.error(`Blocked attempt to download from disallowed URL: ${url}`);
         return null;
     }
 
-    console.log(`Downloading file from ${url} to ${fileLocalPath}`);
+    logger.info(`Downloading file from ${url} to ${fileLocalPath}`);
 
     let downloadResponse: AxiosResponse;
     try {
@@ -74,12 +75,12 @@ export async function downloadFile(url: string, fileName: string, override: bool
             responseType: 'stream'
         });
     } catch (error) {
-        console.error(`Error downloading file ${url}: ${error}`);
+        logger.error(`Error downloading file ${url}: ${error}`);
         return null;
     }
 
-    console.log(`Download response status: ${downloadResponse.status}`);
-    console.log(`Starting saving file to ${fileLocalPath}`);
+    logger.info(`Download response status: ${downloadResponse.status}`);
+    logger.info(`Starting saving file to ${fileLocalPath}`);
 
     const writer = fs.createWriteStream(fileLocalPath);
     downloadResponse.data.pipe(writer);
@@ -91,11 +92,11 @@ export async function downloadFile(url: string, fileName: string, override: bool
 
     return promise
         .then(() => {
-            console.log(`File downloaded successfully ${fileLocalPath}`);
+            logger.info(`File downloaded successfully ${fileLocalPath}`);
             return fileLocalPath;
         })
         .catch((error) => {
-            console.error(`Error downloading file ${url}: ${error}`);
+            logger.error(`Error downloading file ${url}: ${error}`);
             return null;
         });
 }

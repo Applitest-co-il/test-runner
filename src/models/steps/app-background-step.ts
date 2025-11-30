@@ -1,6 +1,6 @@
 import BaseStep from './base-step';
 import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 export default class AppBackgroundStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
@@ -9,7 +9,7 @@ export default class AppBackgroundStep extends BaseStep {
         this.takeSnapshot = true;
     }
 
-    async execute(driver: Browser, _: any): Promise<void> {
+    async execute(driver: Browser, _: ChainablePromiseElement | null): Promise<void> {
         await driver.execute('mobile: backgroundApp');
     }
 }

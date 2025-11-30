@@ -1,13 +1,15 @@
 import { TestDefinitionError } from '../helpers/test-errors';
 import { mergeVariables } from '../helpers/utils';
+import { logger } from '../helpers/log-service';
 import { stepFactory } from './test-step';
 import { VideoRecorder } from '../helpers/video-recorder';
 import AppActivateStep from './steps/app-activate-step';
 import { TrFunction } from './function';
 import { checkArrayMaxItems, MAX_ITEMS } from '../helpers/security';
-import { TestConfiguration, TestStep, RunSession } from '../types';
+import { TestConfiguration, TestStep, RunSession, TestRunnerError } from '../types';
 import BaseStep from './steps/base-step';
 import { TrApi } from './api';
+import { ChainablePromiseElement } from 'webdriverio';
 
 interface TestConstructorData extends TestConfiguration {
     id?: string;
@@ -25,7 +27,7 @@ export class Test {
     private readonly _variables: Record<string, string> = {};
     private readonly _skip: boolean = false;
     private readonly _steps: BaseStep[] = [];
-    private readonly _savedElements: Record<string, any> = {};
+    private readonly _savedElements: Record<string, ChainablePromiseElement> = {};
     private _status: string = 'pending';
     private _lastStep: number = 0;
     private _videoRecorder: VideoRecorder | undefined = undefined;
@@ -43,12 +45,12 @@ export class Test {
 
     private buildSteps(steps: TestStep[]): void {
         if (!steps || steps.length === 0) {
-            console.error(`No test steps found in test "${this._id} - ${this._name}"`);
+            logger.error(`No test steps found in test "${this._id} - ${this._name}"`);
             return;
         }
 
         if (!checkArrayMaxItems(steps)) {
-            console.error(`Too many test steps in test "${this._id} - ${this._name}": Maximum allowed is ${MAX_ITEMS}`);
+            logger.error(`Too many test steps in test "${this._id} - ${this._name}": Maximum allowed is ${MAX_ITEMS}`);
             return;
         }
 
@@ -91,7 +93,7 @@ export class Test {
         return this._steps;
     }
 
-    get savedElements(): Record<string, any> {
+    get savedElements(): Record<string, ChainablePromiseElement> {
         return this._savedElements;
     }
 
@@ -125,6 +127,10 @@ export class Test {
         apis: TrApi[],
         variables: Record<string, string>
     ): Promise<Promise<void>[]> {
+        if (!session.driver) {
+            throw new TestRunnerError('Test::No driver available to execute test');
+        }
+
         const promises: Promise<void>[] = [];
         TrFunction.functionStacks = [];
 
@@ -152,18 +158,18 @@ export class Test {
         mergeVariables(this._variables, variables);
 
         const startFromSteps =
-            (session as any).runConf?.startFromStep > 0 && (session as any).runConf.startFromStep < steps.length
-                ? (session as any).runConf.startFromStep
+            session.runConf?.startFromStep > 0 && session.runConf.startFromStep < steps.length
+                ? session.runConf.startFromStep
                 : 0;
         const stopAtStep =
-            (session as any).runConf?.stopAtStep > startFromSteps && (session as any).runConf.stopAtStep < steps.length
-                ? (session as any).runConf.stopAtStep
+            session.runConf?.stopAtStep > startFromSteps && session.runConf.stopAtStep < steps.length
+                ? session.runConf.stopAtStep
                 : steps.length;
 
-        console.log(`Starting test "${this._name}" from step ${startFromSteps + 1} to ${stopAtStep + 1}`);
+        logger.info(`Starting test "${this._name}" from step ${startFromSteps + 1} to ${stopAtStep + 1}`);
 
         for (let i = startFromSteps; i < stopAtStep; i++) {
-            console.log(`Running step ${i + 1}`);
+            logger.info(`Running step ${i + 1}`);
             const step = steps[i];
 
             if (this._videoRecorder) {
@@ -189,10 +195,10 @@ export class Test {
                 this._status = 'failed';
                 this._lastStep = i;
                 steps[i].errorDetails = (err as Error).message;
-                console.error(`Error at step ${i + 1}: ${(err as Error).message}`);
+                logger.error(`Error at step ${i + 1}: ${(err as Error).message}`);
                 break;
             }
-            console.log(`Step ${i + 1} completed successfully`);
+            logger.info(`Step ${i + 1} completed successfully`);
         }
         if (this._status === 'pending') {
             this._status = 'passed';
@@ -203,7 +209,7 @@ export class Test {
             await this._videoRecorder.stop();
             const videoPromise = this._videoRecorder.generateVideo();
             if (videoPromise) {
-                console.log(`Video promise OK for test "${this._suiteIndex}_${this._index}"`);
+                logger.info(`Video promise OK for test "${this._suiteIndex}_${this._index}"`);
                 promises.push(videoPromise);
             }
         }

@@ -1,6 +1,7 @@
 import BaseStep from './base-step';
-import { Browser, Key } from 'webdriverio';
+import { Browser, ChainablePromiseElement, Key } from 'webdriverio';
 import { TestRunnerError } from '../../helpers/test-errors';
+import { logger } from '../../helpers/log-service';
 import { TestStep } from '../../types';
 
 interface ActionConfig {
@@ -36,7 +37,7 @@ export default class PerformActionsStep extends BaseStep {
         super(sequence, step);
     }
 
-    async execute(driver: Browser, _?: any): Promise<void> {
+    async execute(driver: Browser, _: ChainablePromiseElement | null): Promise<void> {
         try {
             const value = this.value;
             if (!value) {
@@ -90,7 +91,7 @@ export default class PerformActionsStep extends BaseStep {
                         await actionObj.pause(action.duration ?? 10);
                         break;
                     default:
-                        console.error(`PerformWheelAction::Invalid wheel action command "${action.command}"`);
+                        logger.error(`PerformWheelAction::Invalid wheel action command "${action.command}"`);
                         break;
                 }
             }
@@ -118,7 +119,7 @@ export default class PerformActionsStep extends BaseStep {
                         await actionObj.pause(action.duration ?? 10);
                         break;
                     default:
-                        console.error(`PerformKeyAction::Invalid key action command "${action.command}"`);
+                        logger.error(`PerformKeyAction::Invalid key action command "${action.command}"`);
                         break;
                 }
             }
@@ -168,7 +169,7 @@ export default class PerformActionsStep extends BaseStep {
                         await actionObj.pause(action.duration ?? 10);
                         break;
                     default:
-                        console.error(`PerformPointerAction::Invalid pointer action command "${action.command}"`);
+                        logger.error(`PerformPointerAction::Invalid pointer action command "${action.command}"`);
                         break;
                 }
 

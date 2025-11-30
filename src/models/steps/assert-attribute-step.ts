@@ -1,14 +1,18 @@
 import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
 import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 export default class AssertAttributeStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(_: Browser, item: any): Promise<void> {
+    async execute(_: Browser, item: ChainablePromiseElement | null): Promise<void> {
+        if (!item) {
+            throw new TestRunnerError('AssertAttributeStep: No element provided for assert attribute action');
+        }
+
         const value = this.value;
         if (!value) {
             throw new TestRunnerError('AssertAttribute::No value provided');

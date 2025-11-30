@@ -2,15 +2,15 @@ import BaseStep from './base-step';
 import { replaceVariables } from '../../helpers/utils';
 import { TestRunnerError } from '../../helpers/test-errors';
 import { TestStep } from '../../types';
-import randomstring from 'randomstring';
-import { Browser } from 'webdriverio';
+import randomstring, { GenerateOptions } from 'randomstring';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 export default class VariableRandomStringStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(_: Browser, __: any): Promise<void> {
+    async execute(_: Browser, __: ChainablePromiseElement | null): Promise<void> {
         const value = this.value;
         if (!value) {
             throw new TestRunnerError('GenerateRandomString::No value provided');
@@ -36,12 +36,12 @@ export default class VariableRandomStringStep extends BaseStep {
         const capitalization = randomParts[3] ? randomParts[3].toLowerCase() : 'any';
 
         const operator = this.operator ? this.operator : 'alphanumeric';
-        const generateOptions: any = {
+        const generateOptions: GenerateOptions = {
             charset: operator,
             length: maxLen
         };
         if (capitalization !== 'any') {
-            generateOptions.capitalization = capitalization;
+            generateOptions.capitalization = capitalization as 'lowercase' | 'uppercase';
         }
 
         const randomValue = randomstring.generate(generateOptions);

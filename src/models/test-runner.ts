@@ -18,12 +18,14 @@ import UploadFileStep from './steps/upload-file-step';
 import { downloadFile } from '../helpers/download-file';
 import BaseStep from './steps/base-step';
 import { mergeVariables } from '../helpers/utils';
+import { logger } from '../helpers/log-service';
+import { Browser } from 'webdriverio';
 
 const MAX_ITEMS = 1000;
 
 export class TestRunner {
-    private static savedWebDriver: any = null;
-    private static savedMobileDriver: any = null;
+    private static savedWebDriver: Browser | undefined = undefined;
+    private static savedMobileDriver: Browser | undefined = undefined;
 
     private _runConfiguration: RunConfiguration | undefined = undefined;
     private _sessions: RunSession[] = [];
@@ -42,7 +44,7 @@ export class TestRunner {
         this.initApis(options);
 
         if (this._suites.length > 1 && this.runConfiguration) {
-            console.log('Multiple suites found - startFromStep, stopAtStep and keepSession will be ignored');
+            logger.info('Multiple suites found - startFromStep, stopAtStep and keepSession will be ignored');
             this.runConfiguration.startFromStep = -1;
             this.runConfiguration.stopAtStep = -1;
             this.runConfiguration.keepSession = false;
@@ -107,14 +109,14 @@ export class TestRunner {
 
     public initSessions(): void {
         if (!this._runConfiguration) {
-            console.error('Run configuration is not defined');
+            logger.error('Run configuration is not defined');
             throw new TestRunnerConfigurationError('Run configuration is not defined');
         }
 
         this._sessions = runConfigurationFactory(this._runConfiguration);
 
         if (!this._sessions || this._sessions.length === 0) {
-            console.error('No sessions found');
+            logger.error('No sessions found');
             throw new TestRunnerConfigurationError('No sessions found');
         }
 
@@ -126,7 +128,7 @@ export class TestRunner {
 
     public initSuites(options: TestRunnerOptions): void {
         if (!options.suites || !checkArrayMaxItems(options.suites)) {
-            console.error(`Too many suites: Maximum allowed is ${MAX_ITEMS}`);
+            logger.error(`Too many suites: Maximum allowed is ${MAX_ITEMS}`);
             return;
         }
 
@@ -141,7 +143,7 @@ export class TestRunner {
 
     public initFunctions(options: TestRunnerOptions): void {
         if (!options.functions || !checkArrayMaxItems(options.functions)) {
-            console.error(`Too many functions: Maximum allowed is ${MAX_ITEMS}`);
+            logger.error(`Too many functions: Maximum allowed is ${MAX_ITEMS}`);
             return;
         }
 
@@ -154,7 +156,7 @@ export class TestRunner {
 
     public initApis(options: TestRunnerOptions): void {
         if (!options.apis || !checkArrayMaxItems(options.apis)) {
-            console.error(`Too many APIs: Maximum allowed is ${MAX_ITEMS}`);
+            logger.error(`Too many APIs: Maximum allowed is ${MAX_ITEMS}`);
             return;
         }
 
@@ -175,7 +177,7 @@ export class TestRunner {
             const fileName = uploadFileStep.valueFilename;
             const localPath = await downloadFile(url, fileName, true);
             if (!localPath) {
-                console.error(`Failed to download file from ${logName}`);
+                logger.error(`Failed to download file from ${logName}`);
                 throw new TestRunnerError(`Failed to download file: ${logName}`);
             }
             step.value = localPath;
@@ -183,13 +185,13 @@ export class TestRunner {
             if (error instanceof TestRunnerError) {
                 throw error;
             }
-            console.error(`Failed to download file for step: ${error.message}`);
+            logger.error(`Failed to download file for step: ${error.message}`);
             throw new TestRunnerError(`Failed to download file: ${error.message}`);
         }
     }
 
     public async updateStepsDefinition() {
-        console.log('Updating configuration...');
+        logger.info('Updating configuration...');
 
         // ... inside suite > test
         for (const suite of this.suites) {
@@ -213,7 +215,7 @@ export class TestRunner {
     }
 
     public async startSession(sessionType: string, sessionName: string): Promise<void> {
-        console.log(`Starting ${sessionType} session: ${sessionName}`);
+        logger.info(`Starting ${sessionType} session: ${sessionName}`);
 
         const session = this._sessions.find((s) => s.type === sessionType);
         if (!session) {
@@ -230,7 +232,7 @@ export class TestRunner {
             ) {
                 session.driver = TestRunner.savedMobileDriver;
             } else {
-                session.driver = await (session as any).runConf.startSession(sessionName);
+                session.driver = await session.runConf.startSession(sessionName);
 
                 if (sessionType === 'web') {
                     TestRunner.savedWebDriver = session.driver;
@@ -239,7 +241,7 @@ export class TestRunner {
                 }
             }
         } catch (error) {
-            console.error(`Failed to start ${sessionType} session:`, error);
+            logger.error(`Failed to start ${sessionType} session:`, error);
             throw error;
         }
     }
@@ -262,7 +264,7 @@ export class TestRunner {
 
             await this.updateStepsDefinition();
 
-            console.log(`Test run started with ${this._suites.length} suite(s)`);
+            logger.info(`Test run started with ${this._suites.length} suite(s)`);
 
             const suiteResults: SuiteResult[] = [];
             const promises: Promise<void>[] = [];
@@ -296,7 +298,7 @@ export class TestRunner {
                 suiteResults
             };
         } catch (error) {
-            console.error('Test run failed:', error);
+            logger.error('Test run failed:', error);
             success = false;
 
             return {
@@ -311,7 +313,7 @@ export class TestRunner {
     }
 
     public async runSuite(suite: Suite): Promise<SuiteResult> {
-        console.log(`Starting suite ${suite.name} run...`);
+        logger.info(`Starting suite ${suite.name} run...`);
 
         try {
             const suitePromises = await suite.run(this.sessions, this.functions, this.apis, this.variables, this);
@@ -320,15 +322,15 @@ export class TestRunner {
             mergeVariables(this.variables, suite.variables);
             await Promise.all(suitePromises);
 
-            console.log(`suite ${suite.name} run completed.`);
+            logger.info(`suite ${suite.name} run completed.`);
             return suiteResult;
         } catch (error) {
-            console.error('Error running suite:', error);
+            logger.error('Error running suite:', error);
             throw new TestRunnerError(`Error running suite: ${(error as Error).message}`);
         }
     }
 
-    private calculateSummary(suiteResults: any[]): RunSummary {
+    private calculateSummary(suiteResults: SuiteResult[]): RunSummary {
         let total = 0,
             passed = 0,
             failed = 0,
@@ -352,7 +354,7 @@ export class TestRunner {
                 try {
                     await session.driver.deleteSession();
                 } catch (error) {
-                    console.error('Error closing session:', error);
+                    logger.error('Error closing session:', error);
                 }
             }
         }

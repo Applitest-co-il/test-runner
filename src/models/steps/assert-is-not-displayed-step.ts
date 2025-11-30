@@ -1,14 +1,14 @@
 import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
 import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 export default class AssertIsNotDisplayedStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(driver: Browser): Promise<void> {
+    async execute(driver: Browser, _: ChainablePromiseElement | null): Promise<void> {
         const item = await this.selectItem(driver);
         if (!item) {
             return;

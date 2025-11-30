@@ -1,6 +1,6 @@
 import BaseStep from './base-step';
 import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 export default class AppActivateStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
@@ -9,7 +9,7 @@ export default class AppActivateStep extends BaseStep {
         this.takeSnapshot = true;
     }
 
-    async execute(driver: Browser, _: any): Promise<void> {
+    async execute(driver: Browser, _: ChainablePromiseElement | null): Promise<void> {
         const conf = this.conf;
         const appId = this.value === 'current-app' ? conf?.appPackage : this.value;
         const options = conf?.platformName.toLowerCase() === 'android' ? { appId: appId } : { bundleId: appId };

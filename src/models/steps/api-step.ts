@@ -1,15 +1,17 @@
 import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
 import { replaceVariables } from '../../helpers/utils';
+import { logger } from '../../helpers/log-service';
 import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
+import { TrApi } from '../api';
 
 export default class ApiStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
         super(sequence, step);
     }
 
-    async execute(_: Browser, __: any): Promise<void> {
+    async execute(_: Browser, __: ChainablePromiseElement | null): Promise<void> {
         const value = this.value;
         if (!value) {
             throw new TestRunnerError('API::No value provided');
@@ -53,11 +55,10 @@ export default class ApiStep extends BaseStep {
             });
         }
 
-        const apis = this.apis || {};
-        const apiList = Array.isArray(apis) ? apis : Object.values(apis);
-        const api = apiList.find((a: any) => a.id === apiId);
+        const apis = this.apis || [];
+        const api = apis.find((a: TrApi) => a.id === apiId);
         if (api) {
-            console.log(`API "${apiId}" executed with properties: ${propertiesValues.join(', ')}`);
+            logger.info(`API "${apiId}" executed with properties: ${propertiesValues.join(', ')}`);
 
             const apiRun = api.duplicate();
             const variables = this.variables || {};
@@ -67,7 +68,7 @@ export default class ApiStep extends BaseStep {
 
             const result = await apiRun.run(propertiesValues, isApiTesting);
 
-            console.log(`API "${apiId}" executed with result: ${JSON.stringify(result)}`);
+            logger.info(`API "${apiId}" executed with result: ${JSON.stringify(result)}`);
 
             if (!result.success) {
                 if (isApiTesting) {
@@ -93,10 +94,17 @@ export default class ApiStep extends BaseStep {
                                 `API::Expected outputs for "${apiId}": expected is defined as ${expectedOutputs.length} elements (${expectedOutputs.join(', ')})  while API actual outputs are  ${api.outputs.length} elements (${api.outputs.join(', ')})`
                             );
                         }
+
+                        if (!result.outputs) {
+                            throw new TestRunnerError(
+                                `API::No outputs returned for "${apiId}", but expected outputs are defined: ${expectedOutputs.join(', ')}`
+                            );
+                        }
+
                         const resultOutputsKeys = Object.keys(result.outputs);
                         for (let pos = 0; pos < resultOutputsKeys.length; pos++) {
                             const key = resultOutputsKeys[pos];
-                            const index = api.outputs.indexOf(key);
+                            const index = api.outputs.findIndex((output) => output.name === key);
                             if (index === -1) {
                                 throw new TestRunnerError(
                                     `API::Output "${key}" for "${apiId}" is not defined in API outputs`

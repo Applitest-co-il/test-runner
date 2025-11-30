@@ -1,22 +1,7 @@
 import { remote, Browser } from 'webdriverio';
 import { TestRunnerConfigurationError, TestAbuseError } from '../../helpers/test-errors';
-
-interface DriverConfigurationOptions {
-    runName?: string;
-    runType?: string;
-    farm?: string;
-    host?: string;
-    port?: number;
-    user?: string;
-    user_key?: string;
-    logLevel?: string;
-    keepSession?: boolean;
-    startFromStep?: number;
-    stopAtStep?: number;
-    enableVideo?: boolean;
-    videosPath?: string;
-    noFollowReset?: boolean;
-}
+import { logger } from '../../helpers/log-service';
+import { RunConfiguration } from '../../types';
 
 class DriverConfiguration {
     private _runName: string = '';
@@ -34,7 +19,7 @@ class DriverConfiguration {
     private _videosPath: string = './reports/videos';
     private _noFollowReset: boolean = false;
 
-    constructor(options: DriverConfigurationOptions) {
+    constructor(options: RunConfiguration) {
         this._runName = options.runName ?? `RUN ${new Date().toISOString()}`;
         this._runType = options.runType ?? 'mobile';
         this._farm = options.farm ?? process.env.TR_FARM ?? 'local';
@@ -143,24 +128,24 @@ class DriverConfiguration {
         return name;
     }
 
-    async startSession(sessionName: string): Promise<Browser | null> {
-        console.log('Starting session...');
+    async startSession(sessionName: string): Promise<Browser | undefined> {
+        logger.info('Starting session...');
 
         let conf: any | null = null;
         try {
             conf = await this.conf(sessionName);
 
-            console.log(`Starting driver with conf: ${JSON.stringify(conf)}`);
+            logger.info(`Starting driver with conf: ${JSON.stringify(conf)}`);
 
             let driver = await remote(conf);
             if (!driver) {
-                console.error('Driver could not be set');
+                logger.error('Driver could not be set');
                 throw new TestRunnerConfigurationError('Driver could not be set');
             }
 
             await this.afterDriverInit(driver);
 
-            console.log(`Session started successfully: ${sessionName}`);
+            logger.info(`Session started successfully: ${sessionName}`);
 
             return driver;
         } catch (err) {
@@ -168,10 +153,10 @@ class DriverConfiguration {
                 const errMsg = conf
                     ? `Error: Too many jobs running on ${conf.hostname}`
                     : 'Error: Too many jobs running';
-                console.error(errMsg);
+                logger.error(errMsg);
                 throw new TestAbuseError(errMsg);
             }
-            console.error(`Error starting session: ${err}`);
+            logger.error(`Error starting session: ${err}`);
             throw new TestRunnerConfigurationError(`Driver could not be set: ${err}`);
         }
     }

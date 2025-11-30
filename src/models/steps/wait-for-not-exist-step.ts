@@ -1,7 +1,7 @@
 import BaseStep from './base-step';
 import { TestRunnerError } from '../../helpers/test-errors';
 import { TestStep } from '../../types';
-import { Browser } from 'webdriverio';
+import { Browser, ChainablePromiseElement } from 'webdriverio';
 
 class WaitForNotExistStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
@@ -10,7 +10,7 @@ class WaitForNotExistStep extends BaseStep {
         this.takeSnapshot = true;
     }
 
-    async execute(driver: Browser, _?: any): Promise<void> {
+    async execute(driver: Browser, _: ChainablePromiseElement | null): Promise<void> {
         const timeout = this.value ? parseInt(this.value, 10) : 5000;
         try {
             await driver.waitUntil(

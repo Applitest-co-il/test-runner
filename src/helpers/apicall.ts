@@ -1,6 +1,7 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import Ajv, { ValidateFunction } from 'ajv';
 import * as jmesPath from 'jmespath';
+import { logger } from './log-service';
 import { OutputVariable, ApiCallResult, SchemaValidationError } from '../types';
 
 export async function apiCall(
@@ -74,7 +75,7 @@ export async function apiCall(
                         }) || [];
                 }
             } catch (error) {
-                console.error('Schema validation error:', error);
+                logger.error('Schema validation error:', error);
                 schemaValidationErrors = [{ message: (error as Error).message }];
             }
         }
@@ -93,7 +94,7 @@ export async function apiCall(
         return result;
     } catch (error) {
         const axiosError = error as AxiosError;
-        console.error(`API call error: ${axiosError.message}`);
+        logger.error(`API call error: ${axiosError.message}`);
 
         const result: ApiCallResult = {
             success: false,
