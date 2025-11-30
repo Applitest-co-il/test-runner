@@ -5,9 +5,11 @@
 /.gitignore
 /.npmignore
 /.prettierignore
+/.env
 /eslint.config.mjs
-/src/api
-/src/cli
+/nodemon.json
+/tsconfig.json
+/src/
 /cmd/
 /docs/
 /downloads/
@@ -15,3 +17,4 @@
 /apps/
 /samples/
 /defaults/
+

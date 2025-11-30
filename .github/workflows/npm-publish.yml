@@ -7,10 +7,11 @@ on:
         branches:
             - 'main'
         paths:
-            - 'src/**.js'
+            - 'src/**.ts'
             - package.json
             - package-lock.json
             - README.rnd
+            - tsconfig.json
 
 jobs:
     validate:
@@ -33,6 +34,9 @@ jobs:
 
             - name: Install app
               run: npm ci
+
+            - name: Type check
+              run: npm run type:check
 
             - name: Lint app
               run: npm run lint:check
@@ -61,11 +65,14 @@ jobs:
             - name: Install
               run: npm ci
 
+            - name: Build TypeScript
+              run: npm run build:prod
+
             - name: Update version.json
               run: |
                   VERSION=$(node -p "require('./package.json').version")
-                  echo "{\"version\": \"$VERSION\"}" > src/lib/version.json
-                  cat src/lib/version.json
+                  echo "{\"version\": \"$VERSION\"}" > dist/lib/version.json
+                  cat dist/lib/version.json
 
             - uses: JS-DevTools/npm-publish@v3
               with:

@@ -95,6 +95,7 @@ The API returns test execution results in the following format:
 #### Response Fields
 
 **Root Level:**
+
 - `runCompleted` (boolean) - Whether the test run completed successfully
 - `success` (boolean) - Overall success status of all tests
 - `summary` (object) - Aggregate statistics across all suites
@@ -102,6 +103,7 @@ The API returns test execution results in the following format:
 - `executionTime` (number) - Total execution time in seconds
 
 **Summary Object:**
+
 - `suites` (number) - Total number of test suites executed
 - `passedSuites` (number) - Number of suites that passed completely
 - `total` (number) - Total number of individual tests
@@ -111,12 +113,14 @@ The API returns test execution results in the following format:
 - `pending` (number) - Number of tests marked as pending
 
 **Suite Result Object:**
+
 - `name` (string) - Name of the test suite
 - `success` (boolean) - Whether all tests in the suite passed
 - `summary` (object) - Statistics for this specific suite
 - `testResults` (array) - Results for individual tests in the suite
 
 **Test Result Object:**
+
 - `name` (string) - Name of the individual test
 - `success` (boolean) - Whether the test passed
 - `steps` (array) - Results for each step in the test
@@ -124,6 +128,7 @@ The API returns test execution results in the following format:
 - `error` (string) - Error message if test failed
 
 **Step Result Object:**
+
 - `sequence` (number) - Step number in the test
 - `command` (string) - Command that was executed
 - `status` (string) - Step status: `"passed"`, `"failed"`, `"skipped"`
