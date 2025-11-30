@@ -16,9 +16,11 @@ This document provides detailed information about all available step commands in
 ## Navigation Commands
 
 ### navigate
+
 Navigate to a URL (web) or perform navigation actions.
 
 **Properties:**
+
 - `value` (required): URL to navigate to
 - `operator` (optional): `"new"` to open in new window
 
@@ -42,9 +44,11 @@ Navigate to a URL (web) or perform navigation actions.
 ```
 
 ### app-activate
+
 Activate a mobile application.
 
 **Properties:**
+
 - `value` (required): App package/bundle ID or `"current-app"` for current app
 
 **Example:**
@@ -57,6 +61,7 @@ Activate a mobile application.
 ```
 
 ### app-background
+
 Send the current mobile app to background.
 
 **Example:**
@@ -68,9 +73,11 @@ Send the current mobile app to background.
 ```
 
 ### switch-frame
+
 Switch to a specific frame/iframe (web only).
 
 **Properties:**
+
 - `selectors` (required): Frame selector
 
 **Example:**
@@ -85,9 +92,11 @@ Switch to a specific frame/iframe (web only).
 ## Element Interaction
 
 ### click
+
 Click on an element.
 
 **Properties:**
+
 - `selectors` (required): Element selectors
 - `position` (optional): Index when multiple elements match
 
@@ -101,9 +110,11 @@ Click on an element.
 ```
 
 ### multiple-clicks
+
 Perform multiple clicks on an element.
 
 **Properties:**
+
 - `selectors` (required): Element selectors
 - `value` (required): Number of clicks
 
@@ -118,9 +129,11 @@ Perform multiple clicks on an element.
 ```
 
 ### right-click
+
 Right-click on an element.
 
 **Properties:**
+
 - `selectors` (required): Element selectors
 
 **Example:**
@@ -133,9 +146,11 @@ Right-click on an element.
 ```
 
 ### middle-click
+
 Middle-click on an element.
 
 **Properties:**
+
 - `selectors` (required): Element selectors
 
 **Example:**
@@ -148,9 +163,11 @@ Middle-click on an element.
 ```
 
 ### click-coordinates
+
 Click at specific coordinates.
 
 **Properties:**
+
 - `value` (required): Coordinates in format "x,y"
 
 **Example:**
@@ -163,9 +180,11 @@ Click at specific coordinates.
 ```
 
 ### set-value
+
 Set value in an input field.
 
 **Properties:**
+
 - `selectors` (required): Input field selectors
 - `value` (required): Value to set
 
@@ -180,9 +199,11 @@ Set value in an input field.
 ```
 
 ### add-value
+
 Append value to existing input field content.
 
 **Properties:**
+
 - `selectors` (required): Input field selectors
 - `value` (required): Value to append
 
@@ -197,9 +218,11 @@ Append value to existing input field content.
 ```
 
 ### clear-value
+
 Clear content of an input field.
 
 **Properties:**
+
 - `selectors` (required): Input field selectors
 
 **Example:**
@@ -212,9 +235,11 @@ Clear content of an input field.
 ```
 
 ### press-key
+
 Press a keyboard key.
 
 **Properties:**
+
 - `value` (required): Key code (number) or key name
 
 **Example:**
@@ -227,14 +252,17 @@ Press a keyboard key.
 ```
 
 **Common key codes:**
+
 - 13: Enter
 - 27: Escape  
 - 66: Enter (Android)
 
 ### upload-file
+
 Upload a file to a file input element.
 
 **Properties:**
+
 - `selectors` (required): File input selectors
 - `value` (required): Path to file
 
@@ -249,9 +277,11 @@ Upload a file to a file input element.
 ```
 
 ### drag-and-drop
+
 Drag an element to another location.
 
 **Properties:**
+
 - `selectors` (required): Source element selectors
 - `value` (required): Target selector or coordinates
 
@@ -266,9 +296,11 @@ Drag an element to another location.
 ```
 
 ### mouse-hover
+
 Hover mouse over an element.
 
 **Properties:**
+
 - `selectors` (required): Element selectors
 - `value` (optional): Hover duration in milliseconds
 
@@ -283,9 +315,11 @@ Hover mouse over an element.
 ```
 
 ### mouse-move
+
 Move mouse to specific coordinates.
 
 **Properties:**
+
 - `value` (required): Coordinates in format "x,y"
 
 **Example:**
@@ -300,9 +334,11 @@ Move mouse to specific coordinates.
 ## Wait Commands
 
 ### wait-for-exist
+
 Wait for an element to appear.
 
 **Properties:**
+
 - `selectors` (required): Element selectors
 - `value` (optional): Timeout in milliseconds (default: 5000)
 
@@ -317,9 +353,11 @@ Wait for an element to appear.
 ```
 
 ### wait-for-not-exist
+
 Wait for an element to disappear.
 
 **Properties:**
+
 - `selectors` (required): Element selectors
 - `value` (optional): Timeout in milliseconds (default: 5000)
 
@@ -334,9 +372,11 @@ Wait for an element to disappear.
 ```
 
 ### pause
+
 Wait for a specified time.
 
 **Properties:**
+
 - `value` (required): Time in milliseconds
 
 **Example:**
@@ -351,9 +391,11 @@ Wait for a specified time.
 ## Assertion Commands
 
 ### assert-is-displayed
+
 Assert that an element is visible.
 
 **Properties:**
+
 - `selectors` (required): Element selectors
 
 **Example:**
@@ -366,9 +408,11 @@ Assert that an element is visible.
 ```
 
 ### assert-is-not-displayed
+
 Assert that an element is not visible.
 
 **Properties:**
+
 - `selectors` (required): Element selectors
 
 **Example:**
@@ -381,14 +425,17 @@ Assert that an element is not visible.
 ```
 
 ### assert-text
+
 Assert element text content.
 
 **Properties:**
+
 - `selectors` (required): Element selectors
 - `value` (required): Expected text
 - `operator` (optional): Comparison operator
 
 **Operators:**
+
 - `==` (default): Exact match
 - `!=`: Not equal
 - `starts-with`: Text starts with value
@@ -408,9 +455,11 @@ Assert element text content.
 ```
 
 ### assert-number
+
 Assert numeric value in element.
 
 **Properties:**
+
 - `selectors` (required): Element selectors
 - `value` (required): Expected number
 - `operator` (optional): Comparison operator (`==`, `!=`, `>`, `<`, `>=`, `<=`)
@@ -427,9 +476,11 @@ Assert numeric value in element.
 ```
 
 ### assert-attribute
+
 Assert element attribute value.
 
 **Properties:**
+
 - `selectors` (required): Element selectors
 - `value` (required): Format "attribute|||expected_value"
 - `operator` (optional): `==` (default) or `!=`
@@ -445,9 +496,11 @@ Assert element attribute value.
 ```
 
 ### assert-css-property
+
 Assert CSS property value.
 
 **Properties:**
+
 - `selectors` (required): Element selectors
 - `value` (required): Format "property|||expected_value"
 
@@ -462,9 +515,11 @@ Assert CSS property value.
 ```
 
 ### assert-app-installed
+
 Assert that a mobile app is installed.
 
 **Properties:**
+
 - `value` (required): App package/bundle ID
 
 **Example:**
@@ -479,9 +534,11 @@ Assert that a mobile app is installed.
 ## Scroll Commands
 
 ### scroll-up
+
 Scroll up by specified amount.
 
 **Properties:**
+
 - `value` (required): Scroll parameters (see scroll format)
 
 **Example:**
@@ -494,9 +551,11 @@ Scroll up by specified amount.
 ```
 
 ### scroll-down
+
 Scroll down by specified amount.
 
 **Properties:**
+
 - `value` (required): Scroll parameters
 
 **Example:**
@@ -509,9 +568,11 @@ Scroll down by specified amount.
 ```
 
 ### scroll-up-to-element
+
 Scroll up until element becomes visible.
 
 **Properties:**
+
 - `selectors` (required): Target element selectors
 - `value` (required): Max scroll attempts or timeout
 
@@ -526,9 +587,11 @@ Scroll up until element becomes visible.
 ```
 
 ### scroll-down-to-element
+
 Scroll down until element becomes visible.
 
 **Properties:**
+
 - `selectors` (required): Target element selectors
 - `value` (required): Max scroll attempts or timeout
 
@@ -543,9 +606,11 @@ Scroll down until element becomes visible.
 ```
 
 ### scroll-left / scroll-right
+
 Horizontal scrolling commands.
 
 **Properties:**
+
 - `value` (required): Scroll distance
 
 **Example:**
@@ -558,9 +623,11 @@ Horizontal scrolling commands.
 ```
 
 ### scroll-*-from-element
+
 Scroll from a specific element as starting point.
 
 **Properties:**
+
 - `selectors` (required): Starting element selectors
 - `value` (required): Scroll parameters
 
@@ -577,9 +644,11 @@ Scroll from a specific element as starting point.
 ## Variable Commands
 
 ### set-variable
+
 Set a variable value.
 
 **Properties:**
+
 - `value` (required): Format "variable_name|||value"
 
 **Example:**
@@ -592,9 +661,11 @@ Set a variable value.
 ```
 
 ### set-variable-from-element
+
 Set variable from element text content.
 
 **Properties:**
+
 - `selectors` (required): Element selectors
 - `value` (required): Variable name
 
@@ -609,9 +680,11 @@ Set variable from element text content.
 ```
 
 ### set-variable-from-script
+
 Set variable from script execution result.
 
 **Properties:**
+
 - `value` (required): Format "variable_name|||script_code"
 
 **Example:**
@@ -624,9 +697,11 @@ Set variable from script execution result.
 ```
 
 ### generate-random-integer
+
 Generate random integer variable.
 
 **Properties:**
+
 - `value` (required): Format "variable_name|||min|||max"
 
 **Example:**
@@ -639,9 +714,11 @@ Generate random integer variable.
 ```
 
 ### generate-random-string
+
 Generate random string variable.
 
 **Properties:**
+
 - `value` (required): Format "variable_name|||length|||character_set"
 
 **Example:**
@@ -654,9 +731,11 @@ Generate random string variable.
 ```
 
 ### clear-variable
+
 Clear/delete a variable.
 
 **Properties:**
+
 - `value` (required): Variable name
 
 **Example:**
@@ -671,6 +750,7 @@ Clear/delete a variable.
 ## Mobile-Specific Commands
 
 ### hide-keyboard
+
 Hide the mobile keyboard.
 
 **Example:**
@@ -682,9 +762,11 @@ Hide the mobile keyboard.
 ```
 
 ### set-geolocation
+
 Set device geolocation.
 
 **Properties:**
+
 - `value` (required): Coordinates in format "latitude,longitude"
 
 **Example:**
@@ -697,9 +779,11 @@ Set device geolocation.
 ```
 
 ### toggle-location-services
+
 Toggle location services on/off.
 
 **Properties:**
+
 - `value` (required): `"on"` or `"off"`
 
 **Example:**
@@ -712,9 +796,11 @@ Toggle location services on/off.
 ```
 
 ### toggle-airplane-mode
+
 Toggle airplane mode on/off.
 
 **Properties:**
+
 - `value` (required): `"on"` or `"off"`
 
 **Example:**
@@ -729,9 +815,11 @@ Toggle airplane mode on/off.
 ## Advanced Commands
 
 ### execute-script
+
 Execute JavaScript code.
 
 **Properties:**
+
 - `value` (required): JavaScript code
 - `operator` (optional): `"sync"` (default), `"async"`, or `"local"`
 
@@ -746,9 +834,11 @@ Execute JavaScript code.
 ```
 
 ### perform-actions
+
 Perform complex touch/mouse actions.
 
 **Properties:**
+
 - `value` (required): Actions configuration (JSON)
 
 **Example:**
@@ -761,9 +851,11 @@ Perform complex touch/mouse actions.
 ```
 
 ### call-function
+
 Call a reusable function.
 
 **Properties:**
+
 - `value` (required): Format "function_id|||param1|||param2|||..."
 
 **Example:**
@@ -776,9 +868,11 @@ Call a reusable function.
 ```
 
 ### call-api
+
 Make an API call.
 
 **Properties:**
+
 - `value` (required): API configuration
 
 **Example:**
