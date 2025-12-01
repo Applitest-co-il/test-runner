@@ -1,4 +1,4 @@
-import { Browser, ChainablePromiseElement } from 'webdriverio';
+import { Browser } from 'webdriverio';
 import { logger } from '../helpers/log-service';
 
 export class Accessibility {
