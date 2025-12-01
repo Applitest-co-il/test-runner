@@ -390,6 +390,60 @@ Wait for a specified time.
 
 ## Assertion Commands
 
+### assert-accessibility-property
+
+Assert accessibility property value on an element using exact equality comparison.
+
+**Properties:**
+
+- `selectors` (required): Element selectors
+- `value` (required): Format "property_name|||expected_value"
+- `operator` (optional): Search mode ("direct" default, "recursive")
+
+**Operators:**
+
+- `direct` (default): Search only the target element for the property
+- `recursive`: Search the target element and its children for the property
+
+**Common Accessibility Properties:**
+
+- `name`: Accessible name
+- `description`: Accessible description  
+- `role`: ARIA role
+- `value`: Current value
+- `disabled`: Whether disabled
+- `expanded`: Whether expanded
+- `level`: Heading level
+- `checked`: Whether checked
+
+**Example:**
+
+```json
+{
+  "command": "assert-accessibility-property",
+  "selectors": ["#main-button"],
+  "value": "name|||Submit Form"
+}
+```
+
+```json
+{
+  "command": "assert-accessibility-property",
+  "selectors": [".heading"],
+  "value": "level|||2",
+  "operator": "direct"
+}
+```
+
+```json
+{
+  "command": "assert-accessibility-property",
+  "selectors": [".container"],
+  "value": "name|||Important Section",
+  "operator": "recursive"
+}
+```
+
 ### assert-is-displayed
 
 Assert that an element is visible.
@@ -511,6 +565,76 @@ Assert CSS property value.
   "command": "assert-css-property",
   "selectors": [".highlight"],
   "value": "background-color|||rgb(255, 255, 0)"
+}
+```
+
+### assert-current-title
+
+Assert the current page title matches expected value.
+
+**Properties:**
+
+- `value` (required): Expected title to match
+- `operator` (optional): Comparison operator ("==" default, "!=", "starts-with", "ends-with", "contains", "not-contains")
+
+**Operators:**
+
+- `==` (default): Exact match
+- `!=`: Not equal
+- `starts-with`: Title starts with value
+- `ends-with`: Title ends with value
+- `contains`: Title contains value
+- `not-contains`: Title does not contain value
+
+**Example:**
+
+```json
+{
+  "command": "assert-current-title",
+  "value": "Dashboard - My App"
+}
+```
+
+```json
+{
+  "command": "assert-current-title",
+  "value": "Dashboard",
+  "operator": "starts-with"
+}
+```
+
+### assert-current-url
+
+Assert the current page URL matches expected value.
+
+**Properties:**
+
+- `value` (required): Expected URL to match
+- `operator` (optional): Comparison operator ("==" default, "!=", "starts-with", "ends-with", "contains", "not-contains")
+
+**Operators:**
+
+- `==` (default): Exact match
+- `!=`: Not equal
+- `starts-with`: URL starts with value
+- `ends-with`: URL ends with value
+- `contains`: URL contains value
+- `not-contains`: URL does not contain value
+
+**Example:**
+
+```json
+{
+  "command": "assert-current-url",
+  "value": "https://example.com/dashboard"
+}
+```
+
+```json
+{
+  "command": "assert-current-url",
+  "value": "https://example.com",
+  "operator": "starts-with"
 }
 ```
 

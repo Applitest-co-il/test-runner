@@ -24,6 +24,7 @@ import { createLocalTestRunner } from './server';
 import { logger, LogLevel } from '../helpers/log-service';
 import libVersion from './version.json';
 import { ChainablePromiseElement } from 'webdriverio';
+import { Accessibility } from '../models/accessibility';
 
 interface SessionCache {
     sessionId: string;
@@ -197,7 +198,7 @@ export async function runSession(sessionId: string, options: TestRunnerOptions):
     };
 }
 
-export async function getAxTree(sessionId: string, selector: string | null = null): Promise<SessionResult> {
+export async function getAxTree(sessionId: string, selector?: string): Promise<SessionResult> {
     logger.info(`TestRunnerLib::getAxTree::${libVersion.version}`);
 
     if (!trSessionCache || trSessionCache.sessionId !== sessionId) {
@@ -212,30 +213,8 @@ export async function getAxTree(sessionId: string, selector: string | null = nul
         throw new TestRunnerError('GetAxTree::No driver found for the session');
     }
 
-    const puppeteerBrowser = await driver.getPuppeteer();
-
-    // switch to Puppeteer
-    const axTree = await driver.call(async () => {
-        try {
-            const pages = await puppeteerBrowser.pages();
-            const page = pages[0];
-
-            if (selector) {
-                // Get accessibility snapshot for specific element
-                const element = await page.$(selector);
-                if (!element) {
-                    throw new Error(`Element not found for selector: ${selector}`);
-                }
-                return page.accessibility.snapshot({ root: element });
-            } else {
-                // Get accessibility snapshot for entire page
-                return page.accessibility.snapshot();
-            }
-        } catch (error) {
-            logger.error(`Error getting accessibility tree: ${(error as Error).message}`);
-            return null;
-        }
-    });
+    const accessibility = new Accessibility(driver);
+    let axTree = await accessibility.getAxTree(selector);
 
     if (!axTree) {
         return {

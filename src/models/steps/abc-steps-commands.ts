@@ -58,18 +58,22 @@ export class StepsCommands {
         'wait-for-not-exist',
 
         //assertions
-        'assert-text',
-        'assert-is-displayed',
-        'assert-is-not-displayed',
+        'assert-accessibility-property',
+        'assert-app-installed',
         'assert-attribute',
         'assert-css-property',
+        'assert-current-title',
+        'assert-current-url',
+        'assert-is-displayed',
+        'assert-is-not-displayed',
         'assert-number',
-        'assert-app-installed'
+        'assert-text'
     ];
 
     static RequiresItem(command: string): boolean {
         const requireItemCommands = [
             'add-value',
+            'assert-accessibility-property',
             'assert-attribute',
             'assert-css-property',
             'assert-is-displayed',
@@ -110,8 +114,11 @@ export class StepsCommands {
         const requiresValueCommands = [
             'add-value',
             'api',
+            'assert-accessibility-property',
             'assert-attribute',
-            'assert-css',
+            'assert-css-property',
+            'assert-current-title',
+            'assert-current-url',
             'assert-number',
             'assert-text',
             'click-coordinates',

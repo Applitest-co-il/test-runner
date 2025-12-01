@@ -4,6 +4,7 @@ import { TestStep } from '../types';
 // Import step classes - ordered alphabetically
 import AddValueStep from './steps/add-value-step';
 import ApiStep from './steps/api-step';
+import AssertAccessibilityPropertyStep from './steps/assert-accessibility-property-step';
 import AppActivateStep from './steps/app-activate-step';
 import AppBackgroundStep from './steps/app-background-step';
 import AssertAppInstalledStep from './steps/assert-app-installed-step';
@@ -55,6 +56,8 @@ import VariableSetStep from './steps/variable-set-step';
 import WaitForExistStep from './steps/wait-for-exist-step';
 import WaitForNotExistStep from './steps/wait-for-not-exist-step';
 import BaseStep from './steps/base-step';
+import AssertCurrentTitleStep from './steps/assert-current-title-step';
+import AssertCurrentUrlStep from './steps/assert-current-url-step';
 
 export function stepFactory(sequence: number, step: TestStep): BaseStep {
     if (!step.command) {
@@ -189,6 +192,8 @@ export function stepFactory(sequence: number, step: TestStep): BaseStep {
             return new WaitForExistStep(sequence, step);
         case 'wait-for-not-exist':
             return new WaitForNotExistStep(sequence, step);
+        case 'assert-accessibility-property':
+            return new AssertAccessibilityPropertyStep(sequence, step);
         case 'assert-is-displayed':
             return new AssertIsDisplayedStep(sequence, step);
         case 'assert-is-not-displayed':
@@ -203,6 +208,10 @@ export function stepFactory(sequence: number, step: TestStep): BaseStep {
             return new AssertAttributeStep(sequence, step);
         case 'assert-app-installed':
             return new AssertAppInstalledStep(sequence, step);
+        case 'assert-current-title':
+            return new AssertCurrentTitleStep(sequence, step);
+        case 'assert-current-url':
+            return new AssertCurrentUrlStep(sequence, step);
         //#endregion
 
         default:
