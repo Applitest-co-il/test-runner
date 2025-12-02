@@ -1,4 +1,4 @@
-# API Documentation
+# REST API Documentation
 
 The Applitest Test Runner provides a REST API for executing tests and managing test configurations.
 
@@ -7,8 +7,10 @@ The Applitest Test Runner provides a REST API for executing tests and managing t
 When running locally:
 
 ```text
-http://localhost:3000
+http://localhost:8282
 ```
+
+The default port is 8282, but can be configured using the `TR_PORT` environment variable.
 
 ## Endpoints
 
@@ -26,18 +28,38 @@ curl http://localhost:8282/version
 
 ```json
 {
-  "version": "0.9.80"
+  "version": "1.0.0"
 }
 ```
 
-### PATCH /test-runner
+### GET /health
 
-Executes a test configuration and returns the results.
+Returns the health status of the API server.
 
 **Request:**
 
 ```bash
-curl -X PATCH http://localhost:3000/test-runner \
+curl http://localhost:8282/health
+```
+
+**Response:**
+
+```json
+{
+  "status": "OK",
+  "timestamp": "2025-12-02T10:30:00.000Z",
+  "version": "1.0.0"
+}
+```
+
+### POST /run
+
+Executes a complete test configuration and returns the results.
+
+**Request:**
+
+```bash
+curl -X POST http://localhost:8282/run \
   -H "Content-Type: application/json" \
   -d @configuration.json
 ```
@@ -135,6 +157,110 @@ The API returns test execution results in the following format:
 - `duration` (number) - Step execution time in seconds
 - `error` (string) - Error message if step failed
 
+### PATCH /api
+
+Test a single API call without running a full test suite.
+
+**Request:**
+
+```bash
+curl -X PATCH http://localhost:8282/api \
+  -H "Content-Type: application/json" \
+  -d '{
+    "method": "GET",
+    "path": "https://api.example.com/users",
+    "headers": {"Authorization": "Bearer token123"},
+    "data": null,
+    "schema": null,
+    "variables": {},
+    "outputs": []
+  }'
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "statusText": "OK",
+  "headers": {
+    "content-type": "application/json"
+  },
+  "responseBody": {
+    "users": []
+  },
+  "schemaValidation": true,
+  "schemaValidationErrors": [],
+  "outputs": {}
+}
+```
+
+## Session Management
+
+The API supports session-based testing for maintaining browser state across multiple test executions.
+
+### POST /session
+
+Create a new test session.
+
+**Request:**
+
+```bash
+curl -X POST http://localhost:8282/session \
+  -H "Content-Type: application/json" \
+  -d @session-config.json
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "sessionId": "session_123456789",
+  "message": "Session created successfully"
+}
+```
+
+### PATCH /session/:sessionId
+
+Run tests in an existing session.
+
+**Request:**
+
+```bash
+curl -X PATCH http://localhost:8282/session/session_123456789 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "options": {
+      "suites": [...]
+    }
+  }'
+```
+
+**Response:**
+
+Returns the same format as POST /run but maintains session state.
+
+### DELETE /session/:sessionId
+
+Close and cleanup a test session.
+
+**Request:**
+
+```bash
+curl -X DELETE http://localhost:8282/session/session_123456789
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Session closed successfully"
+}
+```
+
 ## HTTP Status Codes
 
 | Status | Description |
@@ -160,16 +286,18 @@ When an error occurs, the API returns an error response:
 ### Running a Simple Web Test
 
 ```bash
-curl -X PATCH http://localhost:3000/test-runner \
+curl -X POST http://localhost:8282/run \
   -H "Content-Type: application/json" \
   -d '{
     "runConfiguration": {
+      "name": "Simple Web Test",
       "runType": "web",
-      "selenium": {
-        "browserName": "chrome",
-        "host": "localhost",
-        "port": 4444
-      }
+      "sessions": [{
+        "type": "web",
+        "capabilities": {
+          "browserName": "chrome"
+        }
+      }]
     },
     "suites": [
       {
@@ -195,14 +323,6 @@ curl -X PATCH http://localhost:3000/test-runner \
   }'
 ```
 
-### Running from Configuration File
-
-```bash
-curl -X PATCH http://localhost:3000/test-runner \
-  -H "Content-Type: application/json" \
-  -d @samples/json/web1.json
-```
-
 ## Integration Examples
 
 ### Node.js
@@ -215,7 +335,7 @@ async function runTests() {
   try {
     const config = JSON.parse(fs.readFileSync('test-config.json', 'utf8'));
     
-    const response = await axios.patch('http://localhost:3000/test-runner', config, {
+    const response = await axios.post('http://localhost:8282/run', config, {
       headers: { 'Content-Type': 'application/json' }
     });
     
@@ -238,8 +358,8 @@ def run_tests(config_file):
     with open(config_file, 'r') as f:
         config = json.load(f)
     
-    response = requests.patch(
-        'http://localhost:3000/test-runner',
+    response = requests.post(
+        'http://localhost:8282/run',
         json=config,
         headers={'Content-Type': 'application/json'}
     )
@@ -269,7 +389,7 @@ SERVER_PID=$!
 sleep 5
 
 # Run tests
-RESULT=$(curl -s -X PATCH http://localhost:3000/test-runner \
+RESULT=$(curl -s -X POST http://localhost:8282/run \
   -H "Content-Type: application/json" \
   -d @e2e-tests.json | jq -r '.success')
 

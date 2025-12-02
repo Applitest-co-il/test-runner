@@ -117,7 +117,7 @@ For web testing (`type: "web"`):
 |----------|------|-------------|
 | `name` | string | Browser: `"chrome"`, `"firefox"`, `"safari"`, `"edge"` |
 | `version` | string | Browser version (for cloud providers) |
-| `startUrl` | string | Initial URL to navigate to |
+| `startUrl` | string | Initial URL to navigate to or `_blank` to start with a blank page |
 | `resolution` | string | Browser window size (e.g., "1920x1080") |
 | `incognito` | boolean | Start browser in incognito/private mode |
 | `startMaximized` | boolean | Start browser maximized |

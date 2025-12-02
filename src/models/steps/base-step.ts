@@ -423,6 +423,19 @@ abstract class BaseStep {
                         item = await driver.$(selector);
                     }
                 }
+                const isDisplayed = await item.isDisplayed();
+                if (!isDisplayed) {
+                    const items = await driver.$$(selector);
+                    const itemCount = await items.length;
+                    if (itemCount > 1) {
+                        for (let j = 0; j < itemCount; j++) {
+                            if (await items[j].isDisplayed()) {
+                                item = items[j];
+                                break;
+                            }
+                        }
+                    }
+                }
             } else {
                 let items = await driver.$$(selector);
                 if (!items || !(await items.length)) {
@@ -447,9 +460,9 @@ abstract class BaseStep {
 
     abstract execute(driver: Browser, item: ChainablePromiseElement | null): Promise<void>;
 
-    async executeScript(script: string, driver: Browser): Promise<any> {
+    async executeScript(driver: Browser, script: string, type: string): Promise<any> {
         try {
-            if (this._operator === 'sync') {
+            if (type === 'sync') {
                 const result = await driver.execute(script);
                 if (!result) {
                     throw new TestRunnerError(`ExecuteScript::Script: script for step ${this._sequence} failed`);

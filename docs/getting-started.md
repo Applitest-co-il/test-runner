@@ -20,17 +20,20 @@ This guide will help you get up and running with Applitest Test Runner quickly.
 2. **Start the API server:**
 
    ```bash
-   npm run api:only
+   npm run api
    ```
 
-3. **The server will start on port 3000** (or the port specified in your environment)
+3. **The server will start on port 8282** (or the port specified in your environment)
 
 ### Option 2: Pre-built Desktop Applications
 
 Download the pre-built desktop applications for your platform:
 
-- **Windows:** Windows Desktop App *([Download](https://app.applitest.co.il/downloads/ApplitestLocalRunner-win.exe))*
-- **macOS:** macOS Desktop App *([Download](https://app.applitest.co.il/downloads/ApplitestLocalRunner-macos13.dmg))*
+- **Test Runner Desktop Project:** Gte the source code at *[GitHub](https://github.com/Applitest-co-il/test-runner-desktop)* .
+- **Windows pre-built:** Windows Desktop App *([Download](https://app.applitest.co.il/downloads/ApplitestLocalRunner-win.exe))*
+- **macOS pre-built:** macOS Desktop App *([Download](https://app.applitest.co.il/downloads/ApplitestLocalRunner-macos13.dmg))*
+
+Note: the pre-built are not commercially signed and requires to be approved after you download them on your system.
 
 ## Testing the API
 
@@ -99,5 +102,6 @@ The test runner returns results in the following JSON format:
 ## Next Steps
 
 - Learn how to create test configurations in the [Configuration Guide](configuration.md)
-- Explore example configurations in the [samples/json/](../samples/json/) directory
+- Understand element selection and targeting in the [Element Selection Guide](element-selection.md)
+- Review all available step commands in the [Step Commands Reference](step-commands.md)
 - Set up local testing environment with the [Local Setup Guide](README-LOCAL.md)

@@ -25,7 +25,7 @@ class VariableSetFromJavascriptStep extends BaseStep {
         const varName = varParts[0];
         const script = replaceVariables(varParts[1], this.variables || {});
 
-        const varValue = await this.executeScript(script, driver);
+        const varValue = await this.executeScript(driver, script, this.operator || 'sync');
         const variables = this.variables;
         if (variables) {
             variables[varName] = varValue;

@@ -15,7 +15,7 @@ export default class AssertIsDisplayedStep extends BaseStep {
             throw new TestRunnerError('AssertIsDisplayed: No element provided for assert is displayed action');
         }
 
-        const isDisplayed = await item.isDisplayed();
+        const isDisplayed = await item.isDisplayed({ withinViewport: true });
         if (!isDisplayed) {
             throw new TestRunnerError(
                 `AssertIsDisplayed::Item with ${this.namedElementOrUsedSelectorsComment} was not found or is not displayed`

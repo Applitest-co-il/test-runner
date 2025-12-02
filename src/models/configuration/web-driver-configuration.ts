@@ -23,7 +23,7 @@ class WebDriverConfiguration extends DriverConfiguration {
         this._browserName = session.browser.name ?? 'chrome';
         this._browserVersion = session.browser.version ?? 'latest';
         this._resolution = session.browser.resolution ?? '1920x1080';
-        this._startUrl = session.browser.startUrl ?? '';
+        this._startUrl = session.browser.startUrl ?? '_blank';
         this._incognito = session.browser.incognito ?? false;
         this._startMaximized = session.browser.startMaximized ?? false;
         this._emulate = session.browser.emulate?.toString() ?? '';
@@ -142,7 +142,7 @@ class WebDriverConfiguration extends DriverConfiguration {
             this._restoreEmulateFunc = await driver.emulateDevice(this._emulate);
         }
 
-        if (this._startUrl) {
+        if (this._startUrl != '_blank') {
             await driver.url(this._startUrl);
         }
     }

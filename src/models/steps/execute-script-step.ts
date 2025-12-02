@@ -10,6 +10,6 @@ export default class ExecuteScriptStep extends BaseStep {
 
     async execute(driver: Browser, _: ChainablePromiseElement | null): Promise<any> {
         const script = replaceVariables(this.value || '', this.variables || {});
-        return await this.executeScript(script, driver);
+        return await this.executeScript(driver, script, this.operator || 'sync');
     }
 }

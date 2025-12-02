@@ -22,16 +22,10 @@ This project is open-source and available under the [MIT License](LICENSE).
 
 - **[Getting Started Guide](docs/getting-started.md)** - Learn how to set up and run your first tests
 - **[Configuration Reference](docs/configuration.md)** - Complete guide to test configuration files
+- **[Element Selection Guide](docs/element-selection.md)** - Comprehensive guide to element selection and targeting
 - **[Step Commands Reference](docs/step-commands.md)** - Detailed documentation of all available test commands
 - **[Conditional Execution Reference](docs/conditions.md)** - Complete guide to conditional step execution
 - **[API Documentation](docs/api.md)** - REST API endpoints and usage examples
-- **[Local Setup Guide](docs/README-LOCAL.md)** - Setting up local testing environment
-
-<!-- ## 🔗 Quick Links
-
-- [Sample configurations](samples/json/) - Example test configurations
-- [Step commands reference](docs/step-commands.md) - Complete list of available test commands
-- [Troubleshooting](docs/troubleshooting.md) - Common issues and solutions -->
 
 ---
 
