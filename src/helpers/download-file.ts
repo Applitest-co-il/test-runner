@@ -6,39 +6,63 @@ import { logger } from './log-service';
 // Define an allow-list of trusted hostnames/endpoints (adjust as appropriate)
 // if host start and ends with / it's treated as regex pattern, if not as exact match
 
-const ALLOWED_HOSTS: string[] = ['s3.amazonaws.com', '/.*\\.s3\\..*\\.amazonaws\\.com$/'];
+// Explicit list of trusted S3 domains (add more as needed)
+const ALLOWED_HOSTS: string[] = [
+    's3.amazonaws.com',
+    's3.us-east-1.amazonaws.com',
+    's3.us-west-1.amazonaws.com',
+    's3.us-west-2.amazonaws.com',
+    // add other well-known S3 regional endpoints here
+];
 
 function isAllowedUrl(urlString: string): boolean {
     try {
         const parsedUrl = new URL(urlString, 'https://dummy-base.com'); // fallback base for relative
 
-        // Enforce HTTPS
+        // Enforce HTTPS (always require 'https')
         if (parsedUrl.protocol !== 'https:') return false;
 
-        // Check host allow-list
-        let isAllowedHost = false;
-        for (const host of ALLOWED_HOSTS) {
-            if (host.startsWith('/') && host.endsWith('/')) {
-                // Regular expression pattern
-                const pattern = host.slice(1, -1); // Remove leading and trailing slashes
-                const regex = new RegExp(pattern);
-                if (regex.test(parsedUrl.hostname)) {
-                    isAllowedHost = true;
-                    break;
-                }
-            } else {
-                // Exact string match
-                if (parsedUrl.hostname === host) {
-                    isAllowedHost = true;
-                    break;
-                }
-            }
-        }
-        if (!isAllowedHost) return false;
+        // Block credentials in URL
+        if (parsedUrl.username || parsedUrl.password) return false;
 
-        // Optionally block suspicious characters (path traversal, etc)
-        if (parsedUrl.pathname && (parsedUrl.pathname.includes('..') || parsedUrl.pathname.includes('//')))
+        // Explicit port control (allow only standard 443)
+        if (parsedUrl.port && parsedUrl.port !== '443') return false;
+
+        // Block IP addresses—including private/internal ranges
+        const ipV4Regex = /^(?:\d{1,3}\.){3}\d{1,3}$/;
+        const ipV6Regex = /^\[[0-9a-fA-F:]+?\]$/;
+        const host = parsedUrl.hostname;
+        if (
+            ipV4Regex.test(host) ||
+            ipV6Regex.test(host) ||
+            // Private IPv4 ranges
+            /^10\./.test(host) ||
+            /^127\./.test(host) ||
+            /^192\.168\./.test(host) ||
+            /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host) ||
+            // Localhost
+            host === 'localhost' ||
+            host === '::1'
+        ) {
             return false;
+        }
+
+        // Hostname must exactly match the allowed list
+        if (!ALLOWED_HOSTS.includes(host)) return false;
+
+        // Path traversal checks: block "..", "//", percent-encoded equivalents
+        const pathname = parsedUrl.pathname || '';
+        if (
+            pathname.includes('..') ||
+            pathname.includes('//') ||
+            /%2e/i.test(pathname) ||
+            /%2f/i.test(pathname)
+        ) {
+            return false;
+        }
+
+        // Optionally: block query strings/fragments (for S3, should not need these)
+        if (parsedUrl.search || parsedUrl.hash) return false;
 
         return true;
     } catch (e) {
