@@ -14,6 +14,7 @@ import AssertIsDisplayedStep from './steps/assert-is-displayed-step';
 import AssertIsNotDisplayedStep from './steps/assert-is-not-displayed-step';
 import AssertNumberStep from './steps/assert-number-step';
 import AssertTextStep from './steps/assert-text-step';
+import AssertTextMultipleStep from './steps/assert-text-multiple-step';
 import ClearValueStep from './steps/clear-value-step';
 import ClickCoordinatesStep from './steps/click-coordinates-step';
 import ClickMultipleStep from './steps/click-multiple-step';
@@ -200,6 +201,8 @@ export function stepFactory(sequence: number, step: TestStep): BaseStep {
             return new AssertIsNotDisplayedStep(sequence, step);
         case 'assert-text':
             return new AssertTextStep(sequence, step);
+        case 'assert-text-multiple':
+            return new AssertTextMultipleStep(sequence, step);
         case 'assert-number':
             return new AssertNumberStep(sequence, step);
         case 'assert-css-property':

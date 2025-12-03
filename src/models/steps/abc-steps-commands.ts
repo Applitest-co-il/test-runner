@@ -67,7 +67,8 @@ export class StepsCommands {
         'assert-is-displayed',
         'assert-is-not-displayed',
         'assert-number',
-        'assert-text'
+        'assert-text',
+        'assert-text-multiple'
     ];
 
     static RequiresItem(command: string): boolean {
@@ -101,6 +102,7 @@ export class StepsCommands {
     static RequiresSelector(command: string): boolean {
         const selectorCommands = [
             'assert-is-not-displayed',
+            'assert-text-multiple',
             'scroll-down-to-element',
             'scroll-up-to-element',
             'switch-frame',

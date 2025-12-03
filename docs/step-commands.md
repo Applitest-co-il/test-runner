@@ -508,6 +508,38 @@ Assert element text content.
 }
 ```
 
+### assert-text-multiple
+
+Assert text content on multiple elements that match the selectors.
+
+**Properties:**
+
+- `selectors` (required): Element selectors (will match multiple elements)
+- `value` (required): Expected text
+- `operator` (optional): Comparison operator
+
+**Operators:**
+
+- `==` (default): Exact match
+- `!=`: Not equal
+- `starts-with`: Text starts with value
+- `ends-with`: Text ends with value
+- `contains`: Text contains value
+- `not-contains`: Text does not contain value
+
+**Example:**
+
+```json
+{
+  "command": "assert-text-multiple",
+  "selectors": [".product-price"],
+  "value": "$",
+  "operator": "starts-with"
+}
+```
+
+**Note:** This command finds all elements matching the selectors and asserts that each element's text content matches the expected value using the specified operator. Useful for validating consistent text across multiple similar elements.
+
 ### assert-number
 
 Assert numeric value in element.

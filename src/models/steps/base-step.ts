@@ -5,7 +5,7 @@ import TestCondition from './test-condition';
 import { TestStep, RunSession } from '../../types';
 import { VideoRecorder } from '../../helpers/video-recorder';
 import StepsCommands from './abc-steps-commands';
-import { Browser, ChainablePromiseElement } from 'webdriverio';
+import { Browser, ChainablePromiseArray, ChainablePromiseElement } from 'webdriverio';
 
 import vmRun from '@danielyaghil/vm-helper';
 import { TrApi } from '../api';
@@ -456,6 +456,34 @@ abstract class BaseStep {
             return null;
         }
         return item;
+    }
+
+    async selectItems(driver: Browser): Promise<ChainablePromiseArray | null> {
+        let selectors = this._selectors;
+        if (!selectors || selectors.length === 0) {
+            return null;
+        }
+
+        let allItems: ChainablePromiseArray | null = null;
+        this._usedSelectors = '';
+        for (let i = 0; i < selectors.length; i++) {
+            const selector = replaceVariables(selectors[i], this._variables || {});
+            if (this._usedSelectors.length > 0) {
+                this._usedSelectors += ',';
+            }
+            this._usedSelectors += `"${selector}"`;
+
+            const items = await driver.$$(selector);
+            if (items && (await items.length) > 0) {
+                allItems = items;
+                break;
+            }
+        }
+        if (!allItems || (await allItems.length) === 0) {
+            return null;
+        }
+
+        return allItems;
     }
 
     abstract execute(driver: Browser, item: ChainablePromiseElement | null): Promise<void>;
