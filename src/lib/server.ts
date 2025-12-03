@@ -2,7 +2,16 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 
 import { downloadFile } from '../helpers/download-file';
-import { runTests, testApiCall, openSession, closeSession, runSession, libVersion } from './index';
+import {
+    runTests,
+    testApiCall,
+    openSession,
+    closeSession,
+    runSession,
+    getAxTree,
+    getDomTree,
+    libVersion
+} from './index';
 import { logger } from '../helpers/log-service';
 import { TestRunnerOptions } from '../types';
 import { Server } from 'http';
@@ -201,6 +210,50 @@ export function createLocalTestRunner(port: number): Server {
             res.status(200).json(result);
         } catch (error) {
             logger.error('Error closing session:', error);
+            res.status(500).json({
+                success: false,
+                message: (error as Error).message
+            });
+        }
+    });
+
+    app.get('/session/:sessionId/axtree', async (req: Request, res: Response) => {
+        try {
+            const { sessionId } = req.params;
+
+            if (!sessionId) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Session ID is required'
+                });
+            }
+
+            const result = await getAxTree(sessionId);
+            res.status(200).json(result);
+        } catch (error) {
+            logger.error('Error getting accessibility tree:', error);
+            res.status(500).json({
+                success: false,
+                message: (error as Error).message
+            });
+        }
+    });
+
+    app.get('/session/:sessionId/domtree', async (req: Request, res: Response) => {
+        try {
+            const { sessionId } = req.params;
+
+            if (!sessionId) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Session ID is required'
+                });
+            }
+
+            const result = await getDomTree(sessionId);
+            res.status(200).json(result);
+        } catch (error) {
+            logger.error('Error getting DOM tree:', error);
             res.status(500).json({
                 success: false,
                 message: (error as Error).message

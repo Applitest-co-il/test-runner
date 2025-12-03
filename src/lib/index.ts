@@ -19,7 +19,7 @@ import {
     TestConfiguration,
     TestStep
 } from '../types';
-import { extractDom } from '../helpers/accessibility-utils';
+import { DOM_EXTRACTION_SCRIPT } from '../helpers/dom-extraction-script';
 import { createLocalTestRunner } from './server';
 import { logger, LogLevel } from '../helpers/log-service';
 import libVersion from './version.json';
@@ -247,11 +247,9 @@ export async function getDomTree(sessionId: string, selector: string | null = nu
     let domTree: any = null;
     try {
         if (selector) {
-            // Extract DOM tree for specific element using JavaScript
-            domTree = await driver.execute(extractDom, selector);
+            domTree = await driver.execute(DOM_EXTRACTION_SCRIPT, selector);
         } else {
-            // Extract DOM tree for entire page
-            domTree = await driver.execute(extractDom);
+            domTree = await driver.execute(DOM_EXTRACTION_SCRIPT, null);
         }
     } catch (error) {
         logger.error(`Error getting DOM tree: ${(error as Error).message}`);
