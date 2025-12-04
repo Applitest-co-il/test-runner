@@ -8,7 +8,6 @@ import {
 } from '../helpers/test-errors';
 import { apiCall } from '../helpers/apicall';
 import { replaceVariables } from '../helpers/utils';
-import { v4 as uuids4 } from 'uuid';
 import {
     OutputVariable,
     SessionResult,
@@ -120,8 +119,22 @@ export async function openSession(options: TestRunnerOptions): Promise<SessionRe
 
     await testRunner.startSession(testRunner.sessions[0].type, 'session-1');
 
+    // Generate session ID - use crypto.randomUUID if available, fallback to custom UUID
+    let sessionId: string;
+    try {
+        const crypto = await import('crypto');
+        sessionId = crypto.randomUUID();
+    } catch {
+        // Fallback UUID generation for older Node.js versions or environments without crypto.randomUUID
+        sessionId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            const r = (Math.random() * 16) | 0;
+            const v = c === 'x' ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+        });
+    }
+
     trSessionCache = {
-        sessionId: uuids4(),
+        sessionId: sessionId,
         testRunner: testRunner,
         savedElements: {}
     };
