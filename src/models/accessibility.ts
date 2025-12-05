@@ -41,24 +41,11 @@ export class Accessibility {
         return axTree;
     }
 
-    private findProperty(node: any, attr: string, recursive: boolean = false): any {
-        if (node && node[attr] !== undefined) {
-            return node[attr];
-        }
-
-        if (recursive && node.children) {
-            for (const child of node.children) {
-                const result = this.findProperty(child, attr);
-                if (result !== undefined) {
-                    return result;
-                }
-            }
-        }
-
-        return undefined;
-    }
-
-    public async getAxProperty(selector: string, attribute: string, recursive: boolean = false): Promise<any> {
+    public async getAxPropertyValues(
+        selector: string,
+        attribute: string,
+        recursive: boolean = false
+    ): Promise<string[]> {
         if (!selector) {
             throw new Error('Selector is required to get accessibility attribute');
         }
@@ -68,7 +55,20 @@ export class Accessibility {
             throw new Error('Could not retrieve accessibility tree');
         }
 
-        const propertyValue = this.findProperty(axTree, attribute, recursive);
-        return propertyValue !== undefined ? String(propertyValue) : null;
+        const possibleValuesInTree: string[] = [];
+
+        if (axTree && axTree[attribute] !== undefined) {
+            possibleValuesInTree.push(String(axTree[attribute]));
+        }
+
+        if (recursive && axTree.children) {
+            for (const child of axTree.children) {
+                if (child && child[attribute] !== undefined) {
+                    possibleValuesInTree.push(String(child[attribute]));
+                }
+            }
+        }
+
+        return possibleValuesInTree;
     }
 }

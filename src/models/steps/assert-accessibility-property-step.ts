@@ -3,6 +3,7 @@ import { TestRunnerError } from '../../helpers/test-errors';
 import { TestStep } from '../../types';
 import { Browser, ChainablePromiseElement } from 'webdriverio';
 import { Accessibility } from '../accessibility';
+import { replaceVariables } from '../../helpers/utils';
 
 export default class AssertAccessibilityPropertyStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
@@ -22,8 +23,8 @@ export default class AssertAccessibilityPropertyStep extends BaseStep {
             );
         }
 
-        const propertyName = propertyParts[0];
-        const expectedValue = propertyParts[1];
+        const propertyName = replaceVariables(propertyParts[0], this.variables || {});
+        const expectedValue = replaceVariables(propertyParts[1], this.variables || {});
 
         if (!propertyName || expectedValue === undefined) {
             throw new TestRunnerError(
@@ -52,18 +53,12 @@ export default class AssertAccessibilityPropertyStep extends BaseStep {
             const isRecursive = operator === 'recursive';
 
             // Get the accessibility property value with recursive option
-            const actualValue = await accessibility.getAxProperty(selector, propertyName, isRecursive);
-
-            if (actualValue === null) {
-                throw new TestRunnerError(
-                    `AssertAccessibilityProperty::Property "${propertyName}" not found or has no value on element with selector "${selector}" using ${isRecursive ? 'recursive' : 'direct'} search`
-                );
-            }
+            const values = await accessibility.getAxPropertyValues(selector, propertyName, isRecursive);
 
             // Perform exact equality comparison
-            if (String(actualValue) !== expectedValue) {
+            if (!values.includes(expectedValue)) {
                 throw new TestRunnerError(
-                    `AssertAccessibilityProperty::Property "${propertyName}" value "${actualValue}" does not match expected value "${expectedValue}" on element with selector "${selector}" using ${isRecursive ? 'recursive' : 'direct'} search`
+                    `AssertAccessibilityProperty::Property "${propertyName}" possible values "[${values.join(', ')}]" does not include expected value "${expectedValue}" on element with selector "${selector}" using ${isRecursive ? 'recursive' : 'direct'} search`
                 );
             }
         } catch (error) {
