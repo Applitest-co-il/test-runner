@@ -4,7 +4,8 @@
  */
 
 export const DOM_EXTRACTION_SCRIPT = `
-    var selectorParam = arguments[0];
+    var depthParam = arguments[0];
+    var selectorParam = arguments[1];
     var rootElement;
     
     if (selectorParam) {
@@ -182,7 +183,7 @@ export const DOM_EXTRACTION_SCRIPT = `
 
     function extractNodeInfo(element, depth) {
         depth = depth || 0;
-        if (depth > 100) return null; // Limit depth to prevent infinite recursion
+        if (depth > depthParam) return null; // Limit depth to prevent infinite recursion
         
         var rect = element.getBoundingClientRect();
         var computedStyle = window.getComputedStyle(element);
@@ -206,9 +207,9 @@ export const DOM_EXTRACTION_SCRIPT = `
             children: []
         };
         
-        // Extract children (limit to 20 to avoid excessive data)
+        // Extract children (limit to "depthParam" to avoid excessive data)
         var children = element.children;
-        for (var i = 0; i < Math.min(children.length, 100); i++) {
+        for (var i = 0; i < Math.min(children.length, depthParam); i++) {
             var child = children[i];
             var childTagName = child.tagName;
             if (isExcludeTag(childTagName)) {

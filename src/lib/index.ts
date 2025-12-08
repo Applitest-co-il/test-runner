@@ -242,7 +242,11 @@ export async function getAxTree(sessionId: string, selector?: string): Promise<S
     };
 }
 
-export async function getDomTree(sessionId: string, selector: string | null = null): Promise<SessionResult> {
+export async function getDomTree(
+    sessionId: string,
+    depth: number = 100,
+    selector: string | null = null
+): Promise<SessionResult> {
     logger.info(`TestRunnerLib::getDomTree::${libVersion.version}`);
 
     if (!trSessionCache || trSessionCache.sessionId !== sessionId) {
@@ -260,9 +264,9 @@ export async function getDomTree(sessionId: string, selector: string | null = nu
     let domTree: any = null;
     try {
         if (selector) {
-            domTree = await driver.execute(DOM_EXTRACTION_SCRIPT, selector);
+            domTree = await driver.execute(DOM_EXTRACTION_SCRIPT, depth, selector);
         } else {
-            domTree = await driver.execute(DOM_EXTRACTION_SCRIPT, null);
+            domTree = await driver.execute(DOM_EXTRACTION_SCRIPT, depth, null);
         }
     } catch (error) {
         logger.error(`Error getting DOM tree: ${(error as Error).message}`);
