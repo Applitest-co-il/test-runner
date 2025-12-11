@@ -29,6 +29,9 @@ import MiddleClickStep from './steps/middle-click-step';
 import MouseHoverStep from './steps/mouse-hover-step';
 import MouseMoveStep from './steps/mouse-move-step';
 import NavigateStep from './steps/navigate-step';
+import BackStep from './steps/back-step';
+import ForwardStep from './steps/forward-step';
+import RefreshStep from './steps/refresh-step';
 import PauseStep from './steps/pause-step';
 import PerformActionsStep from './steps/perform-actions-steps';
 import PressKeyStep from './steps/press-key-step';
@@ -92,6 +95,12 @@ export function stepFactory(sequence: number, step: TestStep): BaseStep {
             return new HideKeyboardStep(sequence, step);
         case 'navigate':
             return new NavigateStep(sequence, step);
+        case 'browser-back':
+            return new BackStep(sequence, step);
+        case 'browser-forward':
+            return new ForwardStep(sequence, step);
+        case 'browser-refresh':
+            return new RefreshStep(sequence, step);
         case 'pause':
             return new PauseStep(sequence, step);
         case 'switch-frame':

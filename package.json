@@ -1,6 +1,6 @@
 {
     "name": "@applitest/test-runner",
-    "version": "0.10.13",
+    "version": "0.10.14",
     "description": "Applitest Test Runner Library: Extends webdirver.io (web and mobile) allowing to provide a json base tests configuration and activate tests locally or via cloud services",
     "main": "dist/lib/index.js",
     "types": "dist/lib/index.d.ts",
@@ -72,6 +72,6 @@
         "typescript": "^5.9.3"
     },
     "applitest": {
-        "mincompatibleversion": "0.10.10"
+        "mincompatibleversion": "0.10.14"
     }
 }

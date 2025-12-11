@@ -1,31 +1,34 @@
 export class StepsCommands {
     static commands: string[] = [
         //generic
-        'pause',
-        'navigate',
         'app-activate',
         'app-background',
-        'switch-frame',
+        'browser-back',
+        'browser-forward',
+        'browser-refresh',
         'hide-keyboard',
+        'navigate',
+        'pause',
+        'switch-frame',
 
-        //function
-        'call-function',
+        //function & APIs
         'call-api',
+        'call-function',
 
         //settings
-        'toggle-location-services',
-        'toggle-airplane-mode',
         'set-geolocation',
+        'toggle-airplane-mode',
+        'toggle-location-services',
 
         //variables
+        'clear-variable',
+        'generate-random-integer',
+        'generate-random-string',
+        'item-clear',
+        'item-select',
         'set-variable',
         'set-variable-from-element',
         'set-variable-from-script',
-        'generate-random-integer',
-        'generate-random-string',
-        'clear-variable',
-        'item-select',
-        'item-clear',
 
         //actions
         'add-value',

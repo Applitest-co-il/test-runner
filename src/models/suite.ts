@@ -160,8 +160,8 @@ export class Suite {
     }
 
     report(): SuiteResult {
-        logger.info('\n===============');
-        logger.info(`Test suite: ${this._name}`);
+        let suiteReport: string = '\n===============';
+        suiteReport += `Test suite: ${this._name}\n`;
         let passed = 0;
         let failed = 0;
         let skipped = 0;
@@ -207,13 +207,14 @@ export class Suite {
             }
             testDetails.push(testDetail);
         }
-        logger.info('===============\n\n');
-        logger.info(`Passed: ${passed}\nFailed: ${failed}\nSkipped: ${skipped}\nPending: ${pending}`);
-        logger.info(`Errors: ${errors.length === 0 ? 'None' : ''}`);
+        suiteReport += '===============\n\n';
+        suiteReport += `Passed: ${passed}\nFailed: ${failed}\nSkipped: ${skipped}\nPending: ${pending}\n`;
+        suiteReport += `Errors: ${errors.length === 0 ? 'None' : ''}\n`;
         for (let i = 0; i < errors.length; i++) {
-            logger.error(`- ${errors[i]}`);
+            suiteReport += `- ${errors[i]}\n`;
         }
-        logger.info('===============\n');
+        suiteReport += '===============\n\n';
+        logger.info(suiteReport);
 
         const output: SuiteResult = {
             id: this._id,

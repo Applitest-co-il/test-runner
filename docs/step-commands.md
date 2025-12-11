@@ -43,6 +43,42 @@ Navigate to a URL (web) or perform navigation actions.
 }
 ```
 
+### browser-back
+
+Navigate back in browser history (web only).
+
+**Example:**
+
+```json
+{
+  "command": "browser-back"
+}
+```
+
+### browser-forward
+
+Navigate forward in browser history (web only).
+
+**Example:**
+
+```json
+{
+  "command": "browser-forward"
+}
+```
+
+### browser-refresh
+
+Refresh the current page (web only).
+
+**Example:**
+
+```json
+{
+  "command": "browser-refresh"
+}
+```
+
 ### app-activate
 
 Activate a mobile application.
