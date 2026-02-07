@@ -1,7 +1,6 @@
 import BaseStep from './base-step';
 import { TestStep } from '../../types';
 import { Browser, ChainablePromiseElement } from 'webdriverio';
-import { replaceVariables } from '../../helpers/utils';
 
 export default class BackStep extends BaseStep {
     constructor(sequence: number, step: TestStep) {
