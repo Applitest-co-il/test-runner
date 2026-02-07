@@ -350,6 +350,20 @@ export class TestRunner {
 
     private async closeSessions(): Promise<void> {
         for (const session of this._sessions) {
+            const sessionType = session.type;
+            logger.info(`Closing ${sessionType} session...`);
+            if (sessionType === 'web' && this._runConfiguration?.keepSession) {
+                continue; // Skip closing if we're keeping the session
+            } else if (sessionType === 'mobile' && this._runConfiguration?.keepSession) {
+                continue; // Skip closing if we're keeping the session
+            }
+
+            if (sessionType === 'web') {
+                TestRunner.savedWebDriver = undefined;
+            } else if (sessionType === 'mobile') {
+                TestRunner.savedMobileDriver = undefined;
+            }
+
             if (session.driver) {
                 try {
                     await session.driver.deleteSession();
