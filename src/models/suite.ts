@@ -151,7 +151,8 @@ export class Suite {
             mergeVariables(this._variables, test.variables);
 
             if (this._waitBetweenTests > 0 && runSession?.driver) {
-                await runSession.driver.pause(this._waitBetweenTests);
+                const driver = runSession.driver;
+                await driver.pause(this._waitBetweenTests);
             }
             logger.info(`TestSuite::Finished test #${i + 1}`);
         }
