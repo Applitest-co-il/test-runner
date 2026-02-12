@@ -139,7 +139,7 @@ class WebDriverConfiguration extends DriverConfiguration {
         }
 
         if (this._emulate && this._browserName.toLowerCase() === 'chrome') {
-            this._restoreEmulateFunc = await driver.emulateDevice(this._emulate);
+            this._restoreEmulateFunc = await driver.emulate('device', this._emulate);
         }
 
         if (this._startUrl != '_blank') {

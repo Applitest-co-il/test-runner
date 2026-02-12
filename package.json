@@ -1,6 +1,6 @@
 {
     "name": "@applitest/test-runner",
-    "version": "0.10.18",
+    "version": "0.10.19",
     "description": "Applitest Test Runner Library: Extends webdriver.io (web and mobile) allowing to provide a json base tests configuration and activate tests locally or via cloud services",
     "main": "dist/lib/index.js",
     "types": "dist/lib/index.d.ts",
@@ -67,7 +67,6 @@
         "nodemon": "^3.1.10",
         "prettier": "^3.6.2",
         "rimraf": "^6.1.0",
-        "serverless": "^3.40.0",
         "ts-node": "^10.9.2",
         "typescript": "^5.9.3"
     },
