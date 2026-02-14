@@ -11,6 +11,7 @@ import AssertAppInstalledStep from './steps/assert-app-installed-step';
 import AssertAttributeStep from './steps/assert-attribute-step';
 import AssertCssStep from './steps/assert-css-step';
 import AssertIsDisplayedStep from './steps/assert-is-displayed-step';
+import AssertIsClickableStep from './steps/assert-is-clickable-step';
 import AssertIsNotDisplayedStep from './steps/assert-is-not-displayed-step';
 import AssertNumberStep from './steps/assert-number-step';
 import AssertTextStep from './steps/assert-text-step';
@@ -206,6 +207,8 @@ export function stepFactory(sequence: number, step: TestStep): BaseStep {
             return new AssertAccessibilityPropertyStep(sequence, step);
         case 'assert-is-displayed':
             return new AssertIsDisplayedStep(sequence, step);
+        case 'assert-is-clickable':
+            return new AssertIsClickableStep(sequence, step);
         case 'assert-is-not-displayed':
             return new AssertIsNotDisplayedStep(sequence, step);
         case 'assert-text':

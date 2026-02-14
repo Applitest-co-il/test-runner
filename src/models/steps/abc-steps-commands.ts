@@ -69,6 +69,7 @@ export class StepsCommands {
         'assert-current-url',
         'assert-is-displayed',
         'assert-is-not-displayed',
+        'assert-is-clickable',
         'assert-number',
         'assert-text',
         'assert-text-multiple'
@@ -81,6 +82,7 @@ export class StepsCommands {
             'assert-attribute',
             'assert-css-property',
             'assert-is-displayed',
+            'assert-is-clickable',
             'assert-number',
             'assert-text',
             'clear-value',
