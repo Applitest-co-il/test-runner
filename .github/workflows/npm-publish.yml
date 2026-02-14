@@ -68,12 +68,6 @@ jobs:
             - name: Build TypeScript
               run: npm run build:prod
 
-            - name: Update version.json
-              run: |
-                  VERSION=$(node -p "require('./package.json').version")
-                  echo "{\"version\": \"$VERSION\"}" > dist/lib/version.json
-                  cat dist/lib/version.json
-
             - uses: JS-DevTools/npm-publish@v3
               with:
                   token: ${{ secrets.NPM_TOKEN }}

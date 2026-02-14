@@ -10,7 +10,7 @@
     "scripts": {
         "test": "echo \"Error: no test specified\"",
         "build:dev": "npm run prebuild && tsc && npm run copy-assets",
-        "build:prod": "tsc",
+        "build:prod": "tsc && node scripts/update-version.js",
         "copy-assets": "copy src\\lib\\version.json dist\\lib\\ /Y",
         "clean": "rimraf dist",
         "prebuild": "npm run clean",
