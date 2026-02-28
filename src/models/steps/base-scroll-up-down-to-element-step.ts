@@ -33,17 +33,11 @@ class BaseScrollUpDownToElementStep extends BaseVerticalScrollStep {
             if (!item) {
                 await this.doVerticalScroll(driver, scrollDuration, origin, startY, scrollY, anchorX);
             } else {
-                const isDisplayed = await item.isDisplayed();
+                const isDisplayed = await item.isDisplayed({ withinViewport: true });
                 if (isDisplayed) {
-                    const session = this.session;
-                    if (session?.type === 'web') {
-                        const isClickable = await item.isClickable();
-                        if (isClickable) {
-                            break;
-                        }
-                    } else {
-                        break; // for mobile is displayed is enough
-                    }
+                    break;
+                } else {
+                    await this.doVerticalScroll(driver, scrollDuration, origin, startY, scrollY, anchorX);
                 }
             }
             count++;

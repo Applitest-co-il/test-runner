@@ -83,7 +83,7 @@ abstract class BaseVerticalScrollStep extends BaseStep {
             topPercentage: 0.2,
             bottomPercentage: 0.85,
             anchorPercentage: 0.5,
-            count: 1
+            count: 5
         };
 
         const value = this.value;
@@ -94,7 +94,7 @@ abstract class BaseVerticalScrollStep extends BaseStep {
                 scrollOptions.topPercentage = parseFloat(valueParts[1]);
                 if (
                     isNaN(scrollOptions.topPercentage) ||
-                    scrollOptions.topPercentage < 0 ||
+                    scrollOptions.topPercentage <= 0 ||
                     scrollOptions.topPercentage > 1
                 ) {
                     scrollOptions.topPercentage = 0.2;
@@ -103,7 +103,11 @@ abstract class BaseVerticalScrollStep extends BaseStep {
 
             if (valueParts.length >= 3) {
                 scrollOptions.bottomPercentage = parseFloat(valueParts[2]);
-                if (scrollOptions.bottomPercentage < 0 || scrollOptions.bottomPercentage > 1) {
+                if (
+                    isNaN(scrollOptions.bottomPercentage) ||
+                    scrollOptions.bottomPercentage <= 0 ||
+                    scrollOptions.bottomPercentage > 1
+                ) {
                     scrollOptions.bottomPercentage = 0.85;
                 }
             }
@@ -112,7 +116,7 @@ abstract class BaseVerticalScrollStep extends BaseStep {
                 scrollOptions.anchorPercentage = parseFloat(valueParts[3]);
                 if (
                     isNaN(scrollOptions.anchorPercentage) ||
-                    scrollOptions.anchorPercentage < 0 ||
+                    scrollOptions.anchorPercentage <= 0 ||
                     scrollOptions.anchorPercentage > 1
                 ) {
                     scrollOptions.anchorPercentage = 0.5;
@@ -120,13 +124,13 @@ abstract class BaseVerticalScrollStep extends BaseStep {
             }
 
             scrollOptions.count = parseInt(valueParts[0]);
-            if (isNaN(scrollOptions.count) || scrollOptions.count < 1) {
-                scrollOptions.count = 1;
+            if (isNaN(scrollOptions.count) || scrollOptions.count < 2) {
+                scrollOptions.count = 5;
             }
         } else if (value && value.length > 0) {
             scrollOptions.count = parseInt(value);
-            if (isNaN(scrollOptions.count) || scrollOptions.count < 1) {
-                scrollOptions.count = 1;
+            if (isNaN(scrollOptions.count) || scrollOptions.count < 2) {
+                scrollOptions.count = 5;
             }
         }
 
